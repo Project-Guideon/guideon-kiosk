@@ -1,0 +1,111 @@
+# ============================================================
+# GUIDEON Kiosk - Unity .gitignore
+# ============================================================
+
+# -----------------------------------------------
+# Unity 자동 생성 폴더
+# -----------------------------------------------
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# MemoryCaptures - Unity 메모리 덤프
+[Mm]emory[Cc]aptures/
+
+# Asset meta data should only be ignored when the associated asset is also ignored.
+!/[Aa]ssets/**/*.meta
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# -----------------------------------------------
+# Unity Cache & Addressables
+# -----------------------------------------------
+Assets/AddressableAssetsData/*/*.bin*
+Assets/AddressableAssetsData/*/*.json*
+Assets/AddressableAssetsData/*/*.xml*
+Library/com.unity.addressables/
+FastCachedAssets/
+
+# -----------------------------------------------
+# IDE 파일
+# -----------------------------------------------
+# Visual Studio
+.vs/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.rider.user
+
+# VS Code (팀원 개인 설정은 무시, 공유 설정은 .vscode/settings.json 따로 관리)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# -----------------------------------------------
+# OS 생성 파일
+# -----------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# -----------------------------------------------
+# 빌드 아웃풋
+# -----------------------------------------------
+ExportedObj/
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# -----------------------------------------------
+# 환경 설정 / 민감 정보
+# -----------------------------------------------
+# 로컬 오버라이드 설정 (Device Token 등)
+Assets/StreamingAssets/config.local.json
+
+# 환경변수 파일
+.env
+.env.local
+.env.*.local
+
+# -----------------------------------------------
+# 프로젝트 내부 문서 (docs 폴더)
+# Git에 문서 커밋 제외 - Notion/Wiki 등으로 관리
+# -----------------------------------------------
+Assets/docs/
+Assets/docs.meta
+
+# -----------------------------------------------
+# 기타
+# -----------------------------------------------
+# Nuget
+*.nupkg
+nuget/
+packages/
+
+# Crashlytics
+crashlytics-build.properties
+
+# Asset Store Tools
+/[Aa]ssets/[Aa]sset[Ss]tore[Tt]ools*
