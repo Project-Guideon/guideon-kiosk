@@ -4,7 +4,7 @@ namespace Guideon.Core
 {
     /// <summary>
     /// 씬 전환 시에도 유지되는 싱글톤 베이스 클래스.
-    /// 모든 Manager 클래스는 이 클래스를 상속받아 사용한다.
+    /// 모든 Manager 클래스가 상속받아 쓴다.
     /// </summary>
     public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
     {
@@ -36,7 +36,7 @@ namespace Guideon.Core
         }
 
         /// <summary>
-        /// 싱글톤 초기화 시 호출. Awake 대신 이 메서드를 오버라이드한다.
+        /// 싱글톤 초기화 시 호출. Awake 대신 이걸 오버라이드해서 써라.
         /// </summary>
         protected virtual void OnInitialize() { }
 

@@ -5,6 +5,7 @@ namespace Guideon.Core
 {
     /// <summary>
     /// 컴포넌트 간 직접 참조 없이 이벤트를 주고받는 전역 이벤트 버스.
+    /// Subscribe → Publish → Unsubscribe 순으로 쓴다.
     /// </summary>
     public static class EventBus
     {
@@ -35,7 +36,7 @@ namespace Guideon.Core
         }
 
         /// <summary>
-        /// 씬 전환 등 전체 초기화 시 모든 구독을 해제한다.
+        /// 씬 전환 등 전체 초기화 시 모든 구독 해제. 필요할 때만 쓸 것.
         /// </summary>
         public static void Clear()
         {

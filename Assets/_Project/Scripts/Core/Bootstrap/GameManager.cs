@@ -5,8 +5,7 @@ using UnityEngine.SceneManagement;
 namespace Guideon.Core
 {
     /// <summary>
-    /// 앱 생명주기와 씬 전환을 담당하는 최상위 매니저.
-    /// Boot 씬에서 생성되며 이후 모든 씬에서 유지된다.
+    /// 앱 생명주기와 씬 전환 담당. Boot 씬에서 생성되고 이후 전 씬에서 유지됨.
     /// </summary>
     public class GameManager : MonoSingleton<GameManager>
     {

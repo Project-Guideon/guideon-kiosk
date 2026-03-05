@@ -6,8 +6,8 @@ using UnityEngine;
 namespace Guideon.Core
 {
     /// <summary>
-    /// StreamingAssets/config.json을 로드하고 앱 전역에 설정값을 제공한다.
-    /// config.local.json이 존재하면 우선 적용한다 (로컬 개발용).
+    /// StreamingAssets/config.json을 로드해서 앱 전역 설정을 제공.
+    /// config.local.json이 있으면 그게 우선 (로컬 개발용).
     /// </summary>
     public class ConfigManager : MonoSingleton<ConfigManager>
     {
