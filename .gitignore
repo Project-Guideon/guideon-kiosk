@@ -95,6 +95,7 @@ Assets/StreamingAssets/config.local.json
 # -----------------------------------------------
 Assets/docs/
 Assets/docs.meta
+docs/
 
 # -----------------------------------------------
 # 기타
