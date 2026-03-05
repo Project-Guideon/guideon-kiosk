@@ -90,20 +90,16 @@ Assets/StreamingAssets/config.local.json
 .env.*.local
 
 # -----------------------------------------------
-# 프로젝트 내부 문서 (docs 폴더)
-# Git에 문서 커밋 제외 - Notion/Wiki 등으로 관리
+# 프로젝트 문서 (로컬에서만 관리)
 # -----------------------------------------------
-Assets/docs/
-Assets/docs.meta
 docs/
 
 # -----------------------------------------------
 # 기타
 # -----------------------------------------------
-# Nuget
+# Nuget (Unity의 Packages/ 폴더와 혼동 주의 - packages/ 는 제외)
 *.nupkg
 nuget/
-packages/
 
 # Crashlytics
 crashlytics-build.properties
