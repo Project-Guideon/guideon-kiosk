@@ -41,6 +41,9 @@ namespace Guideon.Core
     // ── UI / 앱 상태 ──────────────────────────────────────
     public struct IdleTimeoutEvent { }
 
+    // 대기 화면에서 사용자가 터치/클릭했을 때
+    public struct UserTouchedEvent { }
+
     public struct SceneReadyEvent
     {
         public string SceneName;
