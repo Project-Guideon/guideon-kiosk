@@ -47,16 +47,6 @@ namespace Guideon.Test
         private ProceduralMascotAnimator _proceduralAnimator;
         private BoneRig _boneRig;
 
-        // UV Picker
-        private enum UVPickMode { None, LeftEye, RightEye, Mouth }
-        private UVPickMode _uvPickMode = UVPickMode.None;
-        private Vector2 _uvPickStart;
-        private Vector2 _uvPickEnd;
-        private bool _uvDragging;
-        private Rect _leftEyeUV, _rightEyeUV, _mouthUV;
-        private bool _leftEyeSet, _rightEyeSet, _mouthSet;
-        private string _lastPickInfo = "";
-
         // UI State
         private Vector2 _scrollPos;
         private int _tabIndex;
@@ -75,7 +65,6 @@ namespace Guideon.Test
         {
             HandleCameraOrbit();
             UpdateJawTest();
-            HandleUVPicker();
         }
 
         #region GLB Loading
@@ -217,18 +206,8 @@ namespace Guideon.Test
                 Debug.LogWarning("[MascotTest] BoneRig is incomplete - procedural animation may not work correctly.");
             }
 
-            // 첫 번째 SkinnedMeshRenderer를 표정 텍스처 대상으로 사용
-            var mainSmr = _skinnedRenderers.Count > 0 ? _skinnedRenderers[0] : null;
-
             _proceduralAnimator = _modelRoot.AddComponent<ProceduralMascotAnimator>();
-            _proceduralAnimator.Initialize(_boneRig, mainSmr);
-
-            // MeshCollider 추가 (UV 피커용 레이캐스트)
-            if (mainSmr != null && mainSmr.GetComponent<MeshCollider>() == null)
-            {
-                var col = mainSmr.gameObject.AddComponent<MeshCollider>();
-                col.sharedMesh = mainSmr.sharedMesh;
-            }
+            _proceduralAnimator.Initialize(_boneRig);
         }
 
         #endregion
@@ -254,78 +233,6 @@ namespace Guideon.Test
 
             Camera.main.transform.position = pos;
             Camera.main.transform.LookAt(target);
-        }
-
-        #endregion
-
-        #region UV Picker
-
-        private void HandleUVPicker()
-        {
-            if (_uvPickMode == UVPickMode.None) return;
-            if (!_isLoaded || Camera.main == null) return;
-
-            // 왼쪽 클릭 시작 — 드래그로 영역 선택
-            if (Input.GetMouseButtonDown(0) && !IsMouseOverUI())
-            {
-                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out var hit))
-                {
-                    _uvPickStart = hit.textureCoord;
-                    _uvDragging = true;
-                    _lastPickInfo = $"Start UV: ({_uvPickStart.x:F3}, {_uvPickStart.y:F3})";
-                }
-            }
-
-            // 드래그 중
-            if (_uvDragging && Input.GetMouseButton(0))
-            {
-                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out var hit))
-                {
-                    _uvPickEnd = hit.textureCoord;
-                }
-            }
-
-            // 드래그 끝 — 영역 확정
-            if (_uvDragging && Input.GetMouseButtonUp(0))
-            {
-                _uvDragging = false;
-
-                float minU = Mathf.Min(_uvPickStart.x, _uvPickEnd.x);
-                float minV = Mathf.Min(_uvPickStart.y, _uvPickEnd.y);
-                float maxU = Mathf.Max(_uvPickStart.x, _uvPickEnd.x);
-                float maxV = Mathf.Max(_uvPickStart.y, _uvPickEnd.y);
-                var rect = new Rect(minU, minV, maxU - minU, maxV - minV);
-
-                switch (_uvPickMode)
-                {
-                    case UVPickMode.LeftEye:
-                        _leftEyeUV = rect;
-                        _leftEyeSet = true;
-                        _lastPickInfo = $"Left Eye UV set: {rect}";
-                        break;
-                    case UVPickMode.RightEye:
-                        _rightEyeUV = rect;
-                        _rightEyeSet = true;
-                        _lastPickInfo = $"Right Eye UV set: {rect}";
-                        break;
-                    case UVPickMode.Mouth:
-                        _mouthUV = rect;
-                        _mouthSet = true;
-                        _lastPickInfo = $"Mouth UV set: {rect}";
-                        break;
-                }
-
-                _uvPickMode = UVPickMode.None;
-                Debug.Log($"[MascotTest] {_lastPickInfo}");
-            }
-        }
-
-        private bool IsMouseOverUI()
-        {
-            // IMGUI 패널 영역 체크 (왼쪽 380px)
-            return Input.mousePosition.x < 390;
         }
 
         #endregion
@@ -709,88 +616,6 @@ namespace Guideon.Test
             }
 
             GUILayout.Space(15);
-
-            // ===== 표정 텍스처 설정 =====
-            GUILayout.Label("<b>--- Face Texture Expression ---</b>", richStyle);
-            var faceTex = _proceduralAnimator.FaceTexture;
-
-            if (faceTex == null)
-            {
-                GUILayout.Label("<color=red>FaceTextureModifier not initialized.</color>", richStyle);
-            }
-            else if (!faceTex.RegionsSet)
-            {
-                GUILayout.Label("Step 1: Save texture to see UV layout", richStyle);
-                if (GUILayout.Button("Save Texture PNG", GUILayout.Height(30)))
-                {
-                    string path = faceTex.SaveOriginalTextureToDisk();
-                    if (path != null)
-                        _lastPickInfo = $"Saved: {path}";
-                }
-
-                GUILayout.Space(5);
-                GUILayout.Label("Step 2: Pick face regions on model\n(Click and drag on the 3D model)", richStyle);
-
-                // UV Pick 모드 버튼
-                string pickLabel = _uvPickMode != UVPickMode.None
-                    ? $"<color=yellow>Picking: {_uvPickMode}... Click on model</color>"
-                    : "Select a region to pick:";
-                GUILayout.Label(pickLabel, richStyle);
-
-                GUI.enabled = _uvPickMode == UVPickMode.None;
-
-                if (GUILayout.Button(_leftEyeSet ? "Left Eye  [SET]" : "Pick Left Eye", GUILayout.Height(28)))
-                    _uvPickMode = UVPickMode.LeftEye;
-                if (GUILayout.Button(_rightEyeSet ? "Right Eye  [SET]" : "Pick Right Eye", GUILayout.Height(28)))
-                    _uvPickMode = UVPickMode.RightEye;
-                if (GUILayout.Button(_mouthSet ? "Mouth  [SET]" : "Pick Mouth", GUILayout.Height(28)))
-                    _uvPickMode = UVPickMode.Mouth;
-
-                GUI.enabled = true;
-
-                if (!string.IsNullOrEmpty(_lastPickInfo))
-                {
-                    GUILayout.Space(3);
-                    GUILayout.Label(_lastPickInfo);
-                }
-
-                GUILayout.Space(5);
-
-                // 3개 다 설정되면 적용 버튼
-                if (_leftEyeSet && _rightEyeSet && _mouthSet)
-                {
-                    GUILayout.Label("<color=green>All regions set!</color>", richStyle);
-                    if (GUILayout.Button("Apply Face Regions", GUILayout.Height(35)))
-                    {
-                        faceTex.SetFaceRegions(_leftEyeUV, _rightEyeUV, _mouthUV);
-                        Debug.Log("[MascotTest] Face regions applied!");
-                    }
-
-                    if (GUILayout.Button("Debug: Show Region Borders", GUILayout.Height(25)))
-                    {
-                        faceTex.SetFaceRegions(_leftEyeUV, _rightEyeUV, _mouthUV);
-                        faceTex.DebugDrawRegions();
-                    }
-                }
-            }
-            else
-            {
-                GUILayout.Label("<color=green>Face regions configured!</color>", richStyle);
-                GUILayout.Label("Expression changes with animation state.", richStyle);
-
-                if (GUILayout.Button("Debug: Show Borders", GUILayout.Height(25)))
-                {
-                    faceTex.DebugDrawRegions();
-                }
-                if (GUILayout.Button("Reset Regions", GUILayout.Height(25)))
-                {
-                    _leftEyeSet = false;
-                    _rightEyeSet = false;
-                    _mouthSet = false;
-                }
-            }
-
-            GUILayout.Space(10);
             GUILayout.Label("<b>Bone Rig:</b>", richStyle);
             GUILayout.Label(_boneRig.GetDebugInfo());
         }

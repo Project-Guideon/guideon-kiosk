@@ -20,7 +20,6 @@ namespace Guideon.Mascot
         [Header("Greeting")]
         [SerializeField] private float greetingBowAngle = 20f;
         [SerializeField] private float greetingArmAngle = 40f;
-        [SerializeField] private float greetingSpeed = 3f;
 
         [Header("Listening")]
         [SerializeField] private float listeningTiltAngle = 10f;
@@ -37,7 +36,6 @@ namespace Guideon.Mascot
         [SerializeField] private float speakingGestureAmount = 8f;
 
         private BoneRig _rig;
-        private FaceTextureModifier _faceTexture;
         private MascotState _currentState = MascotState.Idle;
         private MascotState _targetState = MascotState.Idle;
         private float _stateTimer;
@@ -48,18 +46,10 @@ namespace Guideon.Mascot
 
         public BoneRig Rig => _rig;
         public MascotState CurrentState => _currentState;
-        public FaceTextureModifier FaceTexture => _faceTexture;
 
-        public void Initialize(BoneRig rig, SkinnedMeshRenderer meshRenderer)
+        public void Initialize(BoneRig rig)
         {
             _rig = rig;
-
-            // 텍스처 기반 표정 시스템 설정
-            if (meshRenderer != null)
-            {
-                _faceTexture = gameObject.AddComponent<FaceTextureModifier>();
-                _faceTexture.Initialize(meshRenderer);
-            }
         }
 
         public void SetState(MascotState state)
@@ -70,12 +60,6 @@ namespace Guideon.Mascot
             _transitionProgress = 0f;
             _stateTimer = 0f;
             _greetingDone = false;
-
-            // 표정도 같이 변경
-            if (_faceTexture != null)
-            {
-                _faceTexture.SetState(state);
-            }
         }
 
         void Update()
