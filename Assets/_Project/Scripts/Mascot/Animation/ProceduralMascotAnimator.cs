@@ -37,7 +37,7 @@ namespace Guideon.Mascot
         [SerializeField] private float speakingGestureAmount = 8f;
 
         private BoneRig _rig;
-        private ExpressionOverlay _expressionOverlay;
+        private FaceTextureModifier _faceTexture;
         private MascotState _currentState = MascotState.Idle;
         private MascotState _targetState = MascotState.Idle;
         private float _stateTimer;
@@ -48,17 +48,17 @@ namespace Guideon.Mascot
 
         public BoneRig Rig => _rig;
         public MascotState CurrentState => _currentState;
-        public ExpressionOverlay ExpressionOverlay => _expressionOverlay;
+        public FaceTextureModifier FaceTexture => _faceTexture;
 
-        public void Initialize(BoneRig rig)
+        public void Initialize(BoneRig rig, SkinnedMeshRenderer meshRenderer)
         {
             _rig = rig;
 
-            // Head bone이 있으면 표정 오버레이 자동 설정
-            if (_rig.Head != null)
+            // 텍스처 기반 표정 시스템 설정
+            if (meshRenderer != null)
             {
-                _expressionOverlay = gameObject.AddComponent<ExpressionOverlay>();
-                _expressionOverlay.Initialize(_rig.Head);
+                _faceTexture = gameObject.AddComponent<FaceTextureModifier>();
+                _faceTexture.Initialize(meshRenderer);
             }
         }
 
@@ -72,9 +72,9 @@ namespace Guideon.Mascot
             _greetingDone = false;
 
             // 표정도 같이 변경
-            if (_expressionOverlay != null)
+            if (_faceTexture != null)
             {
-                _expressionOverlay.SetState(state);
+                _faceTexture.SetState(state);
             }
         }
 
