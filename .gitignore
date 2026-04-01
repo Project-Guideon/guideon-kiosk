@@ -27,11 +27,14 @@
 # -----------------------------------------------
 # Unity Cache & Addressables
 # -----------------------------------------------
-Assets/AddressableAssetsData/*/*.bin*
-Assets/AddressableAssetsData/*/*.json*
-Assets/AddressableAssetsData/*/*.xml*
+Assets/AddressableAssetsData/
 Library/com.unity.addressables/
 FastCachedAssets/
+
+# -----------------------------------------------
+# 로컬 설치 패키지 (Packages/ 안에 수동 설치된 것들)
+# -----------------------------------------------
+Packages/com.vrmc.*/
 
 # -----------------------------------------------
 # IDE 파일
