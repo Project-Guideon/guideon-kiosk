@@ -1,0 +1,38 @@
+name: "\u267B\uFE0F Refactoring & Chore (개선 및 유지보수)"
+description: 코드 리팩토링, 패키지 업데이트, 문서화, 빌드 설정 등 유지보수 작업.
+title: "[CHORE] "
+labels: ["chore"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: "\U0001F3AF 유형"
+      options:
+        - "Architecture (구조 개선)"
+        - "Performance (성능 최적화)"
+        - "Clean Code (코드 정리)"
+        - "Package (패키지/라이브러리 업데이트)"
+        - "Build / CI (빌드 설정, 배포)"
+        - "Docs (문서화)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: as-is
+    attributes:
+      label: "\u26A0\uFE0F AS-IS (현재 문제점)"
+      placeholder: |
+        - AudioClip 해제 누락으로 메모리 누수 발생
+        - UniTask 2.x → 최신 버전 업데이트 필요
+    validations:
+      required: true
+
+  - type: textarea
+    id: to-be
+    attributes:
+      label: "\u2728 TO-BE (개선 방향)"
+      placeholder: |
+        - TTS 재생 완료 후 AudioClip Destroy 처리
+        - UniTask 최신 안정 버전으로 업그레이드
+    validations:
+      required: true
