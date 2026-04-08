@@ -5,7 +5,8 @@
     "timeout": 10
   },
   "device": {
-    "token": "DEVICE_TOKEN_HERE"
+    "id": "",
+    "token": ""
   },
   "kiosk": {
     "idleTimeoutSeconds": 120,

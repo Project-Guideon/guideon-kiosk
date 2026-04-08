@@ -21,6 +21,7 @@ namespace Guideon.Core
     [Serializable]
     public class DeviceConfig
     {
+        public string id = "";
         public string token = "";
     }
 
