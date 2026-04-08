@@ -1,0 +1,79 @@
+name: "\U0001F680 Unity Feature (Unity 기능 구현)"
+description: Unity 씬, 매니저, UI 등 클라이언트 기능 구현 작업 템플릿입니다.
+title: "[FEAT] "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: "\U0001F4CC 관련 Phase"
+      options:
+        - "Phase 1 — 코어 아키텍처 & UI 프레임워크"
+        - "Phase 2 — 네트워크 & 인증"
+        - "Phase 3 — 텍스트 대화 시스템"
+        - "Phase 4 — STT 음성 인식"
+        - "Phase 5 — TTS 음성 합성"
+        - "Phase 6 — 3D 마스코트 & 립싱크"
+        - "Phase 7 — 부가 기능"
+        - "Phase 8 — 안정화 & 최적화"
+        - "Phase 9 — 빌드 & 배포"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "\U0001F3AF 카테고리"
+      options:
+        - "Scene / UI (씬, 패널, Canvas)"
+        - "Manager / Core (매니저, 싱글톤)"
+        - "Network / API (REST, WebSocket)"
+        - "Audio (STT, TTS, 마이크)"
+        - "Mascot (3D 모델, 애니메이션, 립싱크)"
+        - "Config / Settings (설정, 환경)"
+        - "기타"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "\U0001F4DD 작업 내용"
+      description: 어떤 기능을 구현하는지 설명해주세요.
+      placeholder: |
+        - ChatManager 구현: 세션 생성/메시지 전송/세션 종료
+        - ChatPanel UI: 채팅 버블, ScrollRect, 텍스트 입력
+    validations:
+      required: true
+
+  - type: textarea
+    id: related-files
+    attributes:
+      label: "\U0001F4C2 관련 스크립트/씬"
+      description: 생성하거나 수정할 파일 경로
+      placeholder: |
+        - Assets/_Project/Scripts/Chat/ChatManager.cs (신규)
+        - Assets/_Project/Scripts/Core/Bootstrap/GameManager.cs (수정)
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "\u2705 완료 조건 (Acceptance Criteria)"
+      placeholder: |
+        - [ ] 텍스트 입력 → 서버 AI 응답 수신 → 채팅 버블 표시
+        - [ ] 세션 생성/종료가 정상 호출됨
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "\U0001F517 의존성"
+      description: 이 작업 전에 완료되어야 하는 이슈 또는 API
+      placeholder: |
+        - #5 (DTO 모델 구현)
+        - 백엔드 POST /kiosk/chat/sessions API
+    validations:
+      required: false

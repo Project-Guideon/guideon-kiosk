@@ -1,3 +1,5 @@
+using Guideon.Network.Models;
+
 namespace Guideon.Core
 {
     // ── 마스코트 ──────────────────────────────────────────
@@ -16,19 +18,39 @@ namespace Guideon.Core
     }
 
     // ── TTS (음성 합성) ───────────────────────────────────
-    public struct TtsReadyEvent
+    public struct TtsChunkReadyEvent
     {
         public UnityEngine.AudioClip Clip;
-        public string Text;
+        public string Sentence;
+        public int Seq;
+        public bool IsLast;
+    }
+
+    public struct TtsDoneEvent
+    {
+        public string SessionId;
     }
 
     // ── 채팅 ──────────────────────────────────────────────
     public struct ChatResponseEvent
     {
-        public string Message;
         public string SessionId;
+        public string Answer;
         public string Emotion;
-        public string MapUrl;
+        public string Language;
+        public DisplayHint Display; // null이면 장소 언급 없음
+    }
+
+    // ── 페어링 ────────────────────────────────────────────
+    public struct PairingCodeIssuedEvent
+    {
+        public string PairingCode;
+        public string ExpiresAt;
+    }
+
+    public struct PairingCompletedEvent
+    {
+        public string DeviceId;
     }
 
     // ── 네트워크 ──────────────────────────────────────────
@@ -38,10 +60,22 @@ namespace Guideon.Core
         public int StatusCode;
     }
 
+    // ── 인증/부트스트랩 ───────────────────────────────────
+    public struct AuthVerifiedEvent
+    {
+        public string DeviceId;
+        public long SiteId;
+        public long? ZoneId;
+    }
+
+    public struct BootstrapLoadedEvent
+    {
+        public BootstrapResponse Data;
+    }
+
     // ── UI / 앱 상태 ──────────────────────────────────────
     public struct IdleTimeoutEvent { }
 
-    // 대기 화면에서 사용자가 터치/클릭했을 때
     public struct UserTouchedEvent { }
 
     public struct SceneReadyEvent
