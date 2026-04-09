@@ -95,7 +95,8 @@ namespace Guideon.Core
 
         private void OnApplicationQuit()
         {
-            HeartbeatService.Instance.StopHeartbeat();
+            if (HeartbeatService.HasInstance)
+                HeartbeatService.Instance.StopHeartbeat();
             Debug.Log("[GameManager] Application quit.");
         }
     }

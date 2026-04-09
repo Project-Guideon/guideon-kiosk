@@ -171,10 +171,11 @@ namespace Guideon.Network
             return true;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             _pollCts?.Cancel();
             _pollCts?.Dispose();
+            base.OnDestroy();
         }
     }
 }

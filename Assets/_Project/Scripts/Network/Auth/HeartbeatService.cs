@@ -97,9 +97,10 @@ namespace Guideon.Network
             }
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             StopHeartbeat();
+            base.OnDestroy();
         }
     }
 }
