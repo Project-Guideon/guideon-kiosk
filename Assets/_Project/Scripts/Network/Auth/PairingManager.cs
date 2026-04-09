@@ -25,7 +25,12 @@ namespace Guideon.Network
 
         protected override void OnInitialize()
         {
-            _api = new ApiClient(ConfigManager.Instance);
+            // ApiClient는 실제 사용 시점에 생성 (ConfigManager Awake 순서 보장 불가)
+        }
+
+        private void EnsureApiClient()
+        {
+            _api ??= new ApiClient(ConfigManager.Instance);
         }
 
         /// <summary>
@@ -84,6 +89,7 @@ namespace Guideon.Network
         private async UniTask<bool> RequestPairingCodeAsync()
         {
             Debug.Log("[PairingManager] 페어링 코드 발급 요청...");
+            EnsureApiClient();
 
             var response = await _api.PostNoAuthAsync<PairingCodeResponse>(
                 KioskApiEndpoints.PairingRequest);

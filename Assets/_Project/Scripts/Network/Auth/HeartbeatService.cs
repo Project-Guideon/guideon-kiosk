@@ -25,7 +25,12 @@ namespace Guideon.Network
 
         protected override void OnInitialize()
         {
-            _api = new ApiClient(ConfigManager.Instance);
+            // ApiClient는 실제 사용 시점에 생성 (ConfigManager Awake 순서 보장 불가)
+        }
+
+        private void EnsureApiClient()
+        {
+            _api ??= new ApiClient(ConfigManager.Instance);
         }
 
         /// <summary>하트비트 루프 시작.</summary>
@@ -66,6 +71,7 @@ namespace Guideon.Network
 
         private async UniTask SendHeartbeatAsync()
         {
+            EnsureApiClient();
             var body = new HeartbeatRequest
             {
                 Version = Application.version,
