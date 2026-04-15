@@ -24,7 +24,12 @@ namespace Guideon.Network
 
         protected override void OnInitialize()
         {
-            _api = new ApiClient(ConfigManager.Instance);
+            // ApiClient는 실제 사용 시점에 생성 (ConfigManager Awake 순서 보장 불가)
+        }
+
+        private void EnsureApiClient()
+        {
+            _api ??= new ApiClient(ConfigManager.Instance);
         }
 
         /// <summary>
@@ -34,6 +39,7 @@ namespace Guideon.Network
         public async UniTask<bool> VerifyAsync()
         {
             Debug.Log("[AuthManager] 토큰 검증 요청...");
+            EnsureApiClient();
 
             var response = await _api.PostAsync<VerifyResponse>(KioskApiEndpoints.AuthVerify);
 
@@ -67,6 +73,7 @@ namespace Guideon.Network
         public async UniTask<bool> BootstrapAsync()
         {
             Debug.Log("[AuthManager] 부트스트랩 요청...");
+            EnsureApiClient();
 
             var response = await _api.GetAsync<BootstrapResponse>(KioskApiEndpoints.Bootstrap);
 

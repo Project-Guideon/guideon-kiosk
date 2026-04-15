@@ -65,10 +65,10 @@ namespace Guideon.Network
             request.downloadHandler = new DownloadHandlerBuffer();
             request.timeout = _config.Config.server.timeout;
 
-            // JSON body
-            if (body != null)
+            // JSON body — POST/PATCH/PUT은 body가 null이어도 빈 JSON 전송
+            if (body != null || method == "POST" || method == "PATCH" || method == "PUT")
             {
-                string json = JsonConvert.SerializeObject(body);
+                string json = JsonConvert.SerializeObject(body ?? new object());
                 byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
                 request.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 request.SetRequestHeader("Content-Type", "application/json");
