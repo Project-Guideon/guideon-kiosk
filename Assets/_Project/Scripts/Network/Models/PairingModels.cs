@@ -9,6 +9,14 @@ namespace Guideon.Network.Models
     {
         [JsonProperty("pairingCode")] public string PairingCode;
         [JsonProperty("expiresAt")] public string ExpiresAt;
+        [JsonProperty("secret")] public string Secret;
+    }
+
+    // POST /kiosk/pairing/{code}/claim 요청 body
+    [Serializable]
+    public class PairingClaimRequest
+    {
+        [JsonProperty("secret")] public string Secret;
     }
 
     // GET /kiosk/pairing/{code}/status 응답

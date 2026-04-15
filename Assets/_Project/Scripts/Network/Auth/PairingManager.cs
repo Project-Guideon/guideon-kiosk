@@ -19,6 +19,7 @@ namespace Guideon.Network
 
         public string CurrentCode { get; private set; }
         public string ExpiresAt { get; private set; }
+        public string CurrentSecret { get; private set; }
         public bool IsPairing { get; private set; }
 
         private CancellationTokenSource _pollCts;
@@ -102,6 +103,7 @@ namespace Guideon.Network
 
             CurrentCode = response.Data.PairingCode;
             ExpiresAt = response.Data.ExpiresAt;
+            CurrentSecret = response.Data.Secret;
 
             Debug.Log($"[PairingManager] 코드 발급: {CurrentCode} (만료: {ExpiresAt})");
 
@@ -147,8 +149,9 @@ namespace Guideon.Network
         {
             Debug.Log($"[PairingManager] 토큰 수령 요청 (코드: {CurrentCode})");
 
+            var claimBody = new PairingClaimRequest { Secret = CurrentSecret };
             var response = await _api.PostNoAuthAsync<PairingClaimResponse>(
-                KioskApiEndpoints.PairingClaim(CurrentCode));
+                KioskApiEndpoints.PairingClaim(CurrentCode), claimBody);
 
             if (!response.Success || response.Data == null)
             {
