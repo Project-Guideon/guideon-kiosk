@@ -1,7 +1,7 @@
 {
   "server": {
-    "baseUrl": "https://kiosk-api.guideon.com/api/v1",
-    "wsUrl": "wss://kiosk-api.guideon.com/ws/v1",
+    "baseUrl": "https://realguideon.duckdns.org/api/v1",
+    "wsUrl": "wss://realguideon.duckdns.org/ws/v1",
     "timeout": 10
   },
   "device": {
