@@ -21,7 +21,7 @@ namespace Guideon.UI
         }
 
         [Serializable]
-        private struct PanelEntry
+        public struct PanelEntry
         {
             public string id;
             public GameObject panel;
@@ -58,8 +58,34 @@ namespace Guideon.UI
         public void ShowOnly(string panelId)
         {
             foreach (var kv in _panelMap)
+            {
+                if (kv.Value == null) continue; // 씬 전환으로 destroyed된 참조는 스킵
                 kv.Value.SetActive(kv.Key == panelId);
+            }
             _currentPanelId = panelId;
+        }
+
+        /// <summary>씬 전환 후 새 패널을 동적으로 등록. 같은 id면 덮어쓴다.</summary>
+        public void BindPanel(string panelId, GameObject panel)
+        {
+            if (string.IsNullOrEmpty(panelId) || panel == null) return;
+            _panelMap[panelId] = panel;
+        }
+
+        /// <summary>여러 패널을 한 번에 등록.</summary>
+        public void BindPanels(PanelEntry[] entries)
+        {
+            if (entries == null) return;
+            foreach (var e in entries)
+                BindPanel(e.id, e.panel);
+        }
+
+        /// <summary>패널 등록 해제. 보통 씬 unload 직전에 호출.</summary>
+        public void UnbindPanel(string panelId)
+        {
+            if (string.IsNullOrEmpty(panelId)) return;
+            _panelMap.Remove(panelId);
+            if (_currentPanelId == panelId) _currentPanelId = null;
         }
 
         /// <summary>페이드 전환으로 패널 교체. 디자인 퀄리티용.</summary>
@@ -91,7 +117,7 @@ namespace Guideon.UI
         /// <summary>지정 패널만 켬. 다른 패널 상태는 그대로.</summary>
         public void Show(string panelId)
         {
-            if (!_panelMap.TryGetValue(panelId, out var panel))
+            if (!_panelMap.TryGetValue(panelId, out var panel) || panel == null)
             {
                 Debug.LogWarning($"[UIManager] 패널 없음: {panelId}");
                 return;
@@ -102,7 +128,7 @@ namespace Guideon.UI
         /// <summary>지정 패널 끔.</summary>
         public void Hide(string panelId)
         {
-            if (!_panelMap.TryGetValue(panelId, out var panel))
+            if (!_panelMap.TryGetValue(panelId, out var panel) || panel == null)
             {
                 Debug.LogWarning($"[UIManager] 패널 없음: {panelId}");
                 return;
@@ -111,7 +137,7 @@ namespace Guideon.UI
         }
 
         public bool IsVisible(string panelId) =>
-            _panelMap.TryGetValue(panelId, out var panel) && panel.activeSelf;
+            _panelMap.TryGetValue(panelId, out var panel) && panel != null && panel.activeSelf;
 
         public string CurrentPanel => _currentPanelId;
 
