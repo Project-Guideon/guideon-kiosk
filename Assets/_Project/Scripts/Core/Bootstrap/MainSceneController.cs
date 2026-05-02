@@ -12,7 +12,18 @@ namespace Guideon.Core
     /// </summary>
     public class MainSceneController : MonoBehaviour
     {
+        [Header("Panels")]
         [SerializeField] private IdlePanel _idlePanel;
+        [Tooltip("Main 씬 패널들. UIManager에 동적 등록되어 Boot 씬의 동명 패널을 덮어쓴다.")]
+        [SerializeField] private UIManager.PanelEntry[] _scenePanels;
+
+        private void Awake()
+        {
+            // Boot 씬에서 등록됐던 IdlePanel/ErrorPanel 참조는 씬 전환으로 destroy됨.
+            // Main 씬 패널을 같은 id로 다시 등록해서 UIManager가 정상 동작하도록 한다.
+            if (UIManager.HasInstance)
+                UIManager.Instance.BindPanels(_scenePanels);
+        }
 
         private void OnEnable()
         {
