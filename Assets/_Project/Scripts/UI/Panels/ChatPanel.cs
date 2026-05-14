@@ -27,6 +27,9 @@ namespace Guideon.UI
         [SerializeField] private GameObject _thinkingGroup;
         [SerializeField] private TextMeshProUGUI _thinkingText;
 
+        [Header("Voice Waveform")]
+        [SerializeField] private AudioWaveformWidget _waveformWidget;
+
         private void OnEnable()
         {
             EventBus.Subscribe<ChatResponseEvent>(OnChatResponse);
@@ -115,6 +118,16 @@ namespace Guideon.UI
             if (_contentRoot == null) return;
             for (int i = _contentRoot.childCount - 1; i >= 0; i--)
                 Destroy(_contentRoot.GetChild(i).gameObject);
+        }
+
+        public void SetRecording(bool recording)
+        {
+            _waveformWidget?.SetActive(recording);
+        }
+
+        public void SetWaveformLevel(float level)
+        {
+            _waveformWidget?.SetAudioLevel(level);
         }
 
         private void SetThinking(bool on)
