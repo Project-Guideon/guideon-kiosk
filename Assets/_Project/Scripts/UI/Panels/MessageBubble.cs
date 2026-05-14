@@ -30,7 +30,7 @@ namespace Guideon.UI
             {
                 _background.color = sender == Sender.User
                     ? GuideonColors.Primary
-                    : GuideonColors.AccentBg;
+                    : GuideonColors.BgDivider;
             }
 
             if (_container != null)

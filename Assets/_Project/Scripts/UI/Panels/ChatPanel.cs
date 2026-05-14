@@ -95,11 +95,18 @@ namespace Guideon.UI
             if (_contentRoot == null) return;
 
             var prefab = sender == MessageBubble.Sender.User ? _userBubblePrefab : _aiBubblePrefab;
-            if (prefab == null) return;
+            if (prefab == null)
+            {
+                Debug.LogError($"[ChatPanel] {sender} prefab이 null입니다!");
+                return;
+            }
 
             var bubble = Instantiate(prefab, _contentRoot);
             bubble.SetMessage(message, sender);
+            Debug.Log($"[ChatPanel] 버블 생성 — sender={sender}, msg='{message}', " +
+                      $"go={bubble.gameObject.name}, active={bubble.gameObject.activeInHierarchy}");
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_contentRoot);
             ScrollToBottomNextFrame().Forget();
         }
 
@@ -121,10 +128,7 @@ namespace Guideon.UI
         {
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, this.GetCancellationTokenOnDestroy());
             if (_scrollRect != null && _scrollRect.content != null)
-            {
-                Canvas.ForceUpdateCanvases();
                 _scrollRect.verticalNormalizedPosition = 0f;
-            }
         }
     }
 }

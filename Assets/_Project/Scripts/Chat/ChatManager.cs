@@ -84,7 +84,7 @@ namespace Guideon.Chat
                     SessionId = data.SessionId,
                     Answer = data.Answer,
                     Emotion = data.Emotion,
-                    Language = data.Language,
+                    Language = data.Language, 
                     Display = data.Display
                 });
 
