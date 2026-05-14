@@ -119,9 +119,12 @@ namespace Guideon.UI
         // Layout이 반영된 다음 프레임에 스크롤해야 자식 크기가 적용된다
         private async UniTaskVoid ScrollToBottomNextFrame()
         {
-            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
-            if (_scrollRect != null)
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, this.GetCancellationTokenOnDestroy());
+            if (_scrollRect != null && _scrollRect.content != null)
+            {
+                Canvas.ForceUpdateCanvases();
                 _scrollRect.verticalNormalizedPosition = 0f;
+            }
         }
     }
 }

@@ -2,11 +2,11 @@
   "server": {
     "baseUrl": "https://realguideon.duckdns.org/api/v1",
     "wsUrl": "wss://realguideon.duckdns.org/ws/v1",
-    "timeout": 10
+    "timeout": 60
   },
   "device": {
-    "id": "",
-    "token": ""
+    "id": "123123123",
+    "token": "abe3c842-58fc-491c-a302-3fac6121046b"
   },
   "kiosk": {
     "idleTimeoutSeconds": 120,

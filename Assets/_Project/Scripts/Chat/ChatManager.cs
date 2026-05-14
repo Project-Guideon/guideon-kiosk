@@ -76,7 +76,7 @@ namespace Guideon.Chat
                 }
 
                 var data = response.Data;
-                Debug.Log($"[ChatManager] 응답 수신 — emotion: {data.Emotion}, " +
+                Debug.Log($"[ChatManager] 응답 수신 — answer: '{data.Answer}', emotion: {data.Emotion}, " +
                           $"display: {(data.Display != null ? data.Display.PlaceName : "null")}");
 
                 EventBus.Publish(new ChatResponseEvent
