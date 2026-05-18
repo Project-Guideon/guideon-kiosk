@@ -102,14 +102,14 @@ namespace Guideon.Network.Stt
             Debug.Log($"[SttManager] 연결 시도 — {url}");
 
             var tcs = new UniTaskCompletionSource<bool>();
-            Action onOpen = () => tcs.TrySetResult(true);
-            Action<string> onErr = _ => tcs.TrySetResult(false);
+            WebSocketOpenEventHandler  onOpen = () => tcs.TrySetResult(true);
+            WebSocketErrorEventHandler onErr  = _ => tcs.TrySetResult(false);
 
             _ws.OnOpen  += onOpen;
             _ws.OnError += onErr;
 
-            // NativeWebSocket Connect()는 Task 반환
-            _ws.Connect();
+            // Connect()는 Task를 반환하지만 완료 시점은 OnOpen/OnError로 받음
+            _ = _ws.Connect();
 
             // 최대 5초 대기
             bool connected;

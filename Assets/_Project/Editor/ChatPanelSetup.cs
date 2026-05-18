@@ -164,6 +164,19 @@ namespace Guideon.Editor
             waveLE.preferredWidth = 200;
             waveLE.preferredHeight = 56;
 
+            // BarContainer — AudioWaveformWidget이 바를 생성할 부모 RT
+            var barContainerGo = new GameObject("BarContainer", typeof(RectTransform));
+            Undo.RegisterCreatedObjectUndo(barContainerGo, "create");
+            barContainerGo.transform.SetParent(waveGo.transform, false);
+            var barContainerRt = barContainerGo.GetComponent<RectTransform>();
+            Stretch(barContainerRt);
+
+            // BarContainer를 _barContainer 필드에 연결
+            var waveSo = new SerializedObject(waveWidget);
+            var barContainerProp = waveSo.FindProperty("_barContainer");
+            if (barContainerProp != null) barContainerProp.objectReferenceValue = barContainerRt;
+            waveSo.ApplyModifiedProperties();
+
             // 마이크 버튼
             var micBtnGo = new GameObject("MicButton",
                 typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
