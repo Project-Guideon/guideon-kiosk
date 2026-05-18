@@ -254,14 +254,8 @@ namespace Guideon.Network.Stt
                 if (_waitingForFinal)
                 {
                     _waitingForFinal = false;
-#if UNITY_EDITOR
-                    const string debugText = "경복궁 가는 길 알려줘";
-                    Debug.LogWarning($"[SttManager] DEBUG: 서버 응답 없음 — 디버그 텍스트로 강제 전송 '{debugText}'");
-                    TrySendToChat(debugText);
-#else
                     Debug.LogWarning("[SttManager] final 타임아웃 — 마지막 transcript로 폴백");
                     TrySendToChat(_lastTranscript);
-#endif
                 }
             }
 
