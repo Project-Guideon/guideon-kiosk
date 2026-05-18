@@ -21,12 +21,14 @@ namespace Guideon.Editor
         [MenuItem("Tools/GUIDEON/Setup Chat Panel")]
         public static void Run()
         {
-            var chatGo = GameObject.Find("ChatPanel");
-            if (chatGo == null)
+            // FindObjectOfType(true) — 비활성화된 오브젝트도 검색
+            var panel = Object.FindObjectOfType<ChatPanel>(true);
+            if (panel == null)
             {
-                EditorUtility.DisplayDialog("오류", "씬에서 'ChatPanel' 오브젝트를 찾을 수 없습니다.", "확인");
+                EditorUtility.DisplayDialog("오류", "씬에서 ChatPanel 컴포넌트를 찾을 수 없습니다.", "확인");
                 return;
             }
+            var chatGo = panel.gameObject;
 
             if (!EditorUtility.DisplayDialog("확인",
                 "ChatPanel의 자식을 모두 지우고 새로 만듭니다.\n씬을 저장해 두었나요?",
@@ -38,7 +40,6 @@ namespace Guideon.Editor
                 Undo.DestroyObjectImmediate(chatGo.transform.GetChild(i).gameObject);
 
             var root = chatGo.GetComponent<RectTransform>();
-            var panel = chatGo.GetComponent<ChatPanel>();
             var fontNanum = LoadFont(GuidFontNanum);
             var roundedSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
