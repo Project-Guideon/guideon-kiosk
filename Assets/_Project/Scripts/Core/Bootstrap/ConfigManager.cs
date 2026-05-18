@@ -16,6 +16,11 @@ namespace Guideon.Core
 
         private string _loadedPath;
 
+        protected override void OnInitialize()
+        {
+            LoadAsync().Forget();
+        }
+
         public bool HasDeviceCredentials =>
             !string.IsNullOrEmpty(Config?.device?.id) &&
             !string.IsNullOrEmpty(Config?.device?.token);
