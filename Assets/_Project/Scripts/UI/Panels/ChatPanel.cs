@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Guideon.Chat;
 using Guideon.Core;
-using TMPro;
+using Guideon.Network.Stt;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +9,8 @@ namespace Guideon.UI
 {
     /// <summary>
     /// 사용자/AI 메시지를 버블로 누적 표시하는 채팅 화면.
-    /// 개발 단계에서는 텍스트 입력으로 메시지를 보내고, 추후 STT가 동일 채널로 들어온다.
+    /// 마이크 버튼 탭 → SttManager 시작/중지. partial 수신 시 파형만 반응,
+    /// final 수신 시 SttManager가 ChatManager를 직접 호출해 AI 응답을 받는다.
     /// </summary>
     public class ChatPanel : MonoBehaviour
     {
@@ -19,75 +20,81 @@ namespace Guideon.UI
         [SerializeField] private MessageBubble _userBubblePrefab;
         [SerializeField] private MessageBubble _aiBubblePrefab;
 
-        [Header("Input (개발 테스트용 — STT 연동 시 대체)")]
-        [SerializeField] private TMP_InputField _inputField;
-        [SerializeField] private Button _sendButton;
-
         [Header("Thinking Indicator")]
         [SerializeField] private GameObject _thinkingGroup;
-        [SerializeField] private TextMeshProUGUI _thinkingText;
 
-        [Header("Voice Waveform")]
+        [Header("Voice Input")]
+        [SerializeField] private Button _micButton;
+        [SerializeField] private Image _micIcon;
         [SerializeField] private AudioWaveformWidget _waveformWidget;
+
+        [Header("Mic Icon Colors")]
+        [SerializeField] private Color _micIdleColor   = new Color(0.4f, 0.4f, 0.4f);
+        [SerializeField] private Color _micActiveColor = new Color(1f, 0.4f, 0.1f);
 
         private void OnEnable()
         {
             EventBus.Subscribe<ChatResponseEvent>(OnChatResponse);
+            EventBus.Subscribe<SttResultEvent>(OnSttResult);
 
-            if (_sendButton != null) _sendButton.onClick.AddListener(OnSendClicked);
-            if (_inputField != null) _inputField.onSubmit.AddListener(OnInputSubmit);
+            if (_micButton != null) _micButton.onClick.AddListener(OnMicClicked);
+
+            if (SttManager.HasInstance)
+                SttManager.Instance.OnRecordingStateChanged += OnRecordingStateChanged;
 
             ClearBubbles();
             SetThinking(false);
+            SetRecording(false);
         }
 
         private void OnDisable()
         {
             EventBus.Unsubscribe<ChatResponseEvent>(OnChatResponse);
+            EventBus.Unsubscribe<SttResultEvent>(OnSttResult);
 
-            if (_sendButton != null) _sendButton.onClick.RemoveListener(OnSendClicked);
-            if (_inputField != null) _inputField.onSubmit.RemoveListener(OnInputSubmit);
+            if (_micButton != null) _micButton.onClick.RemoveListener(OnMicClicked);
+
+            if (SttManager.HasInstance)
+                SttManager.Instance.OnRecordingStateChanged -= OnRecordingStateChanged;
         }
 
-        // ── 입력 ──────────────────────────────────────────
+        // ── 마이크 입력 ───────────────────────────────────
 
-        private void OnSendClicked() => SubmitInput();
-        private void OnInputSubmit(string _) => SubmitInput();
-
-        private void SubmitInput()
+        private void OnMicClicked()
         {
-            if (_inputField == null) return;
-            string text = _inputField.text?.Trim();
-            if (string.IsNullOrEmpty(text)) return;
+            if (!SttManager.HasInstance)
+            {
+                Debug.LogError("[ChatPanel] SttManager 없음");
+                return;
+            }
 
-            _inputField.text = "";
-            _inputField.ActivateInputField();
-
-            AppendBubble(text, MessageBubble.Sender.User);
-            SendAsync(text).Forget();
+            if (SttManager.Instance.IsRecording)
+                SttManager.Instance.Stop();
+            else
+                SttManager.Instance.StartAsync().Forget();
         }
 
-        private async UniTaskVoid SendAsync(string text)
+        private void OnRecordingStateChanged(bool recording)
         {
+            SetRecording(recording);
+        }
+
+        // ── STT 결과 ──────────────────────────────────────
+
+        private void OnSttResult(SttResultEvent e)
+        {
+            if (!e.IsFinal) return;
+            // final 텍스트는 SttManager가 ChatManager로 이미 전달.
+            // ChatPanel은 사용자 버블 표시 + thinking 인디케이터 ON.
+            AppendBubble(e.Transcript, MessageBubble.Sender.User);
             SetThinking(true);
-            try
-            {
-                if (IdleTimeoutManager.HasInstance)
-                    IdleTimeoutManager.Instance.NotifyInteraction();
-                await ChatManager.Instance.SendMessageAsync(text);
-            }
-            finally
-            {
-                SetThinking(false);
-            }
         }
 
-        // ── 응답 ──────────────────────────────────────────
+        // ── AI 응답 ───────────────────────────────────────
 
-        // display는 ChatResponseEvent에 그대로 실려 발행되므로
-        // 지도 자동 표시 책임은 Phase 7의 MapPanelController에서 같은 이벤트를 구독해 처리한다.
         private void OnChatResponse(ChatResponseEvent e)
         {
+            SetThinking(false);
             AppendBubble(e.Answer, MessageBubble.Sender.Ai);
         }
 
@@ -123,6 +130,13 @@ namespace Guideon.UI
         public void SetRecording(bool recording)
         {
             _waveformWidget?.SetActive(recording);
+            if (_micIcon != null)
+                _micIcon.color = recording ? _micActiveColor : _micIdleColor;
+
+            if (SttManager.HasInstance)
+                SttManager.Instance.OnRmsLevel -= OnRmsLevel;
+            if (recording && SttManager.HasInstance)
+                SttManager.Instance.OnRmsLevel += OnRmsLevel;
         }
 
         public void SetWaveformLevel(float level)
@@ -130,13 +144,16 @@ namespace Guideon.UI
             _waveformWidget?.SetAudioLevel(level);
         }
 
+        private void OnRmsLevel(float rms)
+        {
+            SetWaveformLevel(rms);
+        }
+
         private void SetThinking(bool on)
         {
             if (_thinkingGroup != null) _thinkingGroup.SetActive(on);
-            if (on && _thinkingText != null) _thinkingText.text = "생각 중...";
         }
 
-        // Layout이 반영된 다음 프레임에 스크롤해야 자식 크기가 적용된다
         private async UniTaskVoid ScrollToBottomNextFrame()
         {
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, this.GetCancellationTokenOnDestroy());
