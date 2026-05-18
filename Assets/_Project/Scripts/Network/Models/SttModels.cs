@@ -12,4 +12,21 @@ namespace Guideon.Network.Models
         [JsonProperty("confidence")] public float Confidence;
         [JsonProperty("sessionId")] public string SessionId;
     }
+
+    // Client → Server: 스트림 시작 (JSON)
+    [Serializable]
+    public class SttStartMessage
+    {
+        [JsonProperty("type")] public string Type = "start";
+        [JsonProperty("language")] public string Language;
+        [JsonProperty("sampleRate")] public int SampleRate;
+        [JsonProperty("encoding")] public string Encoding = "pcm16";
+    }
+
+    // Client → Server: 스트림 종료 (JSON)
+    [Serializable]
+    public class SttStopMessage
+    {
+        [JsonProperty("type")] public string Type = "stop";
+    }
 }
