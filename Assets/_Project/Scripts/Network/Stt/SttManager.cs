@@ -86,7 +86,7 @@ namespace Guideon.Network.Stt
         private async UniTask<bool> ConnectAsync(string sessionId)
         {
             var cfg = ConfigManager.Instance.Config;
-            string url = $"{cfg.server.wsUrl}/ws/v1/kiosk/stt?sessionId={sessionId}";
+            string url = $"{cfg.server.wsUrl}/kiosk/stt?sessionId={sessionId}";
 
             var headers = new Dictionary<string, string>
             {

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Guideon.Chat;
 using Guideon.Network;
+using Guideon.Network.Stt;
 using Guideon.UI;
 using UnityEngine;
 
@@ -66,6 +67,9 @@ namespace Guideon.Core
 
             await ChatManager.Instance.CreateSessionAsync();
             IdleTimeoutManager.Instance.Begin();
+
+            if (SttManager.HasInstance)
+                SttManager.Instance.StartAsync().Forget();
         }
 
         // ── ChatPanel → IdlePanel ─────────────────────────
