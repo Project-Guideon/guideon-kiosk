@@ -27,6 +27,8 @@ namespace Guideon.Network.Stt
         private MicrophoneCapture _mic;
         private VoiceActivityDetector _vad;
         private bool _waitingForFinal;
+        private bool _sentToChat;        // 이번 세션에서 이미 ChatManager 호출했는지
+        private string _lastTranscript;  // partial/final 중 마지막으로 받은 텍스트
 
         private const float SilenceThreshold = 0.01f;
 
@@ -70,6 +72,8 @@ namespace Guideon.Network.Stt
             StartMic();
             IsRecording = true;
             _waitingForFinal = false;
+            _sentToChat = false;
+            _lastTranscript = null;
             OnRecordingStateChanged?.Invoke(true);
             EventBus.Publish(new MascotStateEvent { State = MascotState.Listening });
             Debug.Log("[SttManager] 녹음 시작");
@@ -191,21 +195,20 @@ namespace Guideon.Network.Stt
             try { msg = JsonConvert.DeserializeObject<SttMessage>(json); }
             catch { Debug.LogWarning($"[SttManager] JSON 파싱 실패: {json}"); return; }
 
-            EventBus.Publish(new SttResultEvent
-            {
-                Transcript = msg.Transcript,
-                IsFinal = msg.Type == "final"
-            });
+            if (!string.IsNullOrEmpty(msg.Transcript))
+                _lastTranscript = msg.Transcript;
+
+            if (msg.Type != "final")
+                EventBus.Publish(new SttResultEvent { Transcript = msg.Transcript, IsFinal = false });
 
             if (IdleTimeoutManager.HasInstance)
                 IdleTimeoutManager.Instance.NotifyInteraction();
 
-            if (msg.Type == "final" && !string.IsNullOrEmpty(msg.Transcript))
+            if (msg.Type == "final")
             {
                 Debug.Log($"[SttManager] final 수신 — '{msg.Transcript}'");
                 _waitingForFinal = false;
-                ChatManager.Instance.SendMessageAsync(msg.Transcript).Forget();
-                EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
+                TrySendToChat(msg.Transcript);
             }
         }
 
@@ -218,6 +221,12 @@ namespace Guideon.Network.Stt
         private void OnWsClose(WebSocketCloseCode code)
         {
             Debug.Log($"[SttManager] WS 종료 — {code}");
+            // 서버가 final 없이 연결을 닫은 경우 마지막 transcript로 폴백
+            if (_waitingForFinal)
+            {
+                _waitingForFinal = false;
+                TrySendToChat(_lastTranscript);
+            }
             CleanupState();
         }
 
@@ -233,12 +242,26 @@ namespace Guideon.Network.Stt
                 Debug.Log("[SttManager] stop 메시지 전송");
                 _waitingForFinal = true;
 
-                // final 대기 최대 5초
+                // final 대기 최대 5초 — 서버가 final 없이 닫으면 OnWsClose가 폴백 처리
                 float waited = 0f;
                 while (_waitingForFinal && waited < 5f)
                 {
                     await UniTask.Yield();
                     waited += Time.deltaTime;
+                }
+
+                // 5초 타임아웃: 서버가 final도 안 보내고 연결도 안 닫은 경우
+                if (_waitingForFinal)
+                {
+                    _waitingForFinal = false;
+#if UNITY_EDITOR
+                    const string debugText = "경복궁 가는 길 알려줘";
+                    Debug.LogWarning($"[SttManager] DEBUG: 서버 응답 없음 — 디버그 텍스트로 강제 전송 '{debugText}'");
+                    TrySendToChat(debugText);
+#else
+                    Debug.LogWarning("[SttManager] final 타임아웃 — 마지막 transcript로 폴백");
+                    TrySendToChat(_lastTranscript);
+#endif
                 }
             }
 
@@ -258,6 +281,21 @@ namespace Guideon.Network.Stt
             OnRecordingStateChanged?.Invoke(false);
             EventBus.Publish(new MascotStateEvent { State = MascotState.Idle });
             Debug.Log("[SttManager] 녹음 종료 완료");
+        }
+
+        private void TrySendToChat(string transcript)
+        {
+            if (_sentToChat) return;
+            if (string.IsNullOrWhiteSpace(transcript))
+            {
+                Debug.LogWarning("[SttManager] 전송할 텍스트 없음 — 무시");
+                return;
+            }
+            _sentToChat = true;
+            Debug.Log($"[SttManager] ChatManager 전송 — '{transcript}'");
+            EventBus.Publish(new SttResultEvent { Transcript = transcript, IsFinal = true });
+            ChatManager.Instance.SendMessageAsync(transcript).Forget();
+            EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
         }
 
         // ── 유틸 ──────────────────────────────────────────

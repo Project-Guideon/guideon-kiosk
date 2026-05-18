@@ -32,6 +32,36 @@ namespace Guideon.UI
         [SerializeField] private Color _micIdleColor   = new Color(0.4f, 0.4f, 0.4f);
         [SerializeField] private Color _micActiveColor = new Color(1f, 0.4f, 0.1f);
 
+        private void Awake()
+        {
+            EnsureContentLayout();
+        }
+
+        private void EnsureContentLayout()
+        {
+            if (_contentRoot == null) return;
+
+            var vlg = _contentRoot.GetComponent<VerticalLayoutGroup>();
+            if (vlg == null)
+            {
+                vlg = _contentRoot.gameObject.AddComponent<VerticalLayoutGroup>();
+                vlg.childAlignment         = TextAnchor.UpperLeft;
+                vlg.childControlWidth      = true;
+                vlg.childControlHeight     = true;
+                vlg.childForceExpandWidth  = true;
+                vlg.childForceExpandHeight = false;
+                vlg.spacing = 12f;
+                vlg.padding = new RectOffset(16, 16, 16, 16);
+            }
+
+            var csf = _contentRoot.GetComponent<ContentSizeFitter>();
+            if (csf == null)
+            {
+                csf = _contentRoot.gameObject.AddComponent<ContentSizeFitter>();
+                csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            }
+        }
+
         private void OnEnable()
         {
             EventBus.Subscribe<ChatResponseEvent>(OnChatResponse);
@@ -113,8 +143,13 @@ namespace Guideon.UI
 
             var bubble = Instantiate(prefab, _contentRoot);
             bubble.SetMessage(message, sender);
-            Debug.Log($"[ChatPanel] 버블 생성 — sender={sender}, msg='{message}', " +
-                      $"go={bubble.gameObject.name}, active={bubble.gameObject.activeInHierarchy}");
+
+            var csf = bubble.GetComponent<ContentSizeFitter>();
+            if (csf == null)
+            {
+                csf = bubble.gameObject.AddComponent<ContentSizeFitter>();
+                csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(_contentRoot);
             ScrollToBottomNextFrame().Forget();
