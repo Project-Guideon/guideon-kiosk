@@ -9,19 +9,19 @@ using UnityEngine.UI;
 namespace Guideon.Editor
 {
     /// <summary>
-    /// Tools > GUIDEON > Setup Chat Panel 실행 시:
-    ///   1. ChatPanel 계층을 음성 입력 UI로 재구성 (버블 스크롤 + 마이크 버튼 + 파형 위젯)
-    ///   2. 씬에 SttManager GameObject 생성 (없으면)
-    /// 기존 자식들은 모두 제거 후 재생성하므로 씬 저장 후 실행 권고.
+    /// Tools > GUIDEON > Setup Chat Panel
+    /// 기존 ChatPanel 계층을 유지하면서 STT 마이크 입력으로 전환한다.
+    ///   1. TMP_InputField / 전송 Button 제거
+    ///   2. AudioWaveformWidget이 없으면 하단에 생성, 있으면 그대로 활용
+    ///   3. MicButton 생성 (없으면)
+    ///   4. SttManager GO 씬에 추가 (없으면)
+    ///   5. ChatPanel 직렬화 필드 연결
     /// </summary>
     public static class ChatPanelSetup
     {
-        private const string GuidFontNanum = "d75cb7c3237d3f74d9ca5f050d485e97";
-
         [MenuItem("Tools/GUIDEON/Setup Chat Panel")]
         public static void Run()
         {
-            // FindObjectOfType(true) — 비활성화된 오브젝트도 검색
             var panel = Object.FindObjectOfType<ChatPanel>(true);
             if (panel == null)
             {
@@ -29,241 +29,178 @@ namespace Guideon.Editor
                 return;
             }
             var chatGo = panel.gameObject;
+            Undo.RegisterFullObjectHierarchyUndo(chatGo, "Setup Chat Panel (STT)");
 
-            if (!EditorUtility.DisplayDialog("확인",
-                "ChatPanel의 자식을 모두 지우고 새로 만듭니다.\n씬을 저장해 두었나요?",
-                "계속", "취소")) return;
+            // ── 1. 기존 InputField / SendButton 제거 ──────────────────
+            RemoveComponentOwner<TMP_InputField>(chatGo);
+            // InputField 없어진 뒤 남은 고아 Send 버튼도 정리
+            // (이름 기반 — 기존 코드에서 "SendButton" 또는 "InputArea" 였음)
+            TryDestroyChild(chatGo, "SendButton");
+            TryDestroyChild(chatGo, "InputArea");
 
-            Undo.RegisterFullObjectHierarchyUndo(chatGo, "Setup Chat Panel");
+            // ── 2. 기존 요소 탐색 ─────────────────────────────────────
+            var scrollRect    = chatGo.GetComponentInChildren<ScrollRect>(true);
+            var contentRoot   = scrollRect != null ? scrollRect.content : null;
+            var thinkingGroup = FindChildByName(chatGo.transform, "ThinkingGroup");
+            var waveWidget    = chatGo.GetComponentInChildren<AudioWaveformWidget>(true);
 
-            for (int i = chatGo.transform.childCount - 1; i >= 0; i--)
-                Undo.DestroyObjectImmediate(chatGo.transform.GetChild(i).gameObject);
+            // ── 3. BottomBar 찾거나 생성 ──────────────────────────────
+            var bottomBarGo = FindChildByName(chatGo.transform, "BottomBar")?.gameObject;
+            if (bottomBarGo == null)
+            {
+                bottomBarGo = new GameObject("BottomBar", typeof(RectTransform));
+                Undo.RegisterCreatedObjectUndo(bottomBarGo, "create BottomBar");
+                bottomBarGo.transform.SetParent(chatGo.transform, false);
 
-            var root = chatGo.GetComponent<RectTransform>();
-            var fontNanum = LoadFont(GuidFontNanum);
-            var roundedSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+                var rt = bottomBarGo.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = new Vector2(1, 0);
+                rt.pivot     = new Vector2(0.5f, 0);
+                rt.anchoredPosition = Vector2.zero;
+                rt.sizeDelta = new Vector2(0, 100);
 
-            // ── 배경 ────────────────────────────────────────────────
-            var bg = MakeImg(root, "Background", Hex("#FFFBF7"));
-            Stretch(bg);
+                var hlg = bottomBarGo.AddComponent<HorizontalLayoutGroup>();
+                hlg.childAlignment       = TextAnchor.MiddleCenter;
+                hlg.spacing              = 24;
+                hlg.padding              = new RectOffset(40, 40, 12, 12);
+                hlg.childControlWidth    = false;
+                hlg.childControlHeight   = false;
+                hlg.childForceExpandWidth  = false;
+                hlg.childForceExpandHeight = true;
 
-            // ── 버블 스크롤 뷰 (하단 바 높이 제외 전체) ─────────────
-            var scrollGo = new GameObject("BubbleScrollView",
-                typeof(RectTransform), typeof(ScrollRect), typeof(Image));
-            Undo.RegisterCreatedObjectUndo(scrollGo, "create");
-            scrollGo.transform.SetParent(root, false);
-            var scrollImg = scrollGo.GetComponent<Image>();
-            scrollImg.color = Color.clear;
+                // 스크롤뷰 하단 여백 확보
+                if (scrollRect != null)
+                {
+                    var srt = scrollRect.GetComponent<RectTransform>();
+                    srt.offsetMin = new Vector2(srt.offsetMin.x, 100);
+                }
+            }
+            var bottomBarRt = bottomBarGo.GetComponent<RectTransform>();
 
-            var scrollRt = scrollGo.GetComponent<RectTransform>();
-            scrollRt.anchorMin = Vector2.zero;
-            scrollRt.anchorMax = Vector2.one;
-            scrollRt.offsetMin = new Vector2(0, 120);  // 하단 바 120px
-            scrollRt.offsetMax = Vector2.zero;
+            // ── 4. WaveformWidget ─────────────────────────────────────
+            if (waveWidget == null)
+            {
+                var wGo = new GameObject("WaveformWidget",
+                    typeof(RectTransform), typeof(AudioWaveformWidget));
+                Undo.RegisterCreatedObjectUndo(wGo, "create WaveformWidget");
+                wGo.transform.SetParent(bottomBarGo.transform, false);
+                waveWidget = wGo.GetComponent<AudioWaveformWidget>();
+                var le = wGo.AddComponent<LayoutElement>();
+                le.preferredWidth  = 200;
+                le.preferredHeight = 56;
+            }
+            else if (waveWidget.transform.parent != bottomBarRt)
+            {
+                // 기존 WaveformWidget이 다른 위치에 있으면 BottomBar로 이동
+                Undo.SetTransformParent(waveWidget.transform, bottomBarRt, "move WaveformWidget");
+                var le = waveWidget.GetComponent<LayoutElement>()
+                      ?? waveWidget.gameObject.AddComponent<LayoutElement>();
+                le.preferredWidth  = 200;
+                le.preferredHeight = 56;
+            }
 
-            var scrollRect = scrollGo.GetComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.scrollSensitivity = 30;
-            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+            // ── 5. MicButton ──────────────────────────────────────────
+            Button micBtn   = null;
+            Image  micIcon  = null;
 
-            // Viewport
-            var vpGo = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
-            Undo.RegisterCreatedObjectUndo(vpGo, "create");
-            vpGo.transform.SetParent(scrollGo.transform, false);
-            var vpImg = vpGo.GetComponent<Image>();
-            vpImg.color = Color.white;
-            vpImg.sprite = roundedSprite;
-            vpImg.type = Image.Type.Sliced;
-            var vpMask = vpGo.GetComponent<Mask>();
-            vpMask.showMaskGraphic = false;
-            var vpRt = vpGo.GetComponent<RectTransform>();
-            Stretch(vpRt);
-            scrollRect.viewport = vpRt;
+            var existingMicBtn = FindChildByName(bottomBarRt, "MicButton");
+            if (existingMicBtn != null)
+            {
+                micBtn  = existingMicBtn.GetComponent<Button>();
+                micIcon = existingMicBtn.GetComponentInChildren<Image>(true);
+            }
+            else
+            {
+                var roundedSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
-            // Content
-            var contentGo = new GameObject("Content", typeof(RectTransform));
-            Undo.RegisterCreatedObjectUndo(contentGo, "create");
-            contentGo.transform.SetParent(vpGo.transform, false);
-            var contentRt = contentGo.GetComponent<RectTransform>();
-            contentRt.anchorMin = new Vector2(0, 1);
-            contentRt.anchorMax = Vector2.one;
-            contentRt.pivot = new Vector2(0.5f, 1f);
-            contentRt.offsetMin = contentRt.offsetMax = Vector2.zero;
+                var micGo = new GameObject("MicButton",
+                    typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+                Undo.RegisterCreatedObjectUndo(micGo, "create MicButton");
+                micGo.transform.SetParent(bottomBarRt, false);
 
-            var vlg = contentGo.AddComponent<VerticalLayoutGroup>();
-            vlg.childAlignment = TextAnchor.UpperLeft;
-            vlg.spacing = 12;
-            vlg.padding = new RectOffset(20, 20, 20, 20);
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
+                var micImg = micGo.GetComponent<Image>();
+                micImg.sprite = roundedSprite;
+                micImg.type   = Image.Type.Sliced;
+                micImg.color  = Hex("#F1F5F9");
 
-            var csf = contentGo.AddComponent<ContentSizeFitter>();
-            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            scrollRect.content = contentRt;
+                var le = micGo.AddComponent<LayoutElement>();
+                le.preferredWidth  = 80;
+                le.preferredHeight = 80;
 
-            // ── 생각 중 인디케이터 (스크롤 뷰 위, 하단 바 위) ───────
-            var thinkGo = new GameObject("ThinkingGroup", typeof(RectTransform));
-            Undo.RegisterCreatedObjectUndo(thinkGo, "create");
-            thinkGo.transform.SetParent(root, false);
-            var thinkRt = thinkGo.GetComponent<RectTransform>();
-            thinkRt.anchorMin = new Vector2(0, 0);
-            thinkRt.anchorMax = new Vector2(1, 0);
-            thinkRt.pivot = new Vector2(0.5f, 0);
-            thinkRt.anchoredPosition = new Vector2(0, 120);
-            thinkRt.sizeDelta = new Vector2(0, 40);
-            thinkGo.SetActive(false);
+                micBtn = micGo.GetComponent<Button>();
 
-            var thinkHlg = thinkGo.AddComponent<HorizontalLayoutGroup>();
-            thinkHlg.childAlignment = TextAnchor.MiddleCenter;
-            thinkHlg.spacing = 8;
-            thinkHlg.padding = new RectOffset(20, 20, 4, 4);
-            thinkHlg.childControlWidth = false;
-            thinkHlg.childControlHeight = false;
-            thinkHlg.childForceExpandWidth = false;
-            thinkHlg.childForceExpandHeight = true;
+                // 아이콘 Image
+                var iconGo = new GameObject("MicIcon",
+                    typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                Undo.RegisterCreatedObjectUndo(iconGo, "create MicIcon");
+                iconGo.transform.SetParent(micGo.transform, false);
+                micIcon = iconGo.GetComponent<Image>();
+                micIcon.color = Hex("#666666");
+                var iconRt = iconGo.GetComponent<RectTransform>();
+                iconRt.anchorMin = Vector2.zero;
+                iconRt.anchorMax = Vector2.one;
+                iconRt.offsetMin = new Vector2(20, 20);
+                iconRt.offsetMax = new Vector2(-20, -20);
+            }
 
-            var thinkTmpGo = new GameObject("ThinkingText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            Undo.RegisterCreatedObjectUndo(thinkTmpGo, "create");
-            thinkTmpGo.transform.SetParent(thinkGo.transform, false);
-            var thinkTmp = thinkTmpGo.GetComponent<TextMeshProUGUI>();
-            thinkTmp.text = "생각 중...";
-            thinkTmp.fontSize = 16;
-            thinkTmp.color = Hex("#94A3B8");
-            if (fontNanum != null) thinkTmp.font = fontNanum;
-            var thinkLE = thinkTmpGo.AddComponent<LayoutElement>();
-            thinkLE.preferredWidth = 120;
-
-            // ── 하단 바 (높이 120) ───────────────────────────────────
-            var bottomBarGo = new GameObject("BottomBar", typeof(RectTransform));
-            Undo.RegisterCreatedObjectUndo(bottomBarGo, "create");
-            bottomBarGo.transform.SetParent(root, false);
-            var bottomRt = bottomBarGo.GetComponent<RectTransform>();
-            bottomRt.anchorMin = Vector2.zero;
-            bottomRt.anchorMax = new Vector2(1, 0);
-            bottomRt.pivot = new Vector2(0.5f, 0);
-            bottomRt.anchoredPosition = Vector2.zero;
-            bottomRt.sizeDelta = new Vector2(0, 120);
-
-            var bottomHlg = bottomBarGo.AddComponent<HorizontalLayoutGroup>();
-            bottomHlg.childAlignment = TextAnchor.MiddleCenter;
-            bottomHlg.spacing = 20;
-            bottomHlg.padding = new RectOffset(40, 40, 16, 16);
-            bottomHlg.childControlWidth = false;
-            bottomHlg.childControlHeight = false;
-            bottomHlg.childForceExpandWidth = false;
-            bottomHlg.childForceExpandHeight = true;
-
-            // 파형 위젯
-            var waveGo = new GameObject("WaveformWidget",
-                typeof(RectTransform), typeof(AudioWaveformWidget));
-            Undo.RegisterCreatedObjectUndo(waveGo, "create");
-            waveGo.transform.SetParent(bottomBarGo.transform, false);
-            var waveWidget = waveGo.GetComponent<AudioWaveformWidget>();
-            var waveLE = waveGo.AddComponent<LayoutElement>();
-            waveLE.preferredWidth = 200;
-            waveLE.preferredHeight = 56;
-
-            // BarContainer — AudioWaveformWidget이 바를 생성할 부모 RT
-            var barContainerGo = new GameObject("BarContainer", typeof(RectTransform));
-            Undo.RegisterCreatedObjectUndo(barContainerGo, "create");
-            barContainerGo.transform.SetParent(waveGo.transform, false);
-            var barContainerRt = barContainerGo.GetComponent<RectTransform>();
-            Stretch(barContainerRt);
-
-            // BarContainer를 _barContainer 필드에 연결
-            var waveSo = new SerializedObject(waveWidget);
-            var barContainerProp = waveSo.FindProperty("_barContainer");
-            if (barContainerProp != null) barContainerProp.objectReferenceValue = barContainerRt;
-            waveSo.ApplyModifiedProperties();
-
-            // 마이크 버튼
-            var micBtnGo = new GameObject("MicButton",
-                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            Undo.RegisterCreatedObjectUndo(micBtnGo, "create");
-            micBtnGo.transform.SetParent(bottomBarGo.transform, false);
-            var micBtnImg = micBtnGo.GetComponent<Image>();
-            micBtnImg.sprite = roundedSprite;
-            micBtnImg.type = Image.Type.Sliced;
-            micBtnImg.color = Hex("#F1F5F9");
-            var micBtnLE = micBtnGo.AddComponent<LayoutElement>();
-            micBtnLE.preferredWidth = 80;
-            micBtnLE.preferredHeight = 80;
-
-            // 마이크 아이콘 Image (버튼 위에 오버레이)
-            var micIconGo = new GameObject("MicIcon",
-                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            Undo.RegisterCreatedObjectUndo(micIconGo, "create");
-            micIconGo.transform.SetParent(micBtnGo.transform, false);
-            var micIconImg = micIconGo.GetComponent<Image>();
-            micIconImg.color = Hex("#666666");
-            var micIconRt = micIconGo.GetComponent<RectTransform>();
-            Stretch(micIconRt, 20);
-
-            var micBtn = micBtnGo.GetComponent<Button>();
-
-            // ── SttManager GO 생성 (없으면) ─────────────────────────
-            var sttGo = GameObject.Find("SttManager");
+            // ── 6. SttManager GO ──────────────────────────────────────
+            var sttGo = GameObject.Find("SttManager")
+                     ?? Object.FindObjectOfType<SttManager>(true)?.gameObject;
             if (sttGo == null)
             {
                 sttGo = new GameObject("SttManager");
                 Undo.RegisterCreatedObjectUndo(sttGo, "create SttManager");
-                // SttManager의 OnInitialize가 Awake에서 실행되므로 여기선 AddComponent만
                 sttGo.AddComponent<SttManager>();
-                Debug.Log("[ChatPanelSetup] SttManager GameObject 생성 완료");
-            }
-            else
-            {
-                Debug.Log("[ChatPanelSetup] 기존 SttManager 사용");
+                Debug.Log("[ChatPanelSetup] SttManager 생성");
             }
 
-            // ── ChatPanel 필드 직렬 연결 ────────────────────────────
-            if (panel != null)
-            {
-                var so = new SerializedObject(panel);
-                Ref(so, "_scrollRect",    scrollRect);
-                Ref(so, "_contentRoot",   contentRt);
-                Ref(so, "_thinkingGroup", thinkGo);
-                Ref(so, "_micButton",     micBtn);
-                Ref(so, "_micIcon",       micIconImg);
-                Ref(so, "_waveformWidget", waveWidget);
-                so.ApplyModifiedProperties();
-            }
+            // ── 7. ChatPanel 필드 연결 ────────────────────────────────
+            var so = new SerializedObject(panel);
+            Ref(so, "_scrollRect",     scrollRect);
+            Ref(so, "_contentRoot",    contentRoot);
+            Ref(so, "_thinkingGroup",  thinkingGroup?.gameObject);
+            Ref(so, "_micButton",      micBtn);
+            Ref(so, "_micIcon",        micIcon);
+            Ref(so, "_waveformWidget", waveWidget);
+            so.ApplyModifiedProperties();
 
             EditorUtility.SetDirty(chatGo);
-            EditorUtility.SetDirty(sttGo);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(chatGo.scene);
-            Debug.Log("[ChatPanelSetup] 완료! 버블 Prefab을 Inspector에서 수동 연결 후 Ctrl+S로 씬 저장하세요.");
+
+            Debug.Log("[ChatPanelSetup] 완료! Inspector에서 User/AI BubblePrefab 확인 후 Ctrl+S");
             EditorUtility.DisplayDialog("완료",
-                "ChatPanel 재구성 완료!\n\n" +
-                "Inspector에서 ChatPanel의\n" +
-                "User Bubble Prefab / AI Bubble Prefab을\n수동으로 연결한 뒤 Ctrl+S로 저장하세요.",
+                "ChatPanel STT 전환 완료!\n\n" +
+                "Inspector → ChatPanel에서\n" +
+                "User Bubble Prefab / AI Bubble Prefab이\n" +
+                "연결되어 있는지 확인 후 Ctrl+S 저장하세요.",
                 "확인");
         }
 
-        // ── Factories ──────────────────────────────────────────────
+        // ── 헬퍼 ──────────────────────────────────────────────────────
 
-        static RectTransform MakeImg(RectTransform p, string n, Color c)
+        static void RemoveComponentOwner<T>(GameObject root) where T : Component
         {
-            var go = new GameObject(n, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            Undo.RegisterCreatedObjectUndo(go, "ci");
-            go.transform.SetParent(p, false);
-            go.GetComponent<Image>().color = c;
-            return go.GetComponent<RectTransform>();
+            var comp = root.GetComponentInChildren<T>(true);
+            if (comp == null) return;
+            // 자기 GO를 통째로 지우면 ScrollView 같은 부모를 지울 수 있으므로
+            // 컴포넌트의 직접 GO가 루트나 ScrollView가 아닌 경우에만 지움
+            var go = comp.gameObject;
+            if (go == root) { Undo.DestroyObjectImmediate(comp); return; }
+            if (go.GetComponent<ScrollRect>() != null) return; // ScrollRect 보호
+            Undo.DestroyObjectImmediate(go);
         }
 
-        static void Stretch(RectTransform rt, float pad = 0)
+        static void TryDestroyChild(GameObject root, string name)
         {
-            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
-            rt.offsetMin = new Vector2(pad, pad);
-            rt.offsetMax = new Vector2(-pad, -pad);
+            var t = root.transform.Find(name);
+            if (t != null) Undo.DestroyObjectImmediate(t.gameObject);
         }
 
-        static TMP_FontAsset LoadFont(string guid)
+        static Transform FindChildByName(Transform parent, string name)
         {
-            var p = AssetDatabase.GUIDToAssetPath(guid);
-            return string.IsNullOrEmpty(p) ? null : AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(p);
+            foreach (Transform t in parent.GetComponentsInChildren<Transform>(true))
+                if (t.name == name) return t;
+            return null;
         }
 
         static void Ref(SerializedObject so, string field, Object val)

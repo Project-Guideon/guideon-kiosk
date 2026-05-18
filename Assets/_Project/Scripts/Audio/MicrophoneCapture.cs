@@ -83,9 +83,13 @@ namespace Guideon.Audio
             float ratio = (float)_nativeRate / _sampleRate;
             // 타겟 기준 프레임 하나에 해당하는 네이티브 샘플 수
             int nativeFrameSamples = Mathf.RoundToInt(_frameSamples * ratio);
+            if (nativeFrameSamples == 0) return;
 
             while (available >= nativeFrameSamples)
             {
+                // OnRmsLevel 콜백 내부에서 StopCapture()가 호출될 수 있으므로 매 루프 재확인
+                if (!IsCapturing || _clip == null) return;
+
                 if (_readBuffer == null || _readBuffer.Length != nativeFrameSamples)
                     _readBuffer = new float[nativeFrameSamples];
 

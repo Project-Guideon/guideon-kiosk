@@ -90,7 +90,16 @@ namespace Guideon.UI
 
         private void BuildBars()
         {
-            if (_barContainer == null) return;
+            if (_barContainer == null)
+            {
+                var go = new GameObject("BarContainer", typeof(RectTransform));
+                go.transform.SetParent(transform, false);
+                var rt = go.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = rt.offsetMax = Vector2.zero;
+                _barContainer = rt;
+            }
 
             for (int i = _barContainer.childCount - 1; i >= 0; i--)
                 Destroy(_barContainer.GetChild(i).gameObject);
