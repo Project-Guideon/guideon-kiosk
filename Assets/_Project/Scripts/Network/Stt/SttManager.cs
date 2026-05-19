@@ -35,6 +35,15 @@ namespace Guideon.Network.Stt
         protected override void OnInitialize()
         {
             _mic = gameObject.AddComponent<MicrophoneCapture>();
+
+            // TtsManager를 같은 부트스트랩 타이밍에 생성
+            if (!TtsManager.HasInstance)
+            {
+                var go = new GameObject("TtsManager");
+                go.AddComponent<TtsManager>();
+            }
+
+            EventBus.Subscribe<TtsDoneEvent>(OnTtsDone);
             Debug.Log("[SttManager] 초기화 완료");
         }
 
@@ -61,6 +70,9 @@ namespace Guideon.Network.Stt
 
             string sessionId = ChatManager.Instance.CurrentSessionId;
             if (!await ConnectAsync(sessionId)) return;
+
+            // 이전 TTS 재생 중이면 즉시 abort하고 새 세션 시작
+            if (TtsManager.HasInstance) TtsManager.Instance.BeginSession(sessionId);
 
             StartMic();
             IsRecording = true;
@@ -213,6 +225,11 @@ namespace Guideon.Network.Stt
                     HandleStatus(msg.Stage);
                     break;
 
+                case "tts_chunk":
+                    if (TtsManager.HasInstance)
+                        TtsManager.Instance.EnqueueChunk(msg.Seq, msg.AudioFormat, msg.AudioB64);
+                    break;
+
                 case "error":
                     Debug.LogWarning($"[SttManager] 서버 오류 — {msg.Code}: {msg.ErrorMessage}");
                     _waitingForDone = false;
@@ -221,6 +238,7 @@ namespace Guideon.Network.Stt
                 case "done":
                     Debug.Log("[SttManager] done 수신");
                     _waitingForDone = false;
+                    if (TtsManager.HasInstance) TtsManager.Instance.MarkServerDone();
                     break;
             }
         }
@@ -345,8 +363,15 @@ namespace Guideon.Network.Stt
 #endif
         }
 
+        private void OnTtsDone(TtsDoneEvent _)
+        {
+            if (!IsRecording)
+                StartAsync().Forget();
+        }
+
         protected override void OnDestroy()
         {
+            EventBus.Unsubscribe<TtsDoneEvent>(OnTtsDone);
             if (IsRecording) Stop();
             base.OnDestroy();
         }

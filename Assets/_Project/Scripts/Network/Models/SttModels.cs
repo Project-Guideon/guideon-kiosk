@@ -20,6 +20,11 @@ namespace Guideon.Network.Models
         [JsonProperty("code")]          public string Code;          // error
         [JsonProperty("message")]       public string ErrorMessage;  // error
         [JsonProperty("trace_id")]      public string TraceId;
+
+        // tts_chunk
+        [JsonProperty("seq")]          public int    Seq;
+        [JsonProperty("audio_format")] public string AudioFormat;
+        [JsonProperty("audio_b64")]    public string AudioB64;
     }
 
     // Client → Server: 스트림 종료 (JSON)
