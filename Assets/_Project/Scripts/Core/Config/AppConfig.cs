@@ -30,6 +30,8 @@ namespace Guideon.Core
     {
         public int idleTimeoutSeconds = 120;
         public int sttSilenceTimeoutMs = 3000;
+        public int sttSampleRate = 16000;
+        public int sttFrameMs = 20;
         public bool ttsEnabled = true;
         public string language = "ko";
     }

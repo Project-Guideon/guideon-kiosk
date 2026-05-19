@@ -67,6 +67,8 @@ namespace Guideon.UI
         public void SetActive(bool active)
         {
             _isActive = active;
+            if (_bars == null) return;
+
             Color col = active ? _activeColor : _inactiveColor;
             foreach (var bar in _bars)
             {
@@ -88,7 +90,16 @@ namespace Guideon.UI
 
         private void BuildBars()
         {
-            if (_barContainer == null) return;
+            if (_barContainer == null)
+            {
+                var go = new GameObject("BarContainer", typeof(RectTransform));
+                go.transform.SetParent(transform, false);
+                var rt = go.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = rt.offsetMax = Vector2.zero;
+                _barContainer = rt;
+            }
 
             for (int i = _barContainer.childCount - 1; i >= 0; i--)
                 Destroy(_barContainer.GetChild(i).gameObject);
@@ -113,10 +124,6 @@ namespace Guideon.UI
 
                 var img = go.GetComponent<Image>();
                 img.color = _inactiveColor;
-
-                // 둥근 캡슐 모양 (Built-in UI Sprite)
-                img.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
-                img.type = Image.Type.Sliced;
 
                 _bars[i] = rt;
                 _currentHeights[i] = _barMinHeight;
