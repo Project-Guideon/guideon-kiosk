@@ -26,9 +26,9 @@ namespace Guideon.Network.Stt
         private WebSocket _ws;
         private MicrophoneCapture _mic;
         private VoiceActivityDetector _vad;
-        private bool _waitingForFinal;
-        private bool _sentToChat;        // 이번 세션에서 이미 ChatManager 호출했는지
-        private string _lastTranscript;  // partial/final 중 마지막으로 받은 텍스트
+        private bool _waitingForDone;
+        private bool _sentUserBubble;    // 이번 세션에서 유저 버블을 이미 표시했는지
+        private string _lastTranscript;  // stt_interim/stt_final 중 마지막으로 받은 텍스트
 
         private const float SilenceThreshold = 0.01f;
 
@@ -62,17 +62,10 @@ namespace Guideon.Network.Stt
             string sessionId = ChatManager.Instance.CurrentSessionId;
             if (!await ConnectAsync(sessionId)) return;
 
-            await SendJsonAsync(new SttStartMessage
-            {
-                Language = ConfigManager.Instance.Config.kiosk.language,
-                SampleRate = ConfigManager.Instance.Config.kiosk.sttSampleRate
-            });
-            Debug.Log("[SttManager] start 메시지 전송");
-
             StartMic();
             IsRecording = true;
-            _waitingForFinal = false;
-            _sentToChat = false;
+            _waitingForDone = false;
+            _sentUserBubble = false;
             _lastTranscript = null;
             OnRecordingStateChanged?.Invoke(true);
             EventBus.Publish(new MascotStateEvent { State = MascotState.Listening });
@@ -90,7 +83,7 @@ namespace Guideon.Network.Stt
         private async UniTask<bool> ConnectAsync(string sessionId)
         {
             var cfg = ConfigManager.Instance.Config;
-            string url = $"{cfg.server.wsUrl}/kiosk/stt?sessionId={sessionId}";
+            string url = $"{cfg.server.wsUrl}/kiosk/stt?sessionId={sessionId}&languageCode={cfg.kiosk.language}";
 
             var headers = new Dictionary<string, string>
             {
@@ -195,20 +188,79 @@ namespace Guideon.Network.Stt
             try { msg = JsonConvert.DeserializeObject<SttMessage>(json); }
             catch { Debug.LogWarning($"[SttManager] JSON 파싱 실패: {json}"); return; }
 
-            if (!string.IsNullOrEmpty(msg.Transcript))
-                _lastTranscript = msg.Transcript;
-
-            if (msg.Type != "final")
-                EventBus.Publish(new SttResultEvent { Transcript = msg.Transcript, IsFinal = false });
-
             if (IdleTimeoutManager.HasInstance)
                 IdleTimeoutManager.Instance.NotifyInteraction();
 
-            if (msg.Type == "final")
+            switch (msg.Type)
             {
-                Debug.Log($"[SttManager] final 수신 — '{msg.Transcript}'");
-                _waitingForFinal = false;
-                TrySendToChat(msg.Transcript);
+                case "stt_interim":
+                    _lastTranscript = msg.Text;
+                    EventBus.Publish(new SttResultEvent { Transcript = msg.Text, IsFinal = false });
+                    break;
+
+                case "stt_final":
+                    _lastTranscript = msg.Text;
+                    Debug.Log($"[SttManager] stt_final — '{msg.Text}'");
+                    ShowUserBubble(msg.Text);
+                    break;
+
+                case "final_text":
+                    Debug.Log($"[SttManager] final_text — '{msg.Answer}'");
+                    HandleAiResponse(msg.Answer);
+                    break;
+
+                case "status":
+                    HandleStatus(msg.Stage);
+                    break;
+
+                case "error":
+                    Debug.LogWarning($"[SttManager] 서버 오류 — {msg.Code}: {msg.ErrorMessage}");
+                    _waitingForDone = false;
+                    break;
+
+                case "done":
+                    Debug.Log("[SttManager] done 수신");
+                    _waitingForDone = false;
+                    break;
+            }
+        }
+
+        private void ShowUserBubble(string transcript)
+        {
+            if (_sentUserBubble) return;
+            if (string.IsNullOrWhiteSpace(transcript)) return;
+            _sentUserBubble = true;
+            EventBus.Publish(new SttResultEvent { Transcript = transcript, IsFinal = true });
+            EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
+        }
+
+        private void HandleAiResponse(string answer)
+        {
+            if (string.IsNullOrWhiteSpace(answer)) return;
+            EventBus.Publish(new ChatResponseEvent
+            {
+                Answer    = answer,
+                SessionId = ChatManager.HasInstance ? ChatManager.Instance.CurrentSessionId : null,
+                Emotion   = "default",
+                Language  = ConfigManager.Instance.Config.kiosk.language,
+            });
+            EventBus.Publish(new MascotStateEvent { State = MascotState.Speaking });
+        }
+
+        private void HandleStatus(string stage)
+        {
+            switch (stage)
+            {
+                case "stt_start":
+                    EventBus.Publish(new MascotStateEvent { State = MascotState.Listening });
+                    break;
+                case "stt_done":
+                case "graph_start":
+                    EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
+                    break;
+                case "tts_start":
+                    EventBus.Publish(new MascotStateEvent { State = MascotState.Speaking });
+                    break;
             }
         }
 
@@ -221,11 +273,11 @@ namespace Guideon.Network.Stt
         private void OnWsClose(WebSocketCloseCode code)
         {
             Debug.Log($"[SttManager] WS 종료 — {code}");
-            // 서버가 final 없이 연결을 닫은 경우 마지막 transcript로 폴백
-            if (_waitingForFinal)
+            // 서버가 done 없이 연결을 닫은 경우 마지막 transcript로 폴백
+            if (_waitingForDone)
             {
-                _waitingForFinal = false;
-                TrySendToChat(_lastTranscript);
+                _waitingForDone = false;
+                ShowUserBubble(_lastTranscript);
             }
             CleanupState();
         }
@@ -240,22 +292,21 @@ namespace Guideon.Network.Stt
             {
                 await SendJsonAsync(new SttStopMessage());
                 Debug.Log("[SttManager] stop 메시지 전송");
-                _waitingForFinal = true;
+                _waitingForDone = true;
 
-                // final 대기 최대 5초 — 서버가 final 없이 닫으면 OnWsClose가 폴백 처리
+                // done 대기 최대 30초 — 서버가 done 없이 닫으면 OnWsClose가 폴백 처리
                 float waited = 0f;
-                while (_waitingForFinal && waited < 5f)
+                while (_waitingForDone && waited < 30f)
                 {
                     await UniTask.Yield();
                     waited += Time.deltaTime;
                 }
 
-                // 5초 타임아웃: 서버가 final도 안 보내고 연결도 안 닫은 경우
-                if (_waitingForFinal)
+                if (_waitingForDone)
                 {
-                    _waitingForFinal = false;
-                    Debug.LogWarning("[SttManager] final 타임아웃 — 마지막 transcript로 폴백");
-                    TrySendToChat(_lastTranscript);
+                    _waitingForDone = false;
+                    Debug.LogWarning("[SttManager] done 타임아웃 — 마지막 transcript로 폴백");
+                    ShowUserBubble(_lastTranscript);
                 }
             }
 
@@ -277,20 +328,6 @@ namespace Guideon.Network.Stt
             Debug.Log("[SttManager] 녹음 종료 완료");
         }
 
-        private void TrySendToChat(string transcript)
-        {
-            if (_sentToChat) return;
-            if (string.IsNullOrWhiteSpace(transcript))
-            {
-                Debug.LogWarning("[SttManager] 전송할 텍스트 없음 — 무시");
-                return;
-            }
-            _sentToChat = true;
-            Debug.Log($"[SttManager] ChatManager 전송 — '{transcript}'");
-            EventBus.Publish(new SttResultEvent { Transcript = transcript, IsFinal = true });
-            ChatManager.Instance.SendMessageAsync(transcript).Forget();
-            EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
-        }
 
         // ── 유틸 ──────────────────────────────────────────
 
