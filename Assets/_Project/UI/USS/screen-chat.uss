@@ -1,0 +1,156 @@
+/* Chat Screen — 일반 대화 (UNITY_DESIGN_SPEC §3.5) */
+
+.chat-root {
+    flex-direction: column;
+}
+
+/* ── 헤더 (h=72) ── */
+.chat-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    padding: 0 56px;
+    background-color: rgba(245, 237, 224, 0.96);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(90, 60, 20, 0.1);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.chat-status-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* ── 메인 2분할 ── */
+.chat-main {
+    flex: 1;
+    flex-direction: row;
+}
+
+/* 좌측 대화 패널 (860px) */
+.chat-left {
+    width: 860px;
+    flex-direction: column;
+    padding: 44px 52px 36px;
+    border-right-width: 1px;
+    border-right-color: rgba(90, 60, 20, 0.07);
+    justify-content: space-between;
+}
+
+/* ScrollView 대화 영역 */
+.chat-scroll {
+    flex: 1;
+}
+
+.chat-bubble-list {
+    flex-direction: column;
+    padding: 0 0 var(--space-md);
+}
+
+/* 생각 중 인디케이터 */
+.chat-thinking {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 0;
+    align-self: flex-start;
+}
+
+.thinking-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgb(177, 74, 46);
+    margin: 0 4px;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+
+/* 좌측 하단 입력 영역 */
+.chat-input-area {
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+/* 우측 마스코트 패널 */
+.chat-right {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+}
+
+/* 후광 */
+.chat-mascot-halo {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    translate: -50% 0%;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background-color: rgba(200, 64, 48, 0.05);
+}
+
+/* 단청 원 640 */
+.chat-dancheong-ring {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    translate: -50% 0%;
+    width: 640px;
+    height: 640px;
+    border-radius: 50%;
+    border-width: 1.5px;
+    border-color: rgba(200, 64, 48, 0.05);
+}
+
+/* 마스코트 슬롯 */
+.chat-mascot-slot {
+    width: 560px;
+    height: 560px;
+    border-radius: 50%;
+    background-color: rgba(200, 64, 48, 0.02);
+    position: relative;
+    z-index: 2;
+}
+
+/* 좌상단 말풍선 */
+.chat-speech-bubble {
+    position: absolute;
+    top: 80px;
+    left: 60px;
+    max-width: 380px;
+    background-color: rgba(255, 252, 245, 0.97);
+    border-width: 2px;
+    border-color: rgba(90, 60, 20, 0.14);
+    border-radius: 20px 20px 20px 6px;
+    padding: 22px 28px;
+    z-index: 3;
+}
+
+.chat-speech-label {
+    font-size: 13px;
+    color: rgb(177, 74, 46);
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+    -unity-font-style: bold;
+}
+
+.chat-speech-text {
+    font-size: 22px;
+    color: rgb(26, 18, 8);
+    white-space: normal;
+}
+
+/* 우상단 타임아웃 */
+.chat-timeout-area {
+    position: absolute;
+    top: 36px;
+    right: 40px;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 3;
+}
