@@ -10,7 +10,7 @@
     position: absolute;
     overflow: hidden;
     flex-direction: column;
-    -unity-font-definition: url("project://database/Assets/_Project/Font/Noto/NotoSansKR-Regular%20SDF.asset");
+    -unity-font: url("project://database/Assets/_Project/Font/Noto/NotoSansKR-Regular.ttf");
 }
 
 /* ── 단청 띠 (상/하단) ── */
@@ -307,11 +307,11 @@
 
 /* ── 글로벌 폰트 폴백 — UI Toolkit Label 이 기본 폰트 없이 invisible 되는 현상 방지 ── */
 Label {
-    -unity-font-definition: url("project://database/Assets/_Project/Font/Noto/NotoSansKR-Regular%20SDF.asset");
+    -unity-font: url("project://database/Assets/_Project/Font/Noto/NotoSansKR-Regular.ttf");
 }
 
 Button {
-    -unity-font-definition: url("project://database/Assets/_Project/Font/Noto/NotoSansKR-Regular%20SDF.asset");
+    -unity-font: url("project://database/Assets/_Project/Font/Noto/NotoSansKR-Regular.ttf");
 }
 
 /* ── Hidden 유틸 ── */
