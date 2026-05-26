@@ -14,7 +14,7 @@ namespace Guideon.Core
     public class MainSceneController : MonoBehaviour
     {
         [Header("Panels")]
-        [SerializeField] private IdlePanel _idlePanel;
+        [SerializeField] private IdleScreenController _idleScreen;
         [Tooltip("Main 씬 패널들. UIManager에 동적 등록되어 Boot 씬의 동명 패널을 덮어쓴다.")]
         [SerializeField] private UIManager.PanelEntry[] _scenePanels;
 
@@ -46,10 +46,10 @@ namespace Guideon.Core
 
         private void ApplyBootstrapData()
         {
-            if (_idlePanel == null) return;
+            if (_idleScreen == null) return;
             var data = AuthManager.HasInstance ? AuthManager.Instance.BootstrapData : null;
             if (data != null && !string.IsNullOrEmpty(data.SiteName))
-                _idlePanel.SetSiteName(data.SiteName);
+                _idleScreen.SetSiteName(data.SiteName);
         }
 
         // ── IdlePanel → ChatPanel ─────────────────────────

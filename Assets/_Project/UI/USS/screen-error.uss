@@ -1,0 +1,80 @@
+/* Error Screen — 에러/오류 표시 화면 */
+
+.error-root {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-card {
+    background-color: rgba(255, 252, 245, 0.96);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.15);
+    border-radius: 24px;
+    padding: 64px 80px;
+    align-items: center;
+    max-width: 720px;
+    min-width: 560px;
+}
+
+.error-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background-color: rgba(200, 64, 48, 0.08);
+    border-width: 2px;
+    border-color: rgba(177, 74, 46, 0.3);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.error-icon__label {
+    font-size: 36px;
+    -unity-text-align: middle-center;
+}
+
+.error-title {
+    font-size: 36px;
+    color: rgb(26, 18, 8);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 22px;
+    color: rgb(74, 53, 32);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 12px;
+}
+
+.error-code {
+    font-size: 14px;
+    color: rgb(138, 112, 96);
+    letter-spacing: 0.1em;
+    margin-bottom: 40px;
+    -unity-text-align: middle-center;
+}
+
+.error-retry-btn {
+    background-color: rgb(177, 74, 46);
+    color: rgb(255, 252, 245);
+    border-radius: 12px;
+    padding: 16px 48px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    border-width: 0;
+    margin-bottom: 20px;
+}
+
+.error-retry-btn:hover {
+    background-color: rgb(200, 64, 48);
+}
+
+.error-countdown {
+    font-size: 16px;
+    color: rgb(138, 112, 96);
+    -unity-text-align: middle-center;
+}

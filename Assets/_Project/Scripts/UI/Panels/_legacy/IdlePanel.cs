@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using Guideon.Mascot;
 using TMPro;
 using UnityEngine;
@@ -7,7 +7,8 @@ using UnityEngine.UI;
 
 namespace Guideon.UI
 {
-    public class IdlePanel : MonoBehaviour
+    [System.Obsolete("Step 8: UI Toolkit으로 교체됨")]
+        public class IdlePanel : MonoBehaviour
     {
         // ── Header ──────────────────────────────────────────────
         [Header("Header — 로고 & 상태바")]
@@ -188,3 +189,4 @@ namespace Guideon.UI
         }
     }
 }
+

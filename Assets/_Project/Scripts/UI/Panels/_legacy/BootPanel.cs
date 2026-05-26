@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +9,8 @@ namespace Guideon.UI
     /// Boot 씬 스플래시 화면.
     /// 로고 페이드인 → 상태 텍스트 표시 → 다음 단계 전환.
     /// </summary>
-    public class BootPanel : MonoBehaviour
+    [System.Obsolete("Step 8: UI Toolkit으로 교체됨")]
+        public class BootPanel : MonoBehaviour
     {
         [Header("Logo")]
         [SerializeField] private CanvasGroup _logoGroup;
@@ -85,3 +86,4 @@ namespace Guideon.UI
         }
     }
 }
+

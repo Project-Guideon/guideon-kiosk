@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using Guideon.Chat;
 using Guideon.Core;
 using Guideon.Network.Stt;
@@ -12,7 +12,8 @@ namespace Guideon.UI
     /// 마이크 버튼 탭 → SttManager 시작/중지. partial 수신 시 파형만 반응,
     /// final 수신 시 SttManager가 ChatManager를 직접 호출해 AI 응답을 받는다.
     /// </summary>
-    public class ChatPanel : MonoBehaviour
+    [System.Obsolete("Step 8: UI Toolkit으로 교체됨")]
+        public class ChatPanel : MonoBehaviour
     {
         [Header("Bubble List")]
         [SerializeField] private ScrollRect _scrollRect;
@@ -197,3 +198,4 @@ namespace Guideon.UI
         }
     }
 }
+

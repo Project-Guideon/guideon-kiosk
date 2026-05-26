@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using Guideon.Core;
 using TMPro;
 using UnityEngine;
@@ -10,7 +10,8 @@ namespace Guideon.UI
     /// 에러 표시 패널. 인증 실패, 네트워크 오류 등.
     /// 에러 아이콘 + 메시지 + 재시도 버튼.
     /// </summary>
-    public class ErrorPanel : MonoBehaviour
+    [System.Obsolete("Step 8: UI Toolkit으로 교체됨")]
+        public class ErrorPanel : MonoBehaviour
     {
         [Header("Content")]
         [SerializeField] private TextMeshProUGUI _titleText;
@@ -106,3 +107,4 @@ namespace Guideon.UI
         }
     }
 }
+
