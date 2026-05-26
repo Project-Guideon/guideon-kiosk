@@ -1,4 +1,4 @@
-/* Pairing Screen — 페어링 코드 등록 (UNITY_DESIGN_SPEC §3.2) */
+﻿/* Pairing Screen — 페어링 코드 등록 (UNITY_DESIGN_SPEC §3.2) */
 
 .pairing-root {
     flex-direction: row;
@@ -97,7 +97,7 @@
 .pairing-code-label {
     font-size: 20px;
     color: rgb(138, 112, 96);
-    letter-spacing: 0.4em;
+    letter-spacing: 6px;
     margin-bottom: var(--space-xl);
     -unity-text-align: middle-center;
 }
@@ -170,3 +170,4 @@
     margin-top: 40px;
     -unity-text-align: middle-center;
 }
+

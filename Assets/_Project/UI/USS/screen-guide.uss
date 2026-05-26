@@ -1,4 +1,4 @@
-/* Guide Screen — AI 안내 지도 모드 (UNITY_DESIGN_SPEC §3.4) */
+﻿/* Guide Screen — AI 안내 지도 모드 (UNITY_DESIGN_SPEC §3.4) */
 
 .guide-root {
     flex-direction: column;
@@ -83,7 +83,7 @@
 .guide-speech-label {
     font-size: 12px;
     color: rgb(177, 74, 46);
-    letter-spacing: 0.2em;
+    letter-spacing: 3px;
     margin-bottom: 8px;
     -unity-font-style: bold;
 }
@@ -118,7 +118,7 @@
 .guide-dest-label {
     font-size: 13px;
     color: rgb(138, 112, 96);
-    letter-spacing: 0.15em;
+    letter-spacing: 2px;
 }
 
 .guide-dest-value {
@@ -130,3 +130,4 @@
 .guide-dest-value--accent {
     color: rgb(177, 74, 46);
 }
+

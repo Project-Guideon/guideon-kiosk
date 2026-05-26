@@ -1,4 +1,4 @@
-/* Idle Screen — 대기 화면 터치 유도 (UNITY_DESIGN_SPEC §3.3) */
+﻿/* Idle Screen — 대기 화면 터치 유도 (UNITY_DESIGN_SPEC §3.3) */
 
 .idle-root {
     flex-direction: column;
@@ -60,7 +60,7 @@
 .idle-location-text {
     font-size: 15px;
     color: rgb(177, 74, 46);
-    letter-spacing: 0.15em;
+    letter-spacing: 2px;
     -unity-font-style: bold;
 }
 
@@ -160,7 +160,6 @@
     border-color: rgb(177, 74, 46);
     align-items: center;
     justify-content: center;
-    z-index: 1;
 }
 
 .idle-touch-main {
@@ -225,3 +224,4 @@
     color: rgb(138, 112, 96);
     white-space: normal;
 }
+

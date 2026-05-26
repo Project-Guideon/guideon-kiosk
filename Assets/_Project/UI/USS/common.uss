@@ -1,4 +1,4 @@
-/* ─────────────────────────────────────────────────────────────────────
+﻿/* ─────────────────────────────────────────────────────────────────────
    GUIDEON 공통 컴포넌트 스타일
    ───────────────────────────────────────────────────────────────────── */
 
@@ -54,14 +54,14 @@
 .logo-wordmark {
     font-size: 22px;
     color: var(--color-ink);
-    letter-spacing: 0.1em;
+    letter-spacing: 2px;
     -unity-font-style: bold;
 }
 
 .logo-sub {
     font-size: 11px;
     color: var(--color-ink-light);
-    letter-spacing: 0.25em;
+    letter-spacing: 4px;
     margin-top: 2px;
 }
 
@@ -79,7 +79,7 @@
 .chip__label {
     font-size: 11px;
     color: var(--color-ink-light);
-    letter-spacing: 0.1em;
+    letter-spacing: 2px;
 }
 
 .chip__value {
@@ -124,7 +124,7 @@
 .bubble__label {
     font-size: 13px;
     color: rgba(200, 64, 48, 0.5);
-    letter-spacing: 0.2em;
+    letter-spacing: 3px;
     margin-bottom: 10px;
 }
 
@@ -316,3 +316,4 @@
 .text-accent     { color: var(--color-accent); }
 .text-bold       { -unity-font-style: bold; }
 .text-light      { -unity-font-style: normal; }
+

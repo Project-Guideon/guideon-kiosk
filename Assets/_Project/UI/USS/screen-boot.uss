@@ -1,4 +1,4 @@
-/* Boot Screen — 부팅/로딩 화면 (UNITY_DESIGN_SPEC §3.1) */
+﻿/* Boot Screen — 부팅/로딩 화면 (UNITY_DESIGN_SPEC §3.1) */
 
 .boot-root {
     align-items: center;
@@ -10,7 +10,6 @@
     flex-direction: column;
     align-items: center;
     position: relative;
-    z-index: 2;
 }
 
 /* G 로고 컨테이너 (240×240) */
@@ -63,7 +62,7 @@
 .boot-wordmark {
     font-size: 72px;
     color: rgb(26, 18, 8);
-    letter-spacing: 0.18em;
+    letter-spacing: 3px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
@@ -75,7 +74,7 @@
 .boot-subtitle {
     font-size: 22px;
     color: rgb(74, 53, 32);
-    letter-spacing: 0.5em;
+    letter-spacing: 8px;
     margin-top: 12px;
     -unity-text-align: middle-center;
 }
@@ -103,7 +102,7 @@
 .boot-location {
     font-size: 17px;
     color: rgb(138, 112, 96);
-    letter-spacing: 0.3em;
+    letter-spacing: 5px;
     margin-top: 8px;
     -unity-text-align: middle-center;
 }
@@ -117,7 +116,7 @@
 .boot-status-text {
     font-size: 16px;
     color: rgb(138, 112, 96);
-    letter-spacing: 0.2em;
+    letter-spacing: 3px;
     margin: 16px 0;
     -unity-text-align: middle-center;
 }
@@ -152,7 +151,7 @@
 .boot-footer-text {
     font-size: 14px;
     color: rgb(138, 112, 96);
-    letter-spacing: 0.1em;
+    letter-spacing: 2px;
     margin: 0 8px;
     -unity-text-align: middle-center;
 }
@@ -167,3 +166,4 @@
 .boot-corner--tr { right: 24px; top: 24px; }
 .boot-corner--bl { left: 24px; bottom: 24px; }
 .boot-corner--br { right: 24px; bottom: 24px; }
+

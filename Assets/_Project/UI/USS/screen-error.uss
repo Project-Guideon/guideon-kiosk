@@ -1,4 +1,4 @@
-/* Error Screen — 에러/오류 표시 화면 */
+﻿/* Error Screen — 에러/오류 표시 화면 */
 
 .error-root {
     flex-direction: column;
@@ -53,7 +53,7 @@
 .error-code {
     font-size: 14px;
     color: rgb(138, 112, 96);
-    letter-spacing: 0.1em;
+    letter-spacing: 2px;
     margin-bottom: 40px;
     -unity-text-align: middle-center;
 }
@@ -78,3 +78,4 @@
     color: rgb(138, 112, 96);
     -unity-text-align: middle-center;
 }
+
