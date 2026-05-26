@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- GUIDEON G 마크 — 48×48px (UNITY_DESIGN_SPEC §2.4) -->
+  <!-- 원형 배경 -->
+  <circle cx="24" cy="24" r="22" fill="rgba(200,64,48,0.08)" stroke="#B14A2E" stroke-width="1.5"/>
+  <!-- G 글자 (Noto Serif KR 700 근사 path — 폰트 렌더링 대체) -->
+  <!-- 원호 (G 상단) -->
+  <path d="M 33 12
+           A 13 13 0 1 0 33.5 36
+           L 33.5 26 L 26 26 L 26 29 L 30.5 29 L 30.5 34
+           A 11.5 11.5 0 1 1 11 24
+           A 11.5 11.5 0 0 1 30.5 14 Z"
+        fill="#B14A2E"/>
+</svg>

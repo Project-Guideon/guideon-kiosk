@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="10" viewBox="0 0 16 10">
+  <!-- 단청 띠 타일 — 16×10px 반복 단위 (UNITY_DESIGN_SPEC §2.1) -->
+  <!-- Unity SVG Importer: SVG Type = VectorSprite, Generated Asset = Sprite -->
+  <!-- 배경 유닛 -->
+  <rect x="1" y="1" width="14" height="8" rx="1" fill="#C84030" opacity="0.7"/>
+  <!-- 상단 강조 돌출 -->
+  <rect x="4" y="0" width="8" height="3" rx="1" fill="#C84030" opacity="0.9"/>
+</svg>
