@@ -1,0 +1,169 @@
+/* Boot Screen — 부팅/로딩 화면 (UNITY_DESIGN_SPEC §3.1) */
+
+.boot-root {
+    align-items: center;
+    justify-content: center;
+}
+
+/* 중앙 콘텐츠 그룹 */
+.boot-center {
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+/* G 로고 컨테이너 (240×240) */
+.boot-logo-container {
+    width: 240px;
+    height: 240px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 48px;
+    position: relative;
+}
+
+/* 로고 내부 원 (200×200) */
+.boot-logo-inner {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: rgb(255, 248, 240);
+    border-width: 2px;
+    border-color: rgba(200, 64, 48, 0.35);
+    align-items: center;
+    justify-content: center;
+}
+
+/* 로고 외부 단청 원 (SVG 또는 테두리) */
+.boot-logo-ring {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border-width: 1px;
+    border-color: rgba(200, 64, 48, 0.18);
+}
+
+/* G 글자 */
+.boot-g-letter {
+    font-size: 58px;
+    color: rgb(177, 74, 46);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* 워드마크 그룹 */
+.boot-wordmark-group {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 48px;
+}
+
+.boot-wordmark {
+    font-size: 72px;
+    color: rgb(26, 18, 8);
+    letter-spacing: 0.18em;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.boot-wordmark-on {
+    color: rgb(177, 74, 46);
+}
+
+.boot-subtitle {
+    font-size: 22px;
+    color: rgb(74, 53, 32);
+    letter-spacing: 0.5em;
+    margin-top: 12px;
+    -unity-text-align: middle-center;
+}
+
+.boot-divider-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 8px 0;
+}
+
+.boot-divider-line {
+    width: 80px;
+    height: 1px;
+    background-color: rgba(200, 64, 48, 0.4);
+}
+
+.boot-diamond {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(200, 64, 48, 0.8);
+    rotate: 45deg;
+    margin: 0 16px;
+}
+
+.boot-location {
+    font-size: 17px;
+    color: rgb(138, 112, 96);
+    letter-spacing: 0.3em;
+    margin-top: 8px;
+    -unity-text-align: middle-center;
+}
+
+/* 로딩 인디케이터 */
+.boot-loading-group {
+    flex-direction: column;
+    align-items: center;
+}
+
+.boot-status-text {
+    font-size: 16px;
+    color: rgb(138, 112, 96);
+    letter-spacing: 0.2em;
+    margin: 16px 0;
+    -unity-text-align: middle-center;
+}
+
+/* 프로그레스 바 */
+.boot-progress-track {
+    width: 320px;
+    height: 3px;
+    background-color: rgba(200, 64, 48, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.boot-progress-fill {
+    height: 3px;
+    background-color: rgb(177, 74, 46);
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+/* 하단 정보 */
+.boot-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.boot-footer-text {
+    font-size: 14px;
+    color: rgb(138, 112, 96);
+    letter-spacing: 0.1em;
+    margin: 0 8px;
+    -unity-text-align: middle-center;
+}
+
+/* 코너 장식 (단청 원) */
+.boot-corner {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+}
+.boot-corner--tl { left: 24px; top: 24px; }
+.boot-corner--tr { right: 24px; top: 24px; }
+.boot-corner--bl { left: 24px; bottom: 24px; }
+.boot-corner--br { right: 24px; bottom: 24px; }
