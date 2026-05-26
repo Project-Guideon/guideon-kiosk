@@ -1,0 +1,55 @@
+/* ─────────────────────────────────────────────────────────────────────
+   GUIDEON 디자인 토큰 — 컨셉 A 한지 라이트
+   UNITY_DESIGN_SPEC.md §1 기준 / Unity UI Toolkit USS Variables
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+    /* 배경 */
+    --color-bg:       rgb(245, 237, 224);
+    --color-bg-deep:  rgb(237, 224, 204);
+    --color-bg-card:  rgba(255, 252, 245, 0.92);
+
+    /* 텍스트 */
+    --color-ink:       rgb(26, 18, 8);
+    --color-ink-mid:   rgb(74, 53, 32);
+    --color-ink-light: rgb(138, 112, 96);
+
+    /* 액센트 */
+    --color-accent:      rgb(177, 74, 46);
+    --color-accent-blue: rgb(42, 75, 122);
+    --color-gold:        rgb(196, 149, 48);
+    --color-dancheong:   rgb(200, 64, 48);
+
+    /* 테두리 / 그림자 */
+    --color-border:      rgba(90, 60, 20, 0.15);
+    --color-border-card: rgba(90, 60, 20, 0.12);
+    --color-shadow-card: rgba(90, 60, 20, 0.08);
+
+    /* 상태 */
+    --color-success: rgb(92, 184, 92);
+
+    /* 간격 (UNITY_DESIGN_SPEC §1.3) */
+    --space-xs:  8px;
+    --space-sm:  16px;
+    --space-md:  24px;
+    --space-lg:  32px;
+    --space-xl:  48px;
+    --space-xxl: 80px;
+
+    /* 모서리 반경 (UNITY_DESIGN_SPEC §1.4) */
+    --radius-btn:     20px;
+    --radius-card:    16px;
+    --radius-card-lg: 24px;
+    --radius-chip:    40px;
+    --radius-circle:  50%;
+
+    /* 타이포 크기 */
+    --text-headline:  76px;
+    --text-title:     52px;
+    --text-wordmark:  28px;
+    --text-body-lg:   26px;
+    --text-body:      22px;
+    --text-sub:       17px;
+    --text-caption:   13px;
+    --text-code:      80px;
+}

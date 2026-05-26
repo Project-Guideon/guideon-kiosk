@@ -1,37 +1,35 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Guideon.UI.Toolkit;
 using UnityEngine;
-using Guideon.Core;
 
 namespace Guideon.UI
 {
-    /// <summary>
-    /// 패널 Show/Hide 및 화면 전환 담당. 모든 UI 패널은 여기서 관리.
-    /// </summary>
-    public class UIManager : MonoSingleton<UIManager>
+    public class UIManager : Core.MonoSingleton<UIManager>
     {
         public static class Panel
         {
-            public const string Boot = "Boot";
+            public const string Boot    = "Boot";
             public const string Pairing = "Pairing";
-            public const string Idle = "Idle";
-            public const string Chat = "Chat";
-            public const string Error = "Error";
+            public const string Idle    = "Idle";
+            public const string Chat    = "Chat";
+            public const string Guide   = "Guide";
+            public const string Error   = "Error";
         }
 
         [Serializable]
         public struct PanelEntry
         {
             public string id;
-            public GameObject panel;
+            public PanelControllerBase controller;
         }
 
         [SerializeField] private PanelEntry[] _panels;
         [SerializeField] private CanvasGroup _transitionOverlay;
         [SerializeField] private float _transitionDuration = 0.35f;
 
-        private readonly Dictionary<string, GameObject> _panelMap = new();
+        private readonly Dictionary<string, PanelControllerBase> _controllerMap = new();
         private string _currentPanelId;
         private bool _isTransitioning;
 
@@ -39,12 +37,13 @@ namespace Guideon.UI
         {
             foreach (var entry in _panels)
             {
-                if (string.IsNullOrEmpty(entry.id) || entry.panel == null)
+                if (string.IsNullOrEmpty(entry.id) || entry.controller == null)
                 {
                     Debug.LogWarning("[UIManager] 비어있는 패널 항목 있음. Inspector 확인 요망.");
                     continue;
                 }
-                _panelMap[entry.id] = entry.panel;
+                _controllerMap[entry.id] = entry.controller;
+                entry.controller.gameObject.SetActive(false);
             }
 
             if (_transitionOverlay != null)
@@ -54,57 +53,49 @@ namespace Guideon.UI
             }
         }
 
-        /// <summary>패널 하나만 활성화하고 나머지는 전부 끔 (즉시, 애니메이션 없음).</summary>
         public void ShowOnly(string panelId)
         {
-            foreach (var kv in _panelMap)
+            foreach (var kv in _controllerMap)
             {
-                if (kv.Value == null) continue; // 씬 전환으로 destroyed된 참조는 스킵
-                kv.Value.SetActive(kv.Key == panelId);
+                if (kv.Value == null) continue;
+                kv.Value.gameObject.SetActive(kv.Key == panelId);
             }
             _currentPanelId = panelId;
         }
 
-        /// <summary>씬 전환 후 새 패널을 동적으로 등록. 같은 id면 덮어쓴다.</summary>
-        public void BindPanel(string panelId, GameObject panel)
+        public void BindPanel(string panelId, PanelControllerBase controller)
         {
-            if (string.IsNullOrEmpty(panelId) || panel == null) return;
-            _panelMap[panelId] = panel;
+            if (string.IsNullOrEmpty(panelId) || controller == null) return;
+            _controllerMap[panelId] = controller;
         }
 
-        /// <summary>여러 패널을 한 번에 등록.</summary>
         public void BindPanels(PanelEntry[] entries)
         {
             if (entries == null) return;
             foreach (var e in entries)
-                BindPanel(e.id, e.panel);
+                BindPanel(e.id, e.controller);
         }
 
-        /// <summary>패널 등록 해제. 보통 씬 unload 직전에 호출.</summary>
         public void UnbindPanel(string panelId)
         {
             if (string.IsNullOrEmpty(panelId)) return;
-            _panelMap.Remove(panelId);
+            _controllerMap.Remove(panelId);
             if (_currentPanelId == panelId) _currentPanelId = null;
         }
 
-        /// <summary>페이드 전환으로 패널 교체. 디자인 퀄리티용.</summary>
         public async UniTask TransitionToAsync(string panelId)
         {
             if (_isTransitioning || panelId == _currentPanelId) return;
             _isTransitioning = true;
 
-            // Fade out
             if (_transitionOverlay != null)
             {
                 _transitionOverlay.blocksRaycasts = true;
                 await FadeCanvasGroupAsync(_transitionOverlay, 0f, 1f, _transitionDuration);
             }
 
-            // Switch panel
             ShowOnly(panelId);
 
-            // Fade in
             if (_transitionOverlay != null)
             {
                 await FadeCanvasGroupAsync(_transitionOverlay, 1f, 0f, _transitionDuration);
@@ -114,34 +105,30 @@ namespace Guideon.UI
             _isTransitioning = false;
         }
 
-        /// <summary>지정 패널만 켬. 다른 패널 상태는 그대로.</summary>
         public void Show(string panelId)
         {
-            if (!_panelMap.TryGetValue(panelId, out var panel) || panel == null)
+            if (!_controllerMap.TryGetValue(panelId, out var controller) || controller == null)
             {
                 Debug.LogWarning($"[UIManager] 패널 없음: {panelId}");
                 return;
             }
-            panel.SetActive(true);
+            controller.gameObject.SetActive(true);
         }
 
-        /// <summary>지정 패널 끔.</summary>
         public void Hide(string panelId)
         {
-            if (!_panelMap.TryGetValue(panelId, out var panel) || panel == null)
+            if (!_controllerMap.TryGetValue(panelId, out var controller) || controller == null)
             {
                 Debug.LogWarning($"[UIManager] 패널 없음: {panelId}");
                 return;
             }
-            panel.SetActive(false);
+            controller.gameObject.SetActive(false);
         }
 
         public bool IsVisible(string panelId) =>
-            _panelMap.TryGetValue(panelId, out var panel) && panel != null && panel.activeSelf;
+            _controllerMap.TryGetValue(panelId, out var c) && c != null && c.gameObject.activeSelf;
 
         public string CurrentPanel => _currentPanelId;
-
-        // ── 유틸 ──────────────────────────────────────────
 
         private static async UniTask FadeCanvasGroupAsync(
             CanvasGroup cg, float from, float to, float duration)

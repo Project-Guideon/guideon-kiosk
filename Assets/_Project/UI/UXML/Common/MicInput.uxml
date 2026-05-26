@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- 마이크 입력 + 파형 + 빠른 질문 칩 -->
+    <ui:VisualElement name="mic-input-root" style="flex-direction: column;">
+        <!-- 마이크 바 -->
+        <ui:VisualElement name="mic-bar" class="mic-bar">
+            <ui:Button name="mic-button" class="mic-circle" tooltip="마이크 시작/중지">
+                <!-- 마이크 아이콘은 C#에서 VectorImage로 설정 -->
+            </ui:Button>
+            <!-- 파형 (WaveformElement — C#에서 26개 자식 동적 생성) -->
+            <ui:VisualElement name="waveform-container" class="waveform-container" />
+            <ui:Label name="mic-hint" text="말씀하세요..." class="mic-hint" />
+        </ui:VisualElement>
+        <!-- 빠른 질문 칩 행 -->
+        <ui:VisualElement name="quick-chips" style="flex-direction: row; flex-wrap: wrap;">
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,318 @@
+/* ─────────────────────────────────────────────────────────────────────
+   GUIDEON 공통 컴포넌트 스타일
+   ───────────────────────────────────────────────────────────────────── */
+
+/* ── 화면 루트 ── */
+.screen-root {
+    width: 1920px;
+    height: 1080px;
+    background-color: var(--color-bg);
+    position: absolute;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* ── 단청 띠 (상/하단) ── */
+.dancheong-band {
+    width: 100%;
+    height: 12px;
+    background-color: var(--color-dancheong);
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.dancheong-band--bottom {
+    /* 하단 단청 띠: 별도 마진 없이 화면 끝에 붙음 */
+}
+
+/* ── 창살 배경 (전체 화면에 SVG 배경 타일) ── */
+.changsal-bg {
+    /* SVG 배경은 C#에서 동적으로 로드해 적용.
+       Unity UI Toolkit background-image + background-repeat: repeat 사용 */
+    background-color: var(--color-bg);
+}
+
+/* ── 헤더 바 ── */
+.header-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+    padding: 0 56px;
+    background-color: rgba(245, 237, 224, 0.97);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border-card);
+    flex-shrink: 0;
+}
+
+/* ── 로고 그룹 ── */
+.logo-group {
+    flex-direction: row;
+    align-items: center;
+}
+
+.logo-wordmark {
+    font-size: 22px;
+    color: var(--color-ink);
+    letter-spacing: 0.1em;
+    -unity-font-style: bold;
+}
+
+.logo-sub {
+    font-size: 11px;
+    color: var(--color-ink-light);
+    letter-spacing: 0.25em;
+    margin-top: 2px;
+}
+
+/* ── 칩 (운영 정보, 빠른 질문 등) ── */
+.chip {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 24px;
+    background-color: rgba(255, 252, 245, 0.8);
+    border-width: 1px;
+    border-color: var(--color-border-card);
+    border-radius: var(--radius-chip);
+}
+
+.chip__label {
+    font-size: 11px;
+    color: var(--color-ink-light);
+    letter-spacing: 0.1em;
+}
+
+.chip__value {
+    font-size: 16px;
+    color: var(--color-ink);
+    -unity-font-style: bold;
+}
+
+/* ── 카드 ── */
+.card {
+    background-color: var(--color-bg-card);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-card);
+}
+
+.card--lg {
+    border-radius: var(--radius-card-lg);
+}
+
+/* ── 말풍선 ── */
+.bubble-user {
+    align-self: flex-end;
+    max-width: 680px;
+    background-color: rgba(200, 64, 48, 0.08);
+    border-width: 1.5px;
+    border-color: rgba(200, 64, 48, 0.2);
+    border-radius: 26px 6px 26px 26px;
+    padding: 22px 32px;
+}
+
+.bubble-ai {
+    align-self: flex-start;
+    max-width: 680px;
+    background-color: rgba(255, 252, 245, 0.96);
+    border-width: 1.5px;
+    border-color: var(--color-border-card);
+    border-radius: 6px 26px 26px 26px;
+    padding: 24px 32px;
+}
+
+.bubble__label {
+    font-size: 13px;
+    color: rgba(200, 64, 48, 0.5);
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+}
+
+.bubble__text {
+    font-size: 26px;
+    color: var(--color-ink);
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+/* ── 마스코트 슬롯 ── */
+.mascot-slot {
+    width: 640px;
+    height: 640px;
+    /* Step 9에서 RenderTexture RawImage로 채울 영역 */
+    /* 시각적 placeholder — C#에서 배경 색으로 표시 */
+    background-color: rgba(200, 64, 48, 0.03);
+    border-radius: var(--radius-circle);
+    flex-shrink: 0;
+}
+
+.mascot-slot--sm {
+    width: 320px;
+    height: 320px;
+}
+
+/* ── AI 아바타 G 원 ── */
+.ai-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-circle);
+    background-color: rgba(200, 64, 48, 0.07);
+    border-width: 2px;
+    border-color: var(--color-accent);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ai-avatar__text {
+    font-size: 24px;
+    color: var(--color-accent);
+    -unity-font-style: bold;
+}
+
+/* ── 마이크 입력 바 ── */
+.mic-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 20px 28px;
+    background-color: rgba(200, 64, 48, 0.05);
+    border-width: 2px;
+    border-color: rgba(200, 64, 48, 0.18);
+    border-radius: 20px;
+    margin-bottom: var(--space-sm);
+}
+
+.mic-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-circle);
+    background-color: rgba(200, 64, 48, 0.1);
+    border-width: 2px;
+    border-color: var(--color-accent);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mic-hint {
+    font-size: 17px;
+    color: var(--color-ink-mid);
+    -unity-font-style: italic;
+    margin-left: var(--space-sm);
+    flex-shrink: 0;
+}
+
+/* ── 파형 ── */
+.waveform-container {
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    height: 40px;
+    padding: 0 var(--space-sm);
+}
+
+.waveform-bar {
+    width: 5px;
+    border-radius: 3px;
+    background-color: rgba(200, 64, 48, 0.35);
+    margin-right: 3px;
+    align-self: center;
+}
+
+/* ── 빠른 질문 칩 ── */
+.quick-chip {
+    padding: 12px 24px;
+    border-radius: 28px;
+    background-color: rgba(255, 252, 245, 0.92);
+    border-width: 1px;
+    border-color: var(--color-border-card);
+    font-size: 17px;
+    color: var(--color-ink-mid);
+    margin-right: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.quick-chip:hover {
+    background-color: rgba(200, 64, 48, 0.06);
+    border-color: rgba(200, 64, 48, 0.2);
+}
+
+/* ── 버튼 (헤더 액션) ── */
+.action-btn {
+    padding: 8px 22px;
+    border-radius: var(--radius-btn);
+    background-color: rgba(200, 64, 48, 0.05);
+    border-width: 1px;
+    border-color: rgba(200, 64, 48, 0.13);
+    color: var(--color-ink-mid);
+    font-size: 15px;
+}
+
+.action-btn--danger {
+    background-color: transparent;
+    border-width: 1.5px;
+    border-color: rgba(200, 64, 48, 0.4);
+    color: var(--color-accent);
+    -unity-font-style: bold;
+}
+
+/* ── AI 안내 상태 점 ── */
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: var(--radius-circle);
+    background-color: var(--color-success);
+    margin-right: var(--space-xs);
+    flex-shrink: 0;
+}
+
+/* ── 타임아웃 칩 ── */
+.timeout-chip {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: var(--radius-btn);
+    background-color: rgba(255, 252, 245, 0.85);
+    border-width: 1px;
+    border-color: var(--color-border-card);
+}
+
+.timeout-bar {
+    height: 3px;
+    border-radius: 4px;
+    background-color: rgba(90, 60, 20, 0.08);
+    margin-top: var(--space-xs);
+}
+
+.timeout-bar__fill {
+    height: 3px;
+    border-radius: 4px;
+    background-color: var(--color-accent);
+    transition: width 1s;
+}
+
+/* ── 구분 화살표 ── */
+.divider-arrow {
+    flex-direction: row;
+    align-items: center;
+    margin: var(--space-sm) 0;
+}
+
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background-color: rgba(90, 60, 20, 0.07);
+}
+
+/* ── Hidden 유틸 ── */
+.hidden {
+    display: none;
+}
+
+/* ── 텍스트 스타일 ── */
+.text-ink        { color: var(--color-ink); }
+.text-ink-mid    { color: var(--color-ink-mid); }
+.text-ink-light  { color: var(--color-ink-light); }
+.text-accent     { color: var(--color-accent); }
+.text-bold       { -unity-font-style: bold; }
+.text-light      { -unity-font-style: normal; }
