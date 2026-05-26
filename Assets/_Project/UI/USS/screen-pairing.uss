@@ -98,7 +98,7 @@
     font-size: 20px;
     color: rgb(138, 112, 96);
     letter-spacing: 6px;
-    margin-bottom: var(--space-xl);
+    margin-bottom: 48px;
     -unity-text-align: middle-center;
 }
 
@@ -131,7 +131,7 @@
 .timer-group {
     flex-direction: column;
     align-items: center;
-    margin-top: var(--space-xl);
+    margin-top: 48px;
 }
 
 .timer-text {
@@ -170,4 +170,5 @@
     margin-top: 40px;
     -unity-text-align: middle-center;
 }
+
 

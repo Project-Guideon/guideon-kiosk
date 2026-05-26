@@ -45,7 +45,7 @@
 
 .chat-bubble-list {
     flex-direction: column;
-    padding: 0 0 var(--space-md);
+    padding: 0 0 24px;
 }
 
 /* 생각 중 인디케이터 */
@@ -150,4 +150,5 @@
     flex-direction: column;
     align-items: flex-end;
 }
+
 
