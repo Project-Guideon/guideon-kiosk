@@ -1,4 +1,7 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-error.uss" />
     <ui:VisualElement name="error-root" class="screen-root changsal-bg error-root">
         <!-- 단청 띠 상단 -->
         <ui:VisualElement class="dancheong-band" style="position:absolute; top:0; left:0; right:0;" />
@@ -30,3 +33,4 @@
         <ui:VisualElement class="dancheong-band" style="position:absolute; bottom:0; left:0; right:0;" />
     </ui:VisualElement>
 </ui:UXML>
+

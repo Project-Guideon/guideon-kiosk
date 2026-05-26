@@ -3,7 +3,7 @@
    UNITY_DESIGN_SPEC.md §1 기준 / Unity UI Toolkit USS Variables
    ───────────────────────────────────────────────────────────────────── */
 
-:root {
+.screen-root {
     /* 배경 */
     --color-bg:       rgb(245, 237, 224);
     --color-bg-deep:  rgb(237, 224, 204);

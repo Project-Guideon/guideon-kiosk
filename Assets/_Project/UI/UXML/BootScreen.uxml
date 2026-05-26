@@ -1,4 +1,7 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-boot.uss" />
     <ui:VisualElement name="boot-root" class="screen-root changsal-bg boot-root">
         <!-- 상단 단청 띠 -->
         <ui:VisualElement name="dancheong-top" class="dancheong-band" />
@@ -50,3 +53,4 @@
         <ui:VisualElement name="dancheong-bottom" class="dancheong-band" />
     </ui:VisualElement>
 </ui:UXML>
+

@@ -1,4 +1,7 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-guide.uss" />
     <ui:VisualElement name="guide-root" class="screen-root changsal-bg guide-root">
         <!-- 헤더 -->
         <ui:VisualElement name="guide-header" class="chat-header">
@@ -122,3 +125,4 @@
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
+
