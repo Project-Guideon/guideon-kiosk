@@ -30,12 +30,14 @@ namespace Guideon.Core
         {
             EventBus.Subscribe<UserTouchedEvent>(OnUserTouched);
             EventBus.Subscribe<IdleTimeoutEvent>(OnIdleTimeout);
+            EventBus.Subscribe<ChatExitRequestedEvent>(OnChatExitRequested);
         }
 
         private void OnDisable()
         {
             EventBus.Unsubscribe<UserTouchedEvent>(OnUserTouched);
             EventBus.Unsubscribe<IdleTimeoutEvent>(OnIdleTimeout);
+            EventBus.Unsubscribe<ChatExitRequestedEvent>(OnChatExitRequested);
         }
 
         private void Start()
@@ -75,6 +77,11 @@ namespace Guideon.Core
         // ── ChatPanel → IdlePanel ─────────────────────────
 
         private void OnIdleTimeout(IdleTimeoutEvent _)
+        {
+            ReturnToIdleAsync().Forget();
+        }
+
+        private void OnChatExitRequested(ChatExitRequestedEvent _)
         {
             ReturnToIdleAsync().Forget();
         }

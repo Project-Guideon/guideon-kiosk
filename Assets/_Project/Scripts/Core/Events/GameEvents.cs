@@ -78,6 +78,8 @@ namespace Guideon.Core
 
     public struct UserTouchedEvent { }
 
+    public struct ChatExitRequestedEvent { }
+
     public struct SceneReadyEvent
     {
         public string SceneName;
