@@ -25,6 +25,7 @@ namespace Guideon.Audio
         private bool   _isPlaying;
         private int    _activeDecodes;
         private bool   _finalized;
+        private bool   _playbackHeld;
 
         // pcm_s16le: Cartesia 정상 동작 시 사용하는 샘플레이트
         private const int PcmSampleRate = 24000;
@@ -49,6 +50,7 @@ namespace Guideon.Audio
             _isPlaying       = false;
             _activeDecodes   = 0;
             _finalized       = false;
+            _playbackHeld    = false;
 
             Debug.Log($"[TtsManager] 세션 시작 — {sessionId}");
         }
@@ -96,6 +98,18 @@ namespace Guideon.Audio
             _serverDone = true;
             Debug.Log("[TtsManager] 서버 done 마킹");
             TryFinalize();
+        }
+
+        public void HoldPlayback()
+        {
+            _playbackHeld = true;
+        }
+
+        public void ReleasePlayback()
+        {
+            if (!_playbackHeld) return;
+            _playbackHeld = false;
+            TryPlayNext();
         }
 
         public void AbortSession()
@@ -228,6 +242,7 @@ namespace Guideon.Audio
 
         private void TryPlayNext()
         {
+            if (_playbackHeld) return;
             if (_isPlaying) return;
             if (!_ready.TryGetValue(_nextPlaySeq, out var clip)) return;
 
