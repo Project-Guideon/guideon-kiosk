@@ -1,5 +1,5 @@
 using Cysharp.Threading.Tasks;
-using Guideon.Chat;
+using Guideon.Audio;
 using Guideon.Core;
 using Guideon.Network.Stt;
 using Guideon.UI.Toolkit;
@@ -15,13 +15,15 @@ namespace Guideon.UI
         private VisualElement _thinkingGroup;
         private Button _micButton;
         private VisualElement _waveformContainer;
-        private Label _speechText;
-        private Label _timeoutText;
-        private VisualElement _timeoutFill;
+        private Button _endButton;
+        private VisualElement _mascotDots;
+        private VisualElement[] _dotElements;
 
         private WaveformElement _waveform;
         private IVisualElementScheduledItem _waveformJob;
+        private IVisualElementScheduledItem _dotsAnimJob;
         private float _rmsLevel;
+        private int _dotsAnimPhase;
 
         protected override void Awake()
         {
@@ -31,21 +33,29 @@ namespace Guideon.UI
 
         protected override void OnBindUI()
         {
-            _bubbleList       = Q("bubble-list");
-            _chatScroll       = Q<ScrollView>("chat-scroll");
-            _thinkingGroup    = Q("thinking-group");
-            _micButton        = Q<Button>("mic-button");
+            _bubbleList        = Q("bubble-list");
+            _chatScroll        = Q<ScrollView>("chat-scroll");
+            _thinkingGroup     = Q("thinking-group");
+            _micButton         = Q<Button>("mic-button");
             _waveformContainer = Q("waveform-container");
-            _speechText       = Q<Label>("speech-text");
-            _timeoutText      = Q<Label>("timeout-text");
-            _timeoutFill      = Q("timeout-fill");
+            _endButton         = Q<Button>("btn-end");
+            _mascotDots        = Q("mascot-emote-dots");
+
+            if (_mascotDots != null)
+            {
+                _dotElements = new VisualElement[_mascotDots.childCount];
+                for (int i = 0; i < _mascotDots.childCount; i++)
+                    _dotElements[i] = _mascotDots[i];
+            }
 
             _waveform = new WaveformElement(_waveformContainer);
 
             _micButton?.RegisterCallback<ClickEvent>(_ => OnMicClicked());
+            _endButton?.RegisterCallback<ClickEvent>(_ => OnEndClicked());
 
             SetThinking(false);
             SetRecording(false);
+            SetMascotDotsVisible(false);
             ClearBubbles();
 
             _waveformJob = Root?.schedule.Execute(() => _waveform?.SetLevel(_rmsLevel)).Every(32);
@@ -70,6 +80,7 @@ namespace Guideon.UI
         protected override void OnDisable()
         {
             _waveformJob?.Pause();
+            StopDotsAnim();
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRmsLevel -= OnRmsLevel;
             base.OnDisable();
@@ -108,6 +119,13 @@ namespace Guideon.UI
 
         private void OnRmsLevel(float rms) => _rmsLevel = rms;
 
+        // ── 대화 종료 버튼 ─────────────────────────────────────────────────
+
+        private void OnEndClicked()
+        {
+            EventBus.Publish(new ChatExitRequestedEvent());
+        }
+
         // ── STT / AI 응답 ──────────────────────────────────────────────────
 
         private void OnSttResult(SttResultEvent e)
@@ -115,14 +133,24 @@ namespace Guideon.UI
             if (!e.IsFinal) return;
             AppendBubble(e.Transcript, isUser: true);
             SetThinking(true);
+            SetMascotDotsVisible(true);
         }
 
         private void OnChatResponse(ChatResponseEvent e)
         {
+            if (TtsManager.HasInstance)
+                TtsManager.Instance.HoldPlayback();
+
             SetThinking(false);
+            SetMascotDotsVisible(false);
             AppendBubble(e.Answer, isUser: false);
-            if (_speechText != null)
-                _speechText.text = e.Answer.Length > 60 ? e.Answer[..60] + "..." : e.Answer;
+
+            Root?.schedule.Execute(() =>
+            {
+                ScrollToBottom();
+                if (TtsManager.HasInstance)
+                    TtsManager.Instance.ReleasePlayback();
+            }).ExecuteLater(50);
         }
 
         // ── 버블 ───────────────────────────────────────────────────────────
@@ -157,7 +185,6 @@ namespace Guideon.UI
 
                 var bubble = new VisualElement();
                 bubble.AddToClassList("bubble-ai");
-                bubble.style.flexGrow = 1;
                 var label = new Label(message);
                 label.AddToClassList("bubble__text");
                 bubble.Add(label);
@@ -168,7 +195,6 @@ namespace Guideon.UI
             }
 
             _bubbleList.Add(container);
-            Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
         }
 
         private void ScrollToBottom()
@@ -186,6 +212,46 @@ namespace Guideon.UI
         {
             if (_thinkingGroup == null) return;
             _thinkingGroup.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        // ── 마스코트 타이핑 점 ──────────────────────────────────────────────
+
+        private void SetMascotDotsVisible(bool on)
+        {
+            if (_mascotDots == null) return;
+            _mascotDots.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+            if (on) StartDotsAnim();
+            else StopDotsAnim();
+        }
+
+        private void StartDotsAnim()
+        {
+            _dotsAnimPhase = 0;
+            _dotsAnimJob?.Pause();
+            _dotsAnimJob = Root?.schedule.Execute(StepDotsAnim).Every(200);
+        }
+
+        private void StopDotsAnim()
+        {
+            _dotsAnimJob?.Pause();
+            _dotsAnimJob = null;
+            if (_dotElements == null) return;
+            foreach (var d in _dotElements)
+                d.style.translate = new StyleTranslate(
+                    new Translate(new Length(0), new Length(0)));
+        }
+
+        private void StepDotsAnim()
+        {
+            if (_dotElements == null) return;
+            int active = _dotsAnimPhase % _dotElements.Length;
+            for (int i = 0; i < _dotElements.Length; i++)
+            {
+                float y = (i == active) ? -10f : 0f;
+                _dotElements[i].style.translate = new StyleTranslate(
+                    new Translate(new Length(0), new Length(y, LengthUnit.Pixel)));
+            }
+            _dotsAnimPhase++;
         }
     }
 }

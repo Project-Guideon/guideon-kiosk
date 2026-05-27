@@ -78,19 +78,11 @@
                 <ui:VisualElement name="dancheong-ring" class="chat-dancheong-ring" />
                 <!-- 마스코트 슬롯 (Step 9에서 채움) -->
                 <ui:VisualElement name="mascot-slot" class="chat-mascot-slot" />
-                <!-- 말풍선 -->
-                <ui:VisualElement name="speech-bubble" class="chat-speech-bubble">
-                    <ui:Label text="가이온이" class="chat-speech-label" />
-                    <ui:Label name="speech-text" text="안녕하세요! 무엇이 궁금하신가요?" class="chat-speech-text" />
-                </ui:VisualElement>
-                <!-- 타임아웃 -->
-                <ui:VisualElement name="timeout-area" class="chat-timeout-area">
-                    <ui:VisualElement class="timeout-chip">
-                        <ui:Label name="timeout-text" text="2:00 후 대기 화면으로" style="font-size:15px; color:rgb(138,112,96);" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="timeout-track" class="timeout-bar" style="width:220px;">
-                        <ui:VisualElement name="timeout-fill" class="timeout-bar__fill" style="width:100%;" />
-                    </ui:VisualElement>
+                <!-- AI 처리 중 타이핑 점 (C#에서 show/hide) -->
+                <ui:VisualElement name="mascot-emote-dots" class="mascot-emote-dots">
+                    <ui:VisualElement class="mascot-emote-dots__dot" />
+                    <ui:VisualElement class="mascot-emote-dots__dot" />
+                    <ui:VisualElement class="mascot-emote-dots__dot" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
