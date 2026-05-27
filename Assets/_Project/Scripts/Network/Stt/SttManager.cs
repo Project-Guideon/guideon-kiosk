@@ -30,7 +30,8 @@ namespace Guideon.Network.Stt
         private bool _sentUserBubble;    // 이번 세션에서 유저 버블을 이미 표시했는지
         private string _lastTranscript;  // stt_interim/stt_final 중 마지막으로 받은 텍스트
 
-        private const float SilenceThreshold = 0.01f;
+        private float _recordingElapsed;
+        private float _maxRecordingSec;
 
         protected override void OnInitialize()
         {
@@ -76,6 +77,8 @@ namespace Guideon.Network.Stt
 
             StartMic();
             IsRecording = true;
+            _recordingElapsed = 0f;
+            _maxRecordingSec  = ConfigManager.Instance.Config.kiosk.sttMaxRecordingSeconds;
             _waitingForDone = false;
             _sentUserBubble = false;
             _lastTranscript = null;
@@ -148,7 +151,7 @@ namespace Guideon.Network.Stt
         {
             var cfg = ConfigManager.Instance.Config.kiosk;
 
-            _vad = new VoiceActivityDetector(SilenceThreshold, cfg.sttSilenceTimeoutMs);
+            _vad = new VoiceActivityDetector(cfg.sttVadThreshold, cfg.sttSilenceTimeoutMs);
             _vad.OnSilenceTimeout += OnVadSilenceTimeout;
             _vad.Begin();
 
@@ -361,6 +364,16 @@ namespace Guideon.Network.Stt
 #if !UNITY_WEBGL || UNITY_EDITOR
             _ws?.DispatchMessageQueue();
 #endif
+            if (IsRecording && _maxRecordingSec > 0f)
+            {
+                _recordingElapsed += Time.deltaTime;
+                if (_recordingElapsed >= _maxRecordingSec)
+                {
+                    _recordingElapsed = 0f;
+                    Debug.Log("[SttManager] 최대 녹음 시간 초과 → 자동 stop");
+                    StopCaptureAndClose(sendStop: true).Forget();
+                }
+            }
         }
 
         private void OnTtsDone(TtsDoneEvent _)
