@@ -208,16 +208,19 @@
     flex-direction: row;
     align-items: center;
     flex: 1;
-    height: 40px;
-    padding: 0 16px;
+    height: 56px;
+    padding: 0 12px;
 }
 
 .waveform-bar {
-    width: 5px;
+    width: 6px;
     border-radius: 3px;
-    background-color: rgba(200, 64, 48, 0.35);
+    background-color: rgba(177, 74, 46, 0.8);
     margin-right: 3px;
     align-self: center;
+    transition-property: height;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out;
 }
 
 /* ── 빠른 질문 칩 ── */

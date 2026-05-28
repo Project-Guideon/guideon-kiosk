@@ -115,6 +115,90 @@
     position: relative;
 }
 
+/* ── 마이크 상태 변형 ── */
+.mic-circle--active {
+    background-color: rgba(200, 64, 48, 0.15);
+    border-color: rgb(177, 74, 46);
+    border-width: 2.5px;
+}
+
+.mic-circle--busy {
+    opacity: 0.45;
+}
+
+/* 듣는 중 힌트 색 */
+.mic-hint--listening {
+    color: rgb(177, 74, 46);
+    -unity-font-style: bold;
+}
+
+/* 처리 중 힌트 색 */
+.mic-hint--thinking {
+    color: rgb(42, 75, 122);
+}
+
+/* ── 마이크 펄스 링 ── */
+.mic-pulse-ring {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    border-width: 2px;
+    border-color: rgba(177, 74, 46, 0.5);
+    display: none;
+    transition-property: opacity, scale;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-out;
+}
+
+.mic-pulse-ring--visible {
+    display: flex;
+}
+
+/* ── 버블 등장 애니메이션 ── */
+.bubble-enter {
+    opacity: 0;
+    translate: 0 12px;
+    transition-property: opacity, translate;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+
+.bubble-enter--in {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* ── 안내 버블 (Info / Error) ── */
+.bubble-notice {
+    align-self: center;
+    max-width: 560px;
+    background-color: rgba(255, 252, 245, 0.95);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.18);
+    border-radius: 16px;
+    padding: 16px 28px;
+    margin-bottom: 20px;
+}
+
+.bubble-notice--error {
+    background-color: rgba(200, 64, 48, 0.06);
+    border-color: rgba(200, 64, 48, 0.35);
+}
+
+.bubble-notice__text {
+    font-size: 18px;
+    color: rgb(74, 53, 32);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.bubble-notice--error .bubble-notice__text {
+    color: rgb(177, 74, 46);
+}
+
 /* AI 처리 중 타이핑 점 */
 .mascot-emote-dots {
     position: absolute;
