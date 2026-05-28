@@ -234,11 +234,19 @@
     color: rgb(74, 53, 32);
     margin-right: 8px;
     margin-bottom: 8px;
+    transition-property: scale, background-color, border-color;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out;
 }
 
 .quick-chip:hover {
     background-color: rgba(200, 64, 48, 0.06);
     border-color: rgba(200, 64, 48, 0.2);
+}
+
+.quick-chip:active {
+    scale: 0.95;
+    background-color: rgba(200, 64, 48, 0.12);
 }
 
 /* ── 버튼 (헤더 액션) ── */
@@ -250,6 +258,19 @@
     border-color: rgba(200, 64, 48, 0.13);
     color: rgb(74, 53, 32);
     font-size: 15px;
+    transition-property: scale, background-color, opacity;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out;
+}
+
+.action-btn:hover {
+    background-color: rgba(200, 64, 48, 0.1);
+    border-color: rgba(200, 64, 48, 0.28);
+}
+
+.action-btn:active {
+    scale: 0.94;
+    opacity: 0.85;
 }
 
 .action-btn--danger {
@@ -258,6 +279,15 @@
     border-color: rgba(200, 64, 48, 0.4);
     color: rgb(177, 74, 46);
     -unity-font-style: bold;
+}
+
+.action-btn--danger:hover {
+    background-color: rgba(200, 64, 48, 0.07);
+}
+
+.action-btn--danger:active {
+    scale: 0.94;
+    opacity: 0.8;
 }
 
 /* ── AI 안내 상태 점 ── */
