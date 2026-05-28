@@ -295,8 +295,11 @@ namespace Guideon.Network.Stt
             if (_sentUserBubble) return;
             if (string.IsNullOrWhiteSpace(transcript)) return;
             _sentUserBubble = true;
-
             _awaitingAnswer = true;
+
+            // tts_chunk가 final_text보다 먼저 도착해 재생이 앞서는 것을 방지
+            // ReleasePlayback은 ChatScreenController가 AI 버블 렌더 후 호출
+            if (TtsManager.HasInstance) TtsManager.Instance.HoldPlayback();
 
             EventBus.Publish(new SttResultEvent { Transcript = transcript, IsFinal = true });
             EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
