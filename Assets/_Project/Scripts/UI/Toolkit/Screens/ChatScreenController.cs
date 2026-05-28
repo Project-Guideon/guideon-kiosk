@@ -285,6 +285,13 @@ namespace Guideon.UI
             HideTypingBubble();
             SetMascotDotsVisible(false);
             AppendNoticeBubble(e.Message, e.Type == ChatNoticeType.Error);
+            // 오류 시 "말씀해 보세요" 힌트가 남아 마이크가 작동 중인 것처럼 보이는 문제 해소
+            if (e.Type == ChatNoticeType.Error && _micHint != null)
+            {
+                _micHint.text = "잠시 후 다시 말씀해 주세요";
+                SetMicButtonState(active: false, busy: false);
+                StopPulse();
+            }
             Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
         }
 

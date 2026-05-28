@@ -216,11 +216,13 @@ namespace Guideon.Network.Stt
 
         private void OnVadSilenceTimeout()
         {
+            if (!IsRecording) return; // WS 외부 종료 후 VAD 뒤늦게 fire 방지
             StopCaptureAndClose(sendStop: true).Forget();
         }
 
         private void OnVadNoSpeechTimeout()
         {
+            if (!IsRecording) return; // WS 외부 종료 후 VAD 뒤늦게 fire 방지
             Debug.Log("[SttManager] 무발화 종료 → Idle 복귀");
             _exiting = true;
             StopCaptureAndClose(sendStop: false).Forget();
@@ -412,7 +414,8 @@ namespace Guideon.Network.Stt
             IsRecording = false;
             _awaitingAnswer = false;
             OnRecordingStateChanged?.Invoke(false);
-            EventBus.Publish(new MascotStateEvent { State = MascotState.Idle });
+            if (!_exiting) // 종료 전환 중엔 힌트 업데이트 불필요 — "말씀해 보세요" 노출 방지
+                EventBus.Publish(new MascotStateEvent { State = MascotState.Idle });
             Debug.Log("[SttManager] 녹음 종료 완료");
         }
 
