@@ -296,9 +296,7 @@ namespace Guideon.Network.Stt
             if (string.IsNullOrWhiteSpace(transcript)) return;
             _sentUserBubble = true;
 
-            // 응답 워치독 시작
             _awaitingAnswer = true;
-            _awaitingTimer  = 0f;
 
             EventBus.Publish(new SttResultEvent { Transcript = transcript, IsFinal = true });
             EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
