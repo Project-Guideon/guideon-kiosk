@@ -71,6 +71,7 @@ namespace Guideon.UI
 
             _micButton?.RegisterCallback<ClickEvent>(_ => OnMicClicked());
             _endButton?.RegisterCallback<ClickEvent>(_ => OnEndClicked());
+            _endButton?.RegisterCallback<PointerDownEvent>(_ => AnimateEndButtonPress());
 
             SetRecording(false);
             SetMascotDotsVisible(false);
@@ -242,6 +243,14 @@ namespace Guideon.UI
         private void OnEndClicked()
         {
             EventBus.Publish(new ChatExitRequestedEvent());
+        }
+
+        private void AnimateEndButtonPress()
+        {
+            if (_endButton == null) return;
+            _endButton.AddToClassList("btn-end-pressed");
+            Root?.schedule.Execute(() =>
+                _endButton?.RemoveFromClassList("btn-end-pressed")).ExecuteLater(220);
         }
 
         // ── STT / AI 응답 ──────────────────────────────────────

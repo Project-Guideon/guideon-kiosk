@@ -119,6 +119,16 @@
     position: relative;
 }
 
+/* ── 안내 종료 버튼 press 피드백 ── */
+.btn-end-pressed {
+    scale: 0.89;
+    background-color: rgba(200, 64, 48, 0.18);
+    border-color: rgba(200, 64, 48, 0.7);
+    opacity: 0.82;
+    transition-property: scale, background-color, border-color, opacity;
+    transition-duration: 0.1s;
+}
+
 /* ── 마이크 버튼 기본 전환 ── */
 .mic-circle {
     transition-property: scale, background-color, border-color, opacity;
