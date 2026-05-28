@@ -147,9 +147,10 @@
     border-color: rgb(177, 74, 46);
 }
 
-.touch-ripple--sm { width: 60px; height: 60px; opacity: 1; }
-.touch-ripple--md { width: 90px; height: 90px; opacity: 0.55; }
-.touch-ripple--lg { width: 120px; height: 120px; opacity: 0.25; }
+/* 초기 opacity/scale은 C# 애니메이션에서 매 틱 설정 */
+.touch-ripple--sm { width: 60px; height: 60px; opacity: 0; }
+.touch-ripple--md { width: 90px; height: 90px; opacity: 0; }
+.touch-ripple--lg { width: 120px; height: 120px; opacity: 0; }
 
 .touch-center-circle {
     width: 60px;
