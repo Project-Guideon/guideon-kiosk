@@ -232,6 +232,7 @@ namespace Guideon.Network.Stt
 
         private void OnChatExitRequested(ChatExitRequestedEvent _)
         {
+            if (_exiting) return; // 이미 OnVadNoSpeechTimeout이 처리 중 — 이중 StopCaptureAndClose 방지
             _exiting = true;
             if (IsRecording) Stop();
         }
