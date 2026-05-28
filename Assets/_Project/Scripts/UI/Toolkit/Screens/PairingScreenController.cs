@@ -14,6 +14,7 @@ namespace Guideon.UI
 
         private DateTime _expiresAt;
         private float _totalSeconds = 300f;
+        private bool _hasCode;
         private IVisualElementScheduledItem _timerJob;
 
         protected override void Awake()
@@ -48,6 +49,7 @@ namespace Guideon.UI
         protected override void OnDisable()
         {
             _timerJob?.Pause();
+            _hasCode = false;
             base.OnDisable();
         }
 
@@ -70,16 +72,21 @@ namespace Guideon.UI
                     _digits[i].text = code[i].ToString();
             }
 
-            if (DateTime.TryParse(expiresAt, out var dt))
+            if (DateTimeOffset.TryParse(expiresAt, out var dto))
             {
-                _expiresAt = dt;
-                _totalSeconds = (float)(dt - DateTime.Now).TotalSeconds;
+                _expiresAt = dto.LocalDateTime;
+                _totalSeconds = (float)(dto.LocalDateTime - DateTime.Now).TotalSeconds;
+                _hasCode = true;
+            }
+            else
+            {
+                Debug.LogWarning($"[PairingScreen] expiresAt 파싱 실패: '{expiresAt}'");
             }
         }
 
         private void UpdateTimer()
         {
-            if (_timerCountdown == null) return;
+            if (_timerCountdown == null || !_hasCode) return;
             var remaining = _expiresAt - DateTime.Now;
             if (remaining.TotalSeconds <= 0)
             {
