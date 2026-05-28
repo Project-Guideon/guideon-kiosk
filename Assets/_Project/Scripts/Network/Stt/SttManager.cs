@@ -449,8 +449,18 @@ namespace Guideon.Network.Stt
                 if (_recordingElapsed >= _maxRecordingSec)
                 {
                     _recordingElapsed = 0f;
-                    Debug.Log("[SttManager] 최대 녹음 시간 초과 → 자동 stop");
-                    StopCaptureAndClose(sendStop: true).Forget();
+                    if (_vad != null && !_vad.IsVoiceDetected)
+                    {
+                        // 발화 없이 시간 초과 → 무발화 종료로 처리 (Idle 복귀)
+                        Debug.Log("[SttManager] 최대 녹음 시간 초과(무발화) → Idle 복귀");
+                        OnVadNoSpeechTimeout();
+                    }
+                    else
+                    {
+                        // 발화 중 시간 초과 → 정상 stop
+                        Debug.Log("[SttManager] 최대 녹음 시간 초과(발화) → 자동 stop");
+                        StopCaptureAndClose(sendStop: true).Forget();
+                    }
                 }
             }
 
