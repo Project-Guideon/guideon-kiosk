@@ -37,10 +37,8 @@ namespace Guideon.Network.Stt
         // 종료 버튼 / 무발화 자동 복귀 시 TtsDone 자동 재시작 방지
         private bool _exiting;
 
-        // ── 응답 워치독 ───────────────────────────────────
-        private bool  _awaitingAnswer;
-        private float _awaitingTimer;
-        private float _answerTimeoutSec;
+        // 답변 수신 여부 — done-타임아웃 시 에러 메시지 분기용
+        private bool _awaitingAnswer;
 
         protected override void OnInitialize()
         {
@@ -98,8 +96,6 @@ namespace Guideon.Network.Stt
             _lastTranscript = null;
 
             _awaitingAnswer = false;
-            _awaitingTimer  = 0f;
-            _answerTimeoutSec = ConfigManager.Instance.Config.kiosk.answerTimeoutSeconds;
 
             OnRecordingStateChanged?.Invoke(true);
             EventBus.Publish(new MascotStateEvent { State = MascotState.Listening });
@@ -447,19 +443,6 @@ namespace Guideon.Network.Stt
                 }
             }
 
-            // 응답 워치독 — answerTimeoutSec 초과 시 안내
-            if (_awaitingAnswer)
-            {
-                _awaitingTimer += Time.deltaTime;
-                if (_awaitingTimer >= _answerTimeoutSec)
-                {
-                    _awaitingAnswer = false;
-                    _awaitingTimer  = 0f;
-                    Debug.LogWarning("[SttManager] 응답 타임아웃");
-                    PublishNotice("응답이 너무 오래 걸려요. 다시 말씀해 주세요.", isError: true);
-                    EventBus.Publish(new MascotStateEvent { State = MascotState.Idle });
-                }
-            }
         }
 
         private void OnTtsDone(TtsDoneEvent _)
