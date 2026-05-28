@@ -353,6 +353,10 @@ namespace Guideon.Network.Stt
                 _waitingForDone = false;
                 ShowUserBubble(_lastTranscript);
             }
+            // WS가 외부에서 닫혀도 마이크를 확실히 정리
+            StopMic();
+            // done 없이 WS가 닫힌 경우 TTS를 강제 완료해 TtsDoneEvent 보장
+            if (TtsManager.HasInstance) TtsManager.Instance.MarkServerDone();
             CleanupState();
         }
 
@@ -388,6 +392,8 @@ namespace Guideon.Network.Stt
                     {
                         ShowUserBubble(_lastTranscript);
                     }
+                    // done 없이 타임아웃 시 TTS 강제 완료해 TtsDoneEvent 보장
+                    if (TtsManager.HasInstance) TtsManager.Instance.MarkServerDone();
                 }
             }
 
