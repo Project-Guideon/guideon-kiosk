@@ -48,22 +48,26 @@
     padding: 0 0 24px;
 }
 
-/* 생각 중 인디케이터 */
-.chat-thinking {
+/* ── 타이핑 버블 (메시지 흐름 안) ── */
+.typing-bubble {
+    background-color: rgba(255, 252, 245, 0.96);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.12);
+    border-radius: 6px 26px 26px 26px;
+    padding: 20px 28px;
     flex-direction: row;
     align-items: center;
-    padding: 12px 0;
-    align-self: flex-start;
 }
 
-.thinking-dot {
-    width: 10px;
-    height: 10px;
+.typing-dot {
+    width: 11px;
+    height: 11px;
     border-radius: 50%;
     background-color: rgb(177, 74, 46);
-    margin: 0 4px;
-    opacity: 0.4;
-    transition: opacity 0.3s;
+    margin: 0 5px;
+    transition-property: translate;
+    transition-duration: 0.18s;
+    transition-timing-function: ease-in-out;
 }
 
 /* 좌측 하단 입력 영역 */

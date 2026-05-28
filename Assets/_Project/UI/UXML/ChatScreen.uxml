@@ -43,15 +43,6 @@
                 <ui:ScrollView name="chat-scroll" class="chat-scroll" mode="Vertical">
                     <ui:VisualElement name="bubble-list" class="chat-bubble-list" />
                 </ui:ScrollView>
-                <!-- Thinking 인디케이터 -->
-                <ui:VisualElement name="thinking-group" class="chat-thinking hidden">
-                    <ui:VisualElement class="ai-avatar" style="margin-right:12px;">
-                        <ui:Label text="G" class="ai-avatar__text" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="dot-1" class="thinking-dot" />
-                    <ui:VisualElement name="dot-2" class="thinking-dot" />
-                    <ui:VisualElement name="dot-3" class="thinking-dot" />
-                </ui:VisualElement>
                 <!-- 마이크 입력 -->
                 <ui:VisualElement name="mic-input-root" class="chat-input-area">
                     <ui:VisualElement name="mic-bar" class="mic-bar">

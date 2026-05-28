@@ -12,7 +12,6 @@ namespace Guideon.UI
     {
         private VisualElement _bubbleList;
         private ScrollView    _chatScroll;
-        private VisualElement _thinkingGroup;
         private Button        _micButton;
         private VisualElement _waveformContainer;
         private Button        _endButton;
@@ -27,6 +26,12 @@ namespace Guideon.UI
 
         private WaveformElement _waveform;
         private IVisualElementScheduledItem _waveformJob;
+        // 타이핑 버블
+        private VisualElement               _typingBubbleRow;
+        private VisualElement[]             _typingDotEls;
+        private IVisualElementScheduledItem _typingDotsJob;
+        private int                         _typingDotsPhase;
+
         private IVisualElementScheduledItem _dotsAnimJob;
         private float _rmsLevel;
         private int   _dotsAnimPhase;
@@ -41,7 +46,6 @@ namespace Guideon.UI
         {
             _bubbleList        = Q("bubble-list");
             _chatScroll        = Q<ScrollView>("chat-scroll");
-            _thinkingGroup     = Q("thinking-group");
             _micButton         = Q<Button>("mic-button");
             _waveformContainer = Q("waveform-container");
             _endButton         = Q<Button>("btn-end");
@@ -68,7 +72,6 @@ namespace Guideon.UI
             _micButton?.RegisterCallback<ClickEvent>(_ => OnMicClicked());
             _endButton?.RegisterCallback<ClickEvent>(_ => OnEndClicked());
 
-            SetThinking(false);
             SetRecording(false);
             SetMascotDotsVisible(false);
             ClearBubbles();
@@ -100,6 +103,7 @@ namespace Guideon.UI
         protected override void OnDisable()
         {
             _waveformJob?.Pause();
+            HideTypingBubble();
             StopDotsAnim();
             StopPulse();
             if (SttManager.HasInstance)
@@ -246,7 +250,7 @@ namespace Guideon.UI
         {
             if (!e.IsFinal) return;
             AppendBubble(e.Transcript, isUser: true);
-            SetThinking(true);
+            ShowTypingBubble();
             SetMascotDotsVisible(true);
         }
 
@@ -255,7 +259,7 @@ namespace Guideon.UI
             if (TtsManager.HasInstance)
                 TtsManager.Instance.HoldPlayback();
 
-            SetThinking(false);
+            HideTypingBubble();
             SetMascotDotsVisible(false);
             AppendBubble(e.Answer, isUser: false);
 
@@ -269,10 +273,81 @@ namespace Guideon.UI
 
         private void OnChatNotice(ChatNoticeEvent e)
         {
-            SetThinking(false);
+            HideTypingBubble();
             SetMascotDotsVisible(false);
             AppendNoticeBubble(e.Message, e.Type == ChatNoticeType.Error);
             Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
+        }
+
+        // ── 타이핑 버블 ────────────────────────────────────────
+
+        private void ShowTypingBubble()
+        {
+            HideTypingBubble(); // 중복 방지
+
+            if (_bubbleList == null) return;
+
+            // AI 행 래퍼
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.FlexStart;
+            row.style.marginBottom = 28;
+
+            var avatar = new VisualElement();
+            avatar.AddToClassList("ai-avatar");
+            avatar.style.marginRight = 18;
+            var avatarLabel = new Label("G");
+            avatarLabel.AddToClassList("ai-avatar__text");
+            avatar.Add(avatarLabel);
+
+            // 점 3개가 들어있는 버블
+            var bubble = new VisualElement();
+            bubble.AddToClassList("typing-bubble");
+
+            _typingDotEls = new VisualElement[3];
+            for (int i = 0; i < 3; i++)
+            {
+                var dot = new VisualElement();
+                dot.AddToClassList("typing-dot");
+                bubble.Add(dot);
+                _typingDotEls[i] = dot;
+            }
+
+            row.Add(avatar);
+            row.Add(bubble);
+            _typingBubbleRow = row;
+
+            EnqueueBubble(row);
+
+            // 점 바운스 시작
+            _typingDotsPhase = 0;
+            _typingDotsJob = Root?.schedule.Execute(StepTypingDots).Every(200);
+        }
+
+        private void HideTypingBubble()
+        {
+            _typingDotsJob?.Pause();
+            _typingDotsJob = null;
+            _typingDotEls  = null;
+
+            if (_typingBubbleRow != null)
+            {
+                _typingBubbleRow.RemoveFromHierarchy();
+                _typingBubbleRow = null;
+            }
+        }
+
+        private void StepTypingDots()
+        {
+            if (_typingDotEls == null) return;
+            int active = _typingDotsPhase % _typingDotEls.Length;
+            for (int i = 0; i < _typingDotEls.Length; i++)
+            {
+                float y = (i == active) ? -9f : 0f;
+                _typingDotEls[i].style.translate = new StyleTranslate(
+                    new Translate(new Length(0), new Length(y, LengthUnit.Pixel)));
+            }
+            _typingDotsPhase++;
         }
 
         // ── 버블 ───────────────────────────────────────────────
@@ -358,12 +433,6 @@ namespace Guideon.UI
         private void ClearBubbles()
         {
             _bubbleList?.Clear();
-        }
-
-        private void SetThinking(bool on)
-        {
-            if (_thinkingGroup == null) return;
-            _thinkingGroup.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         // ── 마스코트 타이핑 점 ──────────────────────────────────
