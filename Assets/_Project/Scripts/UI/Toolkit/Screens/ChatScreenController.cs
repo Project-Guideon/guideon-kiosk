@@ -11,19 +11,25 @@ namespace Guideon.UI
     public class ChatScreenController : PanelControllerBase
     {
         private VisualElement _bubbleList;
-        private ScrollView _chatScroll;
+        private ScrollView    _chatScroll;
         private VisualElement _thinkingGroup;
-        private Button _micButton;
+        private Button        _micButton;
         private VisualElement _waveformContainer;
-        private Button _endButton;
+        private Button        _endButton;
+        private Label         _micHint;
         private VisualElement _mascotDots;
         private VisualElement[] _dotElements;
+
+        // 마이크 펄스 링
+        private VisualElement _pulseRing;
+        private IVisualElementScheduledItem _pulseJob;
+        private float _pulsePhase;
 
         private WaveformElement _waveform;
         private IVisualElementScheduledItem _waveformJob;
         private IVisualElementScheduledItem _dotsAnimJob;
         private float _rmsLevel;
-        private int _dotsAnimPhase;
+        private int   _dotsAnimPhase;
 
         protected override void Awake()
         {
@@ -39,7 +45,16 @@ namespace Guideon.UI
             _micButton         = Q<Button>("mic-button");
             _waveformContainer = Q("waveform-container");
             _endButton         = Q<Button>("btn-end");
+            _micHint           = Q<Label>("mic-hint");
             _mascotDots        = Q("mascot-emote-dots");
+
+            // 마이크 버튼에 펄스 링 동적 생성
+            if (_micButton != null)
+            {
+                _pulseRing = new VisualElement();
+                _pulseRing.AddToClassList("mic-pulse-ring");
+                _micButton.Add(_pulseRing);
+            }
 
             if (_mascotDots != null)
             {
@@ -57,6 +72,7 @@ namespace Guideon.UI
             SetRecording(false);
             SetMascotDotsVisible(false);
             ClearBubbles();
+            SetMicState(MascotState.Idle);
 
             _waveformJob = Root?.schedule.Execute(() => _waveform?.SetLevel(_rmsLevel)).Every(32);
         }
@@ -65,6 +81,8 @@ namespace Guideon.UI
         {
             EventBus.Subscribe<ChatResponseEvent>(OnChatResponse);
             EventBus.Subscribe<SttResultEvent>(OnSttResult);
+            EventBus.Subscribe<MascotStateEvent>(OnMascotState);
+            EventBus.Subscribe<ChatNoticeEvent>(OnChatNotice);
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRecordingStateChanged += OnRecordingStateChanged;
         }
@@ -73,6 +91,8 @@ namespace Guideon.UI
         {
             EventBus.Unsubscribe<ChatResponseEvent>(OnChatResponse);
             EventBus.Unsubscribe<SttResultEvent>(OnSttResult);
+            EventBus.Unsubscribe<MascotStateEvent>(OnMascotState);
+            EventBus.Unsubscribe<ChatNoticeEvent>(OnChatNotice);
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRecordingStateChanged -= OnRecordingStateChanged;
         }
@@ -81,6 +101,7 @@ namespace Guideon.UI
         {
             _waveformJob?.Pause();
             StopDotsAnim();
+            StopPulse();
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRmsLevel -= OnRmsLevel;
             base.OnDisable();
@@ -92,7 +113,100 @@ namespace Guideon.UI
             _waveformJob?.Resume();
         }
 
-        // ── 마이크 ─────────────────────────────────────────────────────────
+        // ── 마스코트 상태 → UI 동기화 ─────────────────────────
+
+        private void OnMascotState(MascotStateEvent e)
+        {
+            SetMicState(e.State);
+        }
+
+        private void SetMicState(MascotState state)
+        {
+            if (_micHint == null) return;
+
+            // 힌트 텍스트 & 색상 클래스
+            _micHint.RemoveFromClassList("mic-hint--listening");
+            _micHint.RemoveFromClassList("mic-hint--thinking");
+
+            switch (state)
+            {
+                case MascotState.Listening:
+                    _micHint.text = "듣고 있어요…";
+                    _micHint.AddToClassList("mic-hint--listening");
+                    SetMicButtonState(active: true, busy: false);
+                    StartPulse();
+                    break;
+
+                case MascotState.Thinking:
+                    _micHint.text = "답변을 준비하고 있어요…";
+                    _micHint.AddToClassList("mic-hint--thinking");
+                    SetMicButtonState(active: false, busy: true);
+                    StopPulse();
+                    break;
+
+                case MascotState.Speaking:
+                    _micHint.text = "답변하고 있어요";
+                    SetMicButtonState(active: false, busy: true);
+                    StopPulse();
+                    break;
+
+                default: // Idle, Greeting
+                    _micHint.text = "말씀해 보세요";
+                    SetMicButtonState(active: false, busy: false);
+                    StopPulse();
+                    break;
+            }
+        }
+
+        private void SetMicButtonState(bool active, bool busy)
+        {
+            if (_micButton == null) return;
+            if (active)
+            {
+                _micButton.AddToClassList("mic-circle--active");
+                _micButton.RemoveFromClassList("mic-circle--busy");
+            }
+            else if (busy)
+            {
+                _micButton.RemoveFromClassList("mic-circle--active");
+                _micButton.AddToClassList("mic-circle--busy");
+            }
+            else
+            {
+                _micButton.RemoveFromClassList("mic-circle--active");
+                _micButton.RemoveFromClassList("mic-circle--busy");
+            }
+        }
+
+        // ── 마이크 펄스 ────────────────────────────────────────
+
+        private void StartPulse()
+        {
+            if (_pulseRing == null) return;
+            _pulseRing.AddToClassList("mic-pulse-ring--visible");
+            _pulsePhase = 0f;
+            _pulseJob?.Pause();
+            _pulseJob = Root?.schedule.Execute(StepPulse).Every(32); // ~30fps
+        }
+
+        private void StopPulse()
+        {
+            _pulseJob?.Pause();
+            _pulseJob = null;
+            _pulseRing?.RemoveFromClassList("mic-pulse-ring--visible");
+        }
+
+        private void StepPulse()
+        {
+            if (_pulseRing == null) return;
+            _pulsePhase += 0.032f; // ~1 rad/sec
+            float alpha = Mathf.Sin(_pulsePhase * Mathf.PI) * 0.5f + 0.5f;
+            float scale = 0.9f + Mathf.Sin(_pulsePhase * Mathf.PI) * 0.15f;
+            _pulseRing.style.opacity = alpha;
+            _pulseRing.style.scale = new StyleScale(new Scale(new Vector3(scale, scale, 1f)));
+        }
+
+        // ── 마이크 ─────────────────────────────────────────────
 
         private void OnMicClicked()
         {
@@ -119,14 +233,14 @@ namespace Guideon.UI
 
         private void OnRmsLevel(float rms) => _rmsLevel = rms;
 
-        // ── 대화 종료 버튼 ─────────────────────────────────────────────────
+        // ── 대화 종료 버튼 ─────────────────────────────────────
 
         private void OnEndClicked()
         {
             EventBus.Publish(new ChatExitRequestedEvent());
         }
 
-        // ── STT / AI 응답 ──────────────────────────────────────────────────
+        // ── STT / AI 응답 ──────────────────────────────────────
 
         private void OnSttResult(SttResultEvent e)
         {
@@ -153,7 +267,15 @@ namespace Guideon.UI
             }).ExecuteLater(50);
         }
 
-        // ── 버블 ───────────────────────────────────────────────────────────
+        private void OnChatNotice(ChatNoticeEvent e)
+        {
+            SetThinking(false);
+            SetMascotDotsVisible(false);
+            AppendNoticeBubble(e.Message, e.Type == ChatNoticeType.Error);
+            Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
+        }
+
+        // ── 버블 ───────────────────────────────────────────────
 
         private void AppendBubble(string message, bool isUser)
         {
@@ -194,7 +316,37 @@ namespace Guideon.UI
                 container.Add(row);
             }
 
-            _bubbleList.Add(container);
+            EnqueueBubble(container);
+        }
+
+        private void AppendNoticeBubble(string message, bool isError)
+        {
+            if (_bubbleList == null) return;
+
+            var container = new VisualElement();
+            container.AddToClassList("bubble-notice");
+            if (isError) container.AddToClassList("bubble-notice--error");
+            container.style.marginBottom = 20;
+
+            var label = new Label(message);
+            label.AddToClassList("bubble-notice__text");
+            container.Add(label);
+
+            EnqueueBubble(container);
+        }
+
+        /// <summary>버블을 등장 애니메이션과 함께 추가.</summary>
+        private void EnqueueBubble(VisualElement el)
+        {
+            el.AddToClassList("bubble-enter");
+            _bubbleList.Add(el);
+
+            // 다음 프레임에 --in 클래스 추가 → USS transition 발동
+            Root?.schedule.Execute(() =>
+            {
+                el.AddToClassList("bubble-enter--in");
+                ScrollToBottom();
+            }).ExecuteLater(16);
         }
 
         private void ScrollToBottom()
@@ -214,14 +366,14 @@ namespace Guideon.UI
             _thinkingGroup.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        // ── 마스코트 타이핑 점 ──────────────────────────────────────────────
+        // ── 마스코트 타이핑 점 ──────────────────────────────────
 
         private void SetMascotDotsVisible(bool on)
         {
             if (_mascotDots == null) return;
             _mascotDots.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
             if (on) StartDotsAnim();
-            else StopDotsAnim();
+            else    StopDotsAnim();
         }
 
         private void StartDotsAnim()
