@@ -72,16 +72,9 @@ namespace Guideon.UI
                     _digits[i].text = code[i].ToString();
             }
 
-            if (DateTimeOffset.TryParse(expiresAt, out var dto))
-            {
-                _expiresAt = dto.LocalDateTime;
-                _totalSeconds = (float)(dto.LocalDateTime - DateTime.Now).TotalSeconds;
-                _hasCode = true;
-            }
-            else
-            {
-                Debug.LogWarning($"[PairingScreen] expiresAt 파싱 실패: '{expiresAt}'");
-            }
+            _totalSeconds = 300f;
+            _expiresAt = DateTime.Now.AddSeconds(_totalSeconds);
+            _hasCode = true;
         }
 
         private void UpdateTimer()
