@@ -1,7 +1,7 @@
 ﻿/* Pairing Screen — 페어링 코드 등록 (UNITY_DESIGN_SPEC §3.2) */
 
 .pairing-root {
-    flex-direction: row;
+    flex-direction: column;
 }
 
 /* ── 좌측 안내 패널 (680px) ── */
