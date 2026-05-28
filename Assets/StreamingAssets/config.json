@@ -13,6 +13,8 @@
     "sttSilenceTimeoutMs": 3000,
     "sttVadThreshold": 0.03,
     "sttMaxRecordingSeconds": 8.0,
+    "sttNoSpeechExitSeconds": 5.0,
+    "answerTimeoutSeconds": 15.0,
     "ttsEnabled": true,
     "language": "ko"
   }

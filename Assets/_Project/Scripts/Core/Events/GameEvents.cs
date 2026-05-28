@@ -80,6 +80,15 @@ namespace Guideon.Core
 
     public struct ChatExitRequestedEvent { }
 
+    // ── 대화 안내 ──────────────────────────────────────────
+    public enum ChatNoticeType { Info, Error }
+
+    public struct ChatNoticeEvent
+    {
+        public string Message;
+        public ChatNoticeType Type;
+    }
+
     public struct SceneReadyEvent
     {
         public string SceneName;

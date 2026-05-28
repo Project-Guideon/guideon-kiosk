@@ -34,6 +34,8 @@ namespace Guideon.Core
         public int sttFrameMs = 20;
         public float sttVadThreshold = 0.03f;
         public float sttMaxRecordingSeconds = 8.0f;
+        public float sttNoSpeechExitSeconds = 5.0f;
+        public float answerTimeoutSeconds = 15.0f;
         public bool ttsEnabled = true;
         public string language = "ko";
     }

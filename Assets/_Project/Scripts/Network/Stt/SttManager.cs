@@ -14,7 +14,7 @@ namespace Guideon.Network.Stt
     /// <summary>
     /// STT WebSocket 연결/송수신 담당.
     /// 탭 시작 → 마이크 캡처 → binary PCM 전송 → VAD 무음 감지 → 자동 종료.
-    /// final 텍스트 수신 시 ChatManager.SendMessageAsync 자동 호출.
+    /// final 텍스트 수신 시 AI 응답을 ChatResponseEvent로 발행.
     /// </summary>
     public class SttManager : MonoSingleton<SttManager>
     {
@@ -33,6 +33,15 @@ namespace Guideon.Network.Stt
         private float _recordingElapsed;
         private float _maxRecordingSec;
 
+        // ── 이탈 플래그 ──────────────────────────────────
+        // 종료 버튼 / 무발화 자동 복귀 시 TtsDone 자동 재시작 방지
+        private bool _exiting;
+
+        // ── 응답 워치독 ───────────────────────────────────
+        private bool  _awaitingAnswer;
+        private float _awaitingTimer;
+        private float _answerTimeoutSec;
+
         protected override void OnInitialize()
         {
             _mic = gameObject.AddComponent<MicrophoneCapture>();
@@ -45,6 +54,7 @@ namespace Guideon.Network.Stt
             }
 
             EventBus.Subscribe<TtsDoneEvent>(OnTtsDone);
+            EventBus.Subscribe<ChatExitRequestedEvent>(OnChatExitRequested);
             Debug.Log("[SttManager] 초기화 완료");
         }
 
@@ -57,6 +67,8 @@ namespace Guideon.Network.Stt
                 Debug.LogWarning("[SttManager] 이미 녹음 중");
                 return;
             }
+
+            _exiting = false;
 
             if (!ChatManager.HasInstance)
             {
@@ -72,6 +84,8 @@ namespace Guideon.Network.Stt
             string sessionId = ChatManager.Instance.CurrentSessionId;
             if (!await ConnectAsync(sessionId)) return;
 
+            if (_exiting) return; // 연결 중 이탈 요청이 들어온 경우
+
             // 이전 TTS 재생 중이면 즉시 abort하고 새 세션 시작
             if (TtsManager.HasInstance) TtsManager.Instance.BeginSession(sessionId);
 
@@ -82,6 +96,11 @@ namespace Guideon.Network.Stt
             _waitingForDone = false;
             _sentUserBubble = false;
             _lastTranscript = null;
+
+            _awaitingAnswer = false;
+            _awaitingTimer  = 0f;
+            _answerTimeoutSec = ConfigManager.Instance.Config.kiosk.answerTimeoutSeconds;
+
             OnRecordingStateChanged?.Invoke(true);
             EventBus.Publish(new MascotStateEvent { State = MascotState.Listening });
             Debug.Log("[SttManager] 녹음 시작");
@@ -120,7 +139,6 @@ namespace Guideon.Network.Stt
             _ws.OnOpen  += onOpen;
             _ws.OnError += onErr;
 
-            // Connect()는 Task를 반환하지만 완료 시점은 OnOpen/OnError로 받음
             _ = _ws.Connect();
 
             // 최대 5초 대기
@@ -137,6 +155,7 @@ namespace Guideon.Network.Stt
             if (!connected)
             {
                 Debug.LogError("[SttManager] 연결 실패 또는 타임아웃");
+                PublishNotice("연결에 문제가 있어요. 잠시 후 다시 시도해 주세요.");
                 _ws = null;
                 return false;
             }
@@ -151,8 +170,13 @@ namespace Guideon.Network.Stt
         {
             var cfg = ConfigManager.Instance.Config.kiosk;
 
-            _vad = new VoiceActivityDetector(cfg.sttVadThreshold, cfg.sttSilenceTimeoutMs);
-            _vad.OnSilenceTimeout += OnVadSilenceTimeout;
+            _vad = new VoiceActivityDetector(
+                cfg.sttVadThreshold,
+                cfg.sttSilenceTimeoutMs,
+                cfg.sttNoSpeechExitSeconds);
+
+            _vad.OnSilenceTimeout  += OnVadSilenceTimeout;
+            _vad.OnNoSpeechTimeout += OnVadNoSpeechTimeout;
             _vad.Begin();
 
             _mic.OnAudioFrame += OnAudioFrame;
@@ -168,7 +192,8 @@ namespace Guideon.Network.Stt
 
             if (_vad != null)
             {
-                _vad.OnSilenceTimeout -= OnVadSilenceTimeout;
+                _vad.OnSilenceTimeout  -= OnVadSilenceTimeout;
+                _vad.OnNoSpeechTimeout -= OnVadNoSpeechTimeout;
                 _vad.Stop();
                 _vad = null;
             }
@@ -179,8 +204,12 @@ namespace Guideon.Network.Stt
             _vad?.Feed(rms, Time.deltaTime);
             OnRmsLevel?.Invoke(rms);
 
-            if (IdleTimeoutManager.HasInstance)
-                IdleTimeoutManager.Instance.NotifyInteraction();
+            // 실제 음성일 때만 idle 타임아웃 리셋 (마이크가 항상 열려 있어도 120초 idle이 정상 작동)
+            if (rms >= ConfigManager.Instance.Config.kiosk.sttVadThreshold)
+            {
+                if (IdleTimeoutManager.HasInstance)
+                    IdleTimeoutManager.Instance.NotifyInteraction();
+            }
         }
 
         private void OnAudioFrame(byte[] pcm)
@@ -192,6 +221,23 @@ namespace Guideon.Network.Stt
         private void OnVadSilenceTimeout()
         {
             StopCaptureAndClose(sendStop: true).Forget();
+        }
+
+        private void OnVadNoSpeechTimeout()
+        {
+            Debug.Log("[SttManager] 무발화 종료 → Idle 복귀");
+            _exiting = true;
+            StopCaptureAndClose(sendStop: false).Forget();
+            // MainSceneController가 처리하도록 이벤트 발행
+            EventBus.Publish(new ChatExitRequestedEvent());
+        }
+
+        // ── 종료 버튼 / 이탈 ─────────────────────────────
+
+        private void OnChatExitRequested(ChatExitRequestedEvent _)
+        {
+            _exiting = true;
+            if (IsRecording) Stop();
         }
 
         // ── WebSocket 콜백 ────────────────────────────────
@@ -235,7 +281,9 @@ namespace Guideon.Network.Stt
 
                 case "error":
                     Debug.LogWarning($"[SttManager] 서버 오류 — {msg.Code}: {msg.ErrorMessage}");
-                    _waitingForDone = false;
+                    _waitingForDone   = false;
+                    _awaitingAnswer   = false;
+                    PublishNotice("죄송해요, 답변을 가져오지 못했어요. 다시 말씀해 주세요.", isError: true);
                     break;
 
                 case "done":
@@ -251,6 +299,11 @@ namespace Guideon.Network.Stt
             if (_sentUserBubble) return;
             if (string.IsNullOrWhiteSpace(transcript)) return;
             _sentUserBubble = true;
+
+            // 응답 워치독 시작
+            _awaitingAnswer = true;
+            _awaitingTimer  = 0f;
+
             EventBus.Publish(new SttResultEvent { Transcript = transcript, IsFinal = true });
             EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
         }
@@ -258,6 +311,7 @@ namespace Guideon.Network.Stt
         private void HandleAiResponse(string answer)
         {
             if (string.IsNullOrWhiteSpace(answer)) return;
+            _awaitingAnswer = false;
             EventBus.Publish(new ChatResponseEvent
             {
                 Answer    = answer,
@@ -288,13 +342,14 @@ namespace Guideon.Network.Stt
         private void OnWsError(string error)
         {
             Debug.LogError($"[SttManager] WS 오류: {error}");
+            _awaitingAnswer = false;
+            PublishNotice("네트워크 오류가 발생했어요. 다시 시도해 주세요.", isError: true);
             CleanupState();
         }
 
         private void OnWsClose(WebSocketCloseCode code)
         {
             Debug.Log($"[SttManager] WS 종료 — {code}");
-            // 서버가 done 없이 연결을 닫은 경우 마지막 transcript로 폴백
             if (_waitingForDone)
             {
                 _waitingForDone = false;
@@ -315,7 +370,6 @@ namespace Guideon.Network.Stt
                 Debug.Log("[SttManager] stop 메시지 전송");
                 _waitingForDone = true;
 
-                // done 대기 최대 30초 — 서버가 done 없이 닫으면 OnWsClose가 폴백 처리
                 float waited = 0f;
                 while (_waitingForDone && waited < 30f)
                 {
@@ -327,7 +381,15 @@ namespace Guideon.Network.Stt
                 {
                     _waitingForDone = false;
                     Debug.LogWarning("[SttManager] done 타임아웃 — 마지막 transcript로 폴백");
-                    ShowUserBubble(_lastTranscript);
+                    if (_awaitingAnswer)
+                    {
+                        _awaitingAnswer = false;
+                        PublishNotice("응답이 너무 오래 걸려요. 다시 말씀해 주세요.", isError: true);
+                    }
+                    else
+                    {
+                        ShowUserBubble(_lastTranscript);
+                    }
                 }
             }
 
@@ -344,11 +406,11 @@ namespace Guideon.Network.Stt
         {
             if (!IsRecording) return;
             IsRecording = false;
+            _awaitingAnswer = false;
             OnRecordingStateChanged?.Invoke(false);
             EventBus.Publish(new MascotStateEvent { State = MascotState.Idle });
             Debug.Log("[SttManager] 녹음 종료 완료");
         }
-
 
         // ── 유틸 ──────────────────────────────────────────
 
@@ -359,11 +421,21 @@ namespace Guideon.Network.Stt
             await _ws.SendText(json);
         }
 
+        private static void PublishNotice(string message, bool isError = false)
+        {
+            EventBus.Publish(new ChatNoticeEvent
+            {
+                Message = message,
+                Type    = isError ? ChatNoticeType.Error : ChatNoticeType.Info
+            });
+        }
+
         private void Update()
         {
 #if !UNITY_WEBGL || UNITY_EDITOR
             _ws?.DispatchMessageQueue();
 #endif
+            // 최대 녹음 시간 초과
             if (IsRecording && _maxRecordingSec > 0f)
             {
                 _recordingElapsed += Time.deltaTime;
@@ -374,17 +446,33 @@ namespace Guideon.Network.Stt
                     StopCaptureAndClose(sendStop: true).Forget();
                 }
             }
+
+            // 응답 워치독 — answerTimeoutSec 초과 시 안내
+            if (_awaitingAnswer)
+            {
+                _awaitingTimer += Time.deltaTime;
+                if (_awaitingTimer >= _answerTimeoutSec)
+                {
+                    _awaitingAnswer = false;
+                    _awaitingTimer  = 0f;
+                    Debug.LogWarning("[SttManager] 응답 타임아웃");
+                    PublishNotice("응답이 너무 오래 걸려요. 다시 말씀해 주세요.", isError: true);
+                    EventBus.Publish(new MascotStateEvent { State = MascotState.Idle });
+                }
+            }
         }
 
         private void OnTtsDone(TtsDoneEvent _)
         {
-            if (!IsRecording)
+            // 이탈 중이 아닐 때만 자동 재시작
+            if (!_exiting && !IsRecording)
                 StartAsync().Forget();
         }
 
         protected override void OnDestroy()
         {
             EventBus.Unsubscribe<TtsDoneEvent>(OnTtsDone);
+            EventBus.Unsubscribe<ChatExitRequestedEvent>(OnChatExitRequested);
             if (IsRecording) Stop();
             base.OnDestroy();
         }
