@@ -59,6 +59,11 @@ namespace Guideon.UI
 
             _centerCircle = Root?.Q(className: "touch-center-circle");
 
+            // 화면 어디를 눌러도 터치 이벤트 발행 (UI Toolkit 포인터 이벤트로 확실히 처리)
+            var idleRoot = Root?.Q("idle-root");
+            idleRoot?.RegisterCallback<PointerDownEvent>(_ =>
+                Guideon.Core.EventBus.Publish(new Guideon.Core.UserTouchedEvent()));
+
             StartAnimations();
         }
 
@@ -116,20 +121,28 @@ namespace Guideon.UI
 
         private void StartAnimations()
         {
-            // 도트 blink (50ms 틱)
+            // 도트 파동 (80ms 틱, 3.5초 주기 — opacity + scale 동시)
             _dotJob = Root?.schedule.Execute(() =>
             {
-                _dotPhase = (_dotPhase + 0.1f) % 1f;
+                _dotPhase = (_dotPhase + 0.023f) % 1f; // 80ms × ? = 3.5s 주기
                 float a1 = 0.5f + 0.5f * Mathf.Sin(_dotPhase * Mathf.PI * 2f);
                 float a2 = 0.5f + 0.5f * Mathf.Sin((_dotPhase + 0.33f) * Mathf.PI * 2f);
                 float a3 = 0.5f + 0.5f * Mathf.Sin((_dotPhase + 0.66f) * Mathf.PI * 2f);
-                if (_dot1 != null) _dot1.style.opacity = Mathf.Lerp(0.2f, 1f, a1);
-                if (_dot2 != null) _dot2.style.opacity = Mathf.Lerp(0.2f, 1f, a2);
-                if (_dot3 != null) _dot3.style.opacity = Mathf.Lerp(0.2f, 1f, a3);
-            }).Every(50);
+                ApplyDot(_dot1, a1);
+                ApplyDot(_dot2, a2);
+                ApplyDot(_dot3, a3);
+            }).Every(80);
 
             // 소나 리플 + 카드 펄스 (32ms 틱)
             _animJob = Root?.schedule.Execute(StepAnim).Every(32);
+        }
+
+        private static void ApplyDot(VisualElement dot, float t)
+        {
+            if (dot == null) return;
+            dot.style.opacity = Mathf.Lerp(0.2f, 1f, t);
+            float s = Mathf.Lerp(0.65f, 1.35f, t);
+            dot.style.scale = new StyleScale(new Scale(new Vector3(s, s, 1f)));
         }
 
         private void StepAnim()
