@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using Guideon.Audio;
 using Guideon.Core;
 using Guideon.Network.Stt;
 using Guideon.UI.Toolkit;
@@ -265,19 +264,11 @@ namespace Guideon.UI
 
         private void OnChatResponse(ChatResponseEvent e)
         {
-            if (TtsManager.HasInstance)
-                TtsManager.Instance.HoldPlayback();
-
             HideTypingBubble();
             SetMascotDotsVisible(false);
             AppendBubble(e.Answer, isUser: false);
 
-            Root?.schedule.Execute(() =>
-            {
-                ScrollToBottom();
-                if (TtsManager.HasInstance)
-                    TtsManager.Instance.ReleasePlayback();
-            }).ExecuteLater(50);
+            Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
         }
 
         private void OnChatNotice(ChatNoticeEvent e)
