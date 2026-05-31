@@ -1,0 +1,252 @@
+﻿/* Chat Screen — 일반 대화 (UNITY_DESIGN_SPEC §3.5) */
+
+.chat-root {
+    flex-direction: column;
+}
+
+/* ── 헤더 (h=72) ── */
+.chat-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    padding: 0 56px;
+    background-color: rgba(245, 237, 224, 0.96);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(90, 60, 20, 0.1);
+    flex-shrink: 0;
+}
+
+.chat-status-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* ── 메인 2분할 ── */
+.chat-main {
+    flex: 1;
+    flex-direction: row;
+}
+
+/* 좌측 대화 패널 (860px) */
+.chat-left {
+    width: 860px;
+    flex-direction: column;
+    padding: 44px 52px 36px;
+    border-right-width: 1px;
+    border-right-color: rgba(90, 60, 20, 0.07);
+    justify-content: space-between;
+}
+
+/* ScrollView 대화 영역 */
+.chat-scroll {
+    flex: 1;
+}
+
+.chat-bubble-list {
+    flex-direction: column;
+    padding: 0 0 24px;
+}
+
+/* ── 타이핑 버블 (메시지 흐름 안) ── */
+.typing-bubble {
+    background-color: rgba(255, 252, 245, 0.96);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.12);
+    border-radius: 6px 26px 26px 26px;
+    padding: 20px 28px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.typing-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background-color: rgb(177, 74, 46);
+    margin: 0 5px;
+    transition-property: translate;
+    transition-duration: 0.18s;
+    transition-timing-function: ease-in-out;
+}
+
+/* 좌측 하단 입력 영역 */
+.chat-input-area {
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+/* 우측 마스코트 패널 */
+.chat-right {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+}
+
+/* 후광 */
+.chat-mascot-halo {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    translate: -50% 0%;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background-color: rgba(200, 64, 48, 0.05);
+}
+
+/* 단청 원 640 */
+.chat-dancheong-ring {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    translate: -50% 0%;
+    width: 640px;
+    height: 640px;
+    border-radius: 50%;
+    border-width: 1.5px;
+    border-color: rgba(200, 64, 48, 0.05);
+}
+
+/* 마스코트 슬롯 */
+.chat-mascot-slot {
+    width: 560px;
+    height: 560px;
+    border-radius: 50%;
+    background-color: rgba(200, 64, 48, 0.02);
+    position: relative;
+}
+
+/* ── 안내 종료 버튼 press 피드백 ── */
+.btn-end-pressed {
+    scale: 0.89;
+    background-color: rgba(200, 64, 48, 0.18);
+    border-color: rgba(200, 64, 48, 0.7);
+    opacity: 0.82;
+    transition-property: scale, background-color, border-color, opacity;
+    transition-duration: 0.1s;
+}
+
+/* ── 마이크 버튼 기본 전환 ── */
+.mic-circle {
+    transition-property: scale, background-color, border-color, opacity;
+    transition-duration: 0.14s;
+    transition-timing-function: ease-out;
+}
+
+.mic-circle:active {
+    scale: 0.9;
+    opacity: 0.85;
+}
+
+/* ── 마이크 상태 변형 ── */
+.mic-circle--active {
+    background-color: rgba(200, 64, 48, 0.15);
+    border-color: rgb(177, 74, 46);
+    border-width: 2.5px;
+}
+
+.mic-circle--busy {
+    opacity: 0.45;
+}
+
+/* 듣는 중 힌트 색 */
+.mic-hint--listening {
+    color: rgb(177, 74, 46);
+    -unity-font-style: bold;
+}
+
+/* 처리 중 힌트 색 */
+.mic-hint--thinking {
+    color: rgb(42, 75, 122);
+}
+
+/* ── 마이크 펄스 링 ── */
+.mic-pulse-ring {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    border-width: 2px;
+    border-color: rgba(177, 74, 46, 0.5);
+    display: none;
+    transition-property: opacity, scale;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-out;
+}
+
+.mic-pulse-ring--visible {
+    display: flex;
+}
+
+/* ── 버블 등장 애니메이션 ── */
+.bubble-enter {
+    opacity: 0;
+    translate: 0 12px;
+    transition-property: opacity, translate;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+
+.bubble-enter--in {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* ── 안내 버블 (Info / Error) ── */
+.bubble-notice {
+    align-self: center;
+    max-width: 560px;
+    background-color: rgba(255, 252, 245, 0.95);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.18);
+    border-radius: 16px;
+    padding: 16px 28px;
+    margin-bottom: 20px;
+}
+
+.bubble-notice--error {
+    background-color: rgba(200, 64, 48, 0.06);
+    border-color: rgba(200, 64, 48, 0.35);
+}
+
+.bubble-notice__text {
+    font-size: 18px;
+    color: rgb(74, 53, 32);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.bubble-notice--error .bubble-notice__text {
+    color: rgb(177, 74, 46);
+}
+
+/* AI 처리 중 타이핑 점 */
+.mascot-emote-dots {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    display: none;
+}
+
+.mascot-emote-dots__dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: rgb(177, 74, 46);
+    margin-left: 6px;
+    margin-right: 6px;
+    transition-property: translate;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+}
+
+

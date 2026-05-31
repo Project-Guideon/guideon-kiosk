@@ -32,6 +32,9 @@ namespace Guideon.Core
         public int sttSilenceTimeoutMs = 3000;
         public int sttSampleRate = 16000;
         public int sttFrameMs = 20;
+        public float sttVadThreshold = 0.03f;
+        public float sttMaxRecordingSeconds = 8.0f;
+        public float sttNoSpeechExitSeconds = 8.0f;
         public bool ttsEnabled = true;
         public string language = "ko";
     }

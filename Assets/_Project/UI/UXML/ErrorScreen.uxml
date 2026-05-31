@@ -1,0 +1,36 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-error.uss" />
+    <ui:VisualElement name="error-root" class="screen-root changsal-bg error-root">
+        <!-- 단청 띠 상단 -->
+        <ui:VisualElement class="dancheong-band" style="position:absolute; top:0; left:0; right:0;" />
+
+        <!-- 에러 카드 -->
+        <ui:VisualElement name="error-card" class="error-card">
+            <!-- 아이콘 -->
+            <ui:VisualElement class="error-icon">
+                <ui:Label text="⚠" class="error-icon__label" />
+            </ui:VisualElement>
+
+            <!-- 제목 -->
+            <ui:Label name="error-title" text="오류가 발생했습니다" class="error-title" />
+
+            <!-- 메시지 -->
+            <ui:Label name="error-message" text="예상치 못한 오류가 발생했습니다." class="error-message" />
+
+            <!-- 에러 코드 (선택적) -->
+            <ui:Label name="error-code" text="" class="error-code" style="display:none;" />
+
+            <!-- 재시도 버튼 -->
+            <ui:Button name="retry-button" text="다시 시도" class="error-retry-btn" style="display:none;" />
+
+            <!-- 자동 재시도 카운트다운 -->
+            <ui:Label name="countdown-text" text="" class="error-countdown" />
+        </ui:VisualElement>
+
+        <!-- 단청 띠 하단 -->
+        <ui:VisualElement class="dancheong-band" style="position:absolute; bottom:0; left:0; right:0;" />
+    </ui:VisualElement>
+</ui:UXML>
+

@@ -1,0 +1,85 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-chat.uss" />
+    <ui:VisualElement name="chat-root" class="screen-root changsal-bg chat-root">
+        <!-- 상단 단청 띠 -->
+        <ui:VisualElement name="dancheong-top" class="dancheong-band" />
+
+        <!-- 헤더 -->
+        <ui:VisualElement name="chat-header" class="chat-header">
+            <!-- 로고 -->
+            <ui:VisualElement class="logo-group">
+                <ui:VisualElement style="width:42px; height:42px; border-radius:50%; background-color:rgba(200,64,48,0.08); border-width:1.5px; border-color:rgb(177,74,46); align-items:center; justify-content:center; margin-right:16px;">
+                    <ui:Label text="G" style="font-size:24px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement>
+                    <ui:Label text="GUIDEON" class="logo-wordmark" />
+                    <ui:Label text="경복궁 AI 안내" class="logo-sub" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <!-- 상태 -->
+            <ui:VisualElement class="chat-status-row">
+                <ui:VisualElement class="status-dot" />
+                <ui:Label text="AI 안내 진행 중" style="font-size:17px; color:rgb(74,53,32); margin-right:14px;" />
+                <ui:VisualElement class="chip" style="padding:5px 20px; border-radius:20px; background-color:rgba(200,64,48,0.07);">
+                    <ui:Label text="일반 대화" style="font-size:14px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <!-- 액션 버튼 -->
+            <ui:VisualElement style="flex-direction:row; align-items:center;">
+                <ui:Button name="btn-map" text="🗺 지도 보기" class="action-btn" style="margin-right:12px;" />
+                <ui:Button name="btn-info" text="📋 정보" class="action-btn" style="margin-right:12px;" />
+                <ui:Button name="btn-end" text="안내 종료" class="action-btn action-btn--danger" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 메인 -->
+        <ui:VisualElement name="chat-main" class="chat-main">
+
+            <!-- 좌측: 대화 패널 -->
+            <ui:VisualElement name="chat-left" class="chat-left">
+                <!-- 대화 스크롤 -->
+                <ui:ScrollView name="chat-scroll" class="chat-scroll" mode="Vertical">
+                    <ui:VisualElement name="bubble-list" class="chat-bubble-list" />
+                </ui:ScrollView>
+                <!-- 마이크 입력 -->
+                <ui:VisualElement name="mic-input-root" class="chat-input-area">
+                    <ui:VisualElement name="mic-bar" class="mic-bar">
+                        <ui:Button name="mic-button" class="mic-circle" tooltip="마이크 시작/중지">
+                            <ui:Label text="🎤" style="font-size:22px; -unity-text-align:middle-center;" />
+                        </ui:Button>
+                        <ui:VisualElement name="waveform-container" class="waveform-container" />
+                        <ui:Label name="mic-hint" text="말씀하세요..." class="mic-hint" />
+                    </ui:VisualElement>
+                    <!-- 빠른 질문 칩 -->
+                    <ui:VisualElement name="quick-chips" style="flex-direction:row; flex-wrap:wrap;">
+                        <ui:Button text="화장실 어디예요?" class="quick-chip" />
+                        <ui:Button text="근정전 위치" class="quick-chip" />
+                        <ui:Button text="오늘 행사" class="quick-chip" />
+                        <ui:Button text="식당 추천" class="quick-chip" />
+                        <ui:Button text="관람 시간" class="quick-chip" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 우측: 마스코트 패널 -->
+            <ui:VisualElement name="chat-right" class="chat-right">
+                <ui:VisualElement name="mascot-halo" class="chat-mascot-halo" />
+                <ui:VisualElement name="dancheong-ring" class="chat-dancheong-ring" />
+                <!-- 마스코트 슬롯 (Step 9에서 채움) -->
+                <ui:VisualElement name="mascot-slot" class="chat-mascot-slot" />
+                <!-- AI 처리 중 타이핑 점 (C#에서 show/hide) -->
+                <ui:VisualElement name="mascot-emote-dots" class="mascot-emote-dots">
+                    <ui:VisualElement class="mascot-emote-dots__dot" />
+                    <ui:VisualElement class="mascot-emote-dots__dot" />
+                    <ui:VisualElement class="mascot-emote-dots__dot" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 하단 단청 띠 -->
+        <ui:VisualElement name="dancheong-bottom" class="dancheong-band" />
+    </ui:VisualElement>
+</ui:UXML>
+

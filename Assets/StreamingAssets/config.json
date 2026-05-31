@@ -10,7 +10,10 @@
   },
   "kiosk": {
     "idleTimeoutSeconds": 120,
-    "sttSilenceTimeoutMs": 3000,
+    "sttSilenceTimeoutMs": 1500,
+    "sttVadThreshold": 0.03,
+    "sttMaxRecordingSeconds": 8.0,
+    "sttNoSpeechExitSeconds": 9.0,
     "ttsEnabled": true,
     "language": "ko"
   }

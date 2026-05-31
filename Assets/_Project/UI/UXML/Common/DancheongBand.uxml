@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!-- 단청 띠 — 화면 상단/하단에 삽입. height: 12px, 색: #C84030 -->
+    <!-- 실제 단청 패턴(SVG 타일)은 C#에서 동적으로 배경 이미지 설정 -->
+    <ui:VisualElement name="dancheong-band" class="dancheong-band">
+        <!-- 단청 줄무늬: 16px 단위 반복은 배경 이미지 타일로 처리 -->
+    </ui:VisualElement>
+</ui:UXML>

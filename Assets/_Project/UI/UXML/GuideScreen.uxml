@@ -1,0 +1,128 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-guide.uss" />
+    <ui:VisualElement name="guide-root" class="screen-root changsal-bg guide-root">
+        <!-- 헤더 -->
+        <ui:VisualElement name="guide-header" class="chat-header">
+            <ui:VisualElement class="logo-group">
+                <ui:VisualElement style="width:42px; height:42px; border-radius:50%; background-color:rgba(200,64,48,0.08); border-width:1.5px; border-color:rgb(177,74,46); align-items:center; justify-content:center; margin-right:16px;">
+                    <ui:Label text="G" style="font-size:24px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement>
+                    <ui:Label text="GUIDEON" class="logo-wordmark" />
+                    <ui:Label text="경복궁 AI 안내" class="logo-sub" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="chat-status-row">
+                <ui:VisualElement class="status-dot" />
+                <ui:Label text="AI 안내 진행 중" style="font-size:17px; color:rgb(74,53,32); margin-right:14px;" />
+                <ui:VisualElement class="chip" style="padding:5px 20px; border-radius:20px; background-color:rgba(200,64,48,0.07);">
+                    <ui:Label name="area-chip" text="근정전 권역" style="font-size:14px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-direction:row; align-items:center;">
+                <ui:Button name="btn-info" text="📋 정보" class="action-btn" style="margin-right:12px;" />
+                <ui:Button name="btn-mute" text="🔊 음성 끄기" class="action-btn" style="margin-right:12px;" />
+                <ui:Button name="btn-end" text="안내 종료" class="action-btn action-btn--danger" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 메인 -->
+        <ui:VisualElement name="guide-main" class="guide-main">
+
+            <!-- 좌측: 대화 패널 -->
+            <ui:VisualElement name="guide-left" class="guide-left">
+                <!-- 대화 영역 -->
+                <ui:VisualElement name="conversation-area" style="flex:1; flex-direction:column; justify-content:center;">
+                    <!-- 사용자 질문 -->
+                    <ui:VisualElement style="align-self:flex-end; max-width:420px;" class="bubble-user">
+                        <ui:Label text="내 질문" class="bubble__label" />
+                        <ui:Label name="user-question" text="근정전은 어디에 있나요?" class="bubble__text" style="font-size:24px;" />
+                    </ui:VisualElement>
+                    <!-- 구분 화살표 -->
+                    <ui:VisualElement class="divider-arrow" style="margin:24px 0;">
+                        <ui:VisualElement class="divider-line" />
+                        <ui:Label text="↓" style="font-size:24px; color:rgba(177,74,46,0.5); margin:0 8px;" />
+                        <ui:VisualElement class="divider-line" />
+                    </ui:VisualElement>
+                    <!-- AI 답변 -->
+                    <ui:VisualElement style="flex-direction:row; align-items:flex-start;">
+                        <ui:VisualElement class="ai-avatar" style="width:52px; height:52px; margin-right:16px;">
+                            <ui:Label text="G" class="ai-avatar__text" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="bubble-ai" style="flex:1;">
+                            <ui:Label text="가이온이 · AI 안내" class="bubble__label" style="color:rgb(177,74,46);" />
+                            <ui:Label name="ai-answer" text="근정전은 경복궁 정문에서 북쪽으로 직진하시면 보이십니다." class="bubble__text" style="font-size:22px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- 마이크 입력 -->
+                <ui:VisualElement name="guide-mic-input" class="chat-input-area">
+                    <ui:VisualElement name="mic-bar" class="mic-bar">
+                        <ui:Button name="mic-button" class="mic-circle">
+                            <ui:Label text="🎤" style="font-size:20px; -unity-text-align:middle-center;" />
+                        </ui:Button>
+                        <ui:VisualElement name="waveform-container" class="waveform-container" />
+                        <ui:Label text="말씀하세요..." class="mic-hint" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="flex-direction:row; flex-wrap:wrap;">
+                        <ui:Button text="화장실 위치" class="quick-chip" />
+                        <ui:Button text="매표소" class="quick-chip" />
+                        <ui:Button text="오늘 행사" class="quick-chip" />
+                        <ui:Button text="식당 추천" class="quick-chip" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 우측: 지도 -->
+            <ui:VisualElement name="guide-right" class="guide-right">
+                <ui:VisualElement name="map-container" class="guide-map-container">
+                    <!-- 지도 placeholder (Step 10 WebView로 교체 예정) -->
+                    <ui:VisualElement name="map-placeholder" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgb(232,220,200);">
+                        <ui:Label text="지도 영역 (Step 10 WebView)" style="position:absolute; top:50%; left:50%; translate:-50% -50%; font-size:18px; color:rgba(90,60,20,0.3); -unity-text-align:middle-center;" />
+                    </ui:VisualElement>
+                    <!-- 지도 헤더 오버레이 -->
+                    <ui:VisualElement name="map-header" class="guide-map-header">
+                        <ui:VisualElement style="flex-direction:row; align-items:center;">
+                            <ui:Label text="📍" style="font-size:18px; margin-right:12px;" />
+                            <ui:Label name="map-location" text="경복궁 근정전 권역" style="font-size:18px; color:rgb(26,18,8); -unity-font-style:bold;" />
+                            <ui:Label text=" 현재 위치 기준" style="font-size:15px; color:rgb(138,112,96); margin-left:8px;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction:row;">
+                            <ui:Button text="+" class="action-btn" style="width:36px; height:36px; border-radius:10px; padding:0; margin-right:8px;" />
+                            <ui:Button text="-" class="action-btn" style="width:36px; height:36px; border-radius:10px; padding:0;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <!-- 마스코트 슬롯 (지도 우하단) -->
+                    <ui:VisualElement name="mascot-slot" class="guide-map-mascot" />
+                    <!-- 말풍선 -->
+                    <ui:VisualElement name="guide-speech" class="guide-speech-bubble">
+                        <ui:Label text="가이온이" class="guide-speech-label" />
+                        <ui:Label name="guide-speech-text" text="근정전은 여기서&#10;도보 약 3분 거리예요!" class="guide-speech-text" />
+                    </ui:VisualElement>
+                    <!-- 목적지 카드 -->
+                    <ui:VisualElement name="dest-card" class="guide-dest-card">
+                        <ui:Label text="📍" style="font-size:24px; margin-right:16px;" />
+                        <ui:VisualElement>
+                            <ui:Label text="목적지" class="guide-dest-label" />
+                            <ui:Label name="dest-name" text="근정전" class="guide-dest-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="guide-dest-divider" />
+                        <ui:VisualElement>
+                            <ui:Label text="도보 거리" class="guide-dest-label" />
+                            <ui:Label name="dest-distance" text="약 3분" class="guide-dest-value guide-dest-value--accent" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="guide-dest-divider" />
+                        <ui:VisualElement>
+                            <ui:Label text="방향" class="guide-dest-label" />
+                            <ui:Label name="dest-direction" text="북쪽으로 직진" class="guide-dest-value" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
+

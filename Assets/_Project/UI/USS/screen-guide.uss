@@ -1,0 +1,133 @@
+﻿/* Guide Screen — AI 안내 지도 모드 (UNITY_DESIGN_SPEC §3.4) */
+
+.guide-root {
+    flex-direction: column;
+}
+
+/* 헤더는 chat-header와 동일 스타일 공유 */
+
+/* ── 메인 2분할 ── */
+.guide-main {
+    flex: 1;
+    flex-direction: row;
+}
+
+/* 좌측 대화 (560px) */
+.guide-left {
+    width: 560px;
+    flex-direction: column;
+    padding: 40px 40px 36px;
+    border-right-width: 1px;
+    border-right-color: rgba(90, 60, 20, 0.08);
+    justify-content: space-between;
+}
+
+/* 우측 지도 영역 */
+.guide-right {
+    flex: 1;
+    position: relative;
+}
+
+/* 지도 컨테이너 */
+.guide-map-container {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+    border-radius: 20px;
+    background-color: rgb(232, 220, 200);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.13);
+    overflow: hidden;
+}
+
+/* 지도 위 그라디언트 오버레이 */
+.guide-map-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    background-color: rgba(245, 237, 224, 0.88);
+}
+
+/* 마스코트 (지도 우하단) */
+.guide-map-mascot {
+    position: absolute;
+    bottom: 0;
+    right: 20px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background-color: rgba(200, 64, 48, 0.02);
+}
+
+/* 말풍선 (지도 마스코트 좌상단) */
+.guide-speech-bubble {
+    position: absolute;
+    bottom: 200px;
+    right: 320px;
+    max-width: 360px;
+    background-color: rgba(255, 252, 245, 0.98);
+    border-width: 2px;
+    border-color: rgba(90, 60, 20, 0.15);
+    border-radius: 20px 20px 6px 20px;
+    padding: 20px 24px;
+}
+
+.guide-speech-label {
+    font-size: 12px;
+    color: rgb(177, 74, 46);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+    -unity-font-style: bold;
+}
+
+.guide-speech-text {
+    font-size: 19px;
+    color: rgb(26, 18, 8);
+    white-space: normal;
+}
+
+/* 목적지 카드 (지도 좌하단) */
+.guide-dest-card {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    background-color: rgba(255, 252, 245, 0.96);
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.12);
+    border-radius: 16px;
+    padding: 18px 28px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.guide-dest-divider {
+    width: 1px;
+    height: 40px;
+    background-color: rgba(90, 60, 20, 0.1);
+    margin: 0 12px;
+}
+
+.guide-dest-label {
+    font-size: 13px;
+    color: rgb(138, 112, 96);
+    letter-spacing: 2px;
+}
+
+.guide-dest-value {
+    font-size: 22px;
+    color: rgb(26, 18, 8);
+    -unity-font-style: bold;
+}
+
+.guide-dest-value--accent {
+    color: rgb(177, 74, 46);
+}
+

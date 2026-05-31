@@ -14,7 +14,7 @@ namespace Guideon.Core
     public class MainSceneController : MonoBehaviour
     {
         [Header("Panels")]
-        [SerializeField] private IdlePanel _idlePanel;
+        [SerializeField] private IdleScreenController _idleScreen;
         [Tooltip("Main 씬 패널들. UIManager에 동적 등록되어 Boot 씬의 동명 패널을 덮어쓴다.")]
         [SerializeField] private UIManager.PanelEntry[] _scenePanels;
 
@@ -30,12 +30,14 @@ namespace Guideon.Core
         {
             EventBus.Subscribe<UserTouchedEvent>(OnUserTouched);
             EventBus.Subscribe<IdleTimeoutEvent>(OnIdleTimeout);
+            EventBus.Subscribe<ChatExitRequestedEvent>(OnChatExitRequested);
         }
 
         private void OnDisable()
         {
             EventBus.Unsubscribe<UserTouchedEvent>(OnUserTouched);
             EventBus.Unsubscribe<IdleTimeoutEvent>(OnIdleTimeout);
+            EventBus.Unsubscribe<ChatExitRequestedEvent>(OnChatExitRequested);
         }
 
         private void Start()
@@ -46,10 +48,10 @@ namespace Guideon.Core
 
         private void ApplyBootstrapData()
         {
-            if (_idlePanel == null) return;
+            if (_idleScreen == null) return;
             var data = AuthManager.HasInstance ? AuthManager.Instance.BootstrapData : null;
             if (data != null && !string.IsNullOrEmpty(data.SiteName))
-                _idlePanel.SetSiteName(data.SiteName);
+                _idleScreen.SetSiteName(data.SiteName);
         }
 
         // ── IdlePanel → ChatPanel ─────────────────────────
@@ -75,6 +77,11 @@ namespace Guideon.Core
         // ── ChatPanel → IdlePanel ─────────────────────────
 
         private void OnIdleTimeout(IdleTimeoutEvent _)
+        {
+            ReturnToIdleAsync().Forget();
+        }
+
+        private void OnChatExitRequested(ChatExitRequestedEvent _)
         {
             ReturnToIdleAsync().Forget();
         }

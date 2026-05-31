@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Cysharp.Threading.Tasks;
 using Guideon.Core;
 using TMPro;
@@ -11,7 +11,8 @@ namespace Guideon.UI
     /// 페어링 코드 표시 화면.
     /// 6자리 코드를 대형으로 표시 + 만료 카운트다운 + 펄스 애니메이션.
     /// </summary>
-    public class PairingPanel : MonoBehaviour
+    [System.Obsolete("Step 8: UI Toolkit으로 교체됨")]
+        public class PairingPanel : MonoBehaviour
     {
         [Header("Code Display")]
         [SerializeField] private TextMeshProUGUI _codeText;
@@ -126,3 +127,4 @@ namespace Guideon.UI
         }
     }
 }
+

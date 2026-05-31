@@ -1,0 +1,109 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-idle.uss" />
+    <ui:VisualElement name="idle-root" class="screen-root changsal-bg idle-root">
+        <!-- 상단 단청 띠 -->
+        <ui:VisualElement name="dancheong-top" class="dancheong-band" />
+
+        <!-- 헤더 (h=90) -->
+        <ui:VisualElement name="idle-header" class="idle-header">
+            <!-- 로고 -->
+            <ui:VisualElement name="header-logo" class="logo-group">
+                <ui:VisualElement style="width:56px; height:56px; border-radius:50%; background-color:rgba(200,64,48,0.08); border-width:1.5px; border-color:rgb(177,74,46); align-items:center; justify-content:center; margin-right:18px;">
+                    <ui:Label text="G" style="font-size:32px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement>
+                    <ui:Label text="GUIDEON" style="font-size:28px; color:rgb(26,18,8); letter-spacing:2px; -unity-font-style:bold;" />
+                    <ui:Label text="경복궁 AI 안내 시스템" class="logo-sub" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <!-- 운영 정보 칩 -->
+            <ui:VisualElement name="idle-header-chips" class="idle-header-chips" style="gap: 20px;">
+                <ui:VisualElement name="chip-hours" class="chip">
+                    <ui:VisualElement style="flex-direction:column; margin-left:10px;">
+                        <ui:Label text="개방시간" class="chip__label" />
+                        <ui:Label name="chip-hours-val" text="09:00 – 18:00" class="chip__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="chip-weather" class="chip">
+                    <ui:VisualElement style="flex-direction:column; margin-left:10px;">
+                        <ui:Label text="날씨" class="chip__label" />
+                        <ui:Label name="chip-weather-val" text="맑음 · 22°C" class="chip__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="chip-crowd" class="chip">
+                    <ui:VisualElement style="flex-direction:column; margin-left:10px;">
+                        <ui:Label text="혼잡도" class="chip__label" />
+                        <ui:Label name="chip-crowd-val" text="여유" class="chip__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 메인 3분할 -->
+        <ui:VisualElement name="idle-main" class="idle-main">
+
+            <!-- 좌측: 환영 메시지 -->
+            <ui:VisualElement name="idle-welcome" class="idle-welcome">
+                <!-- 위치 뱃지 -->
+                <ui:VisualElement name="location-badge" class="idle-location-badge">
+                    <ui:VisualElement class="idle-location-dot" />
+                    <ui:Label name="location-text" text="경복궁 정문 안내소" class="idle-location-text" />
+                </ui:VisualElement>
+                <!-- 환영 문구 (76px Noto Serif KR 700) -->
+                <ui:Label name="welcome-headline" text="경복궁에&#10;오신 것을&#10;환영합니다" class="idle-welcome-headline" />
+                <!-- 영문 -->
+                <ui:Label text="Welcome to Gyeongbokgung Palace" class="idle-welcome-en" />
+                <!-- 다국어 -->
+                <ui:Label text="景福宮へようこそ · 欢迎来到景福宫" class="idle-welcome-intl" />
+            </ui:VisualElement>
+
+            <!-- 중앙: 마스코트 슬롯 -->
+            <ui:VisualElement name="idle-mascot-area" class="idle-mascot-area">
+                <!-- 후광 원 -->
+                <ui:VisualElement name="mascot-halo" class="idle-mascot-halo" />
+                <!-- 마스코트 슬롯 — Step 9에서 RenderTexture 채움 -->
+                <ui:VisualElement name="mascot-slot" class="mascot-slot" style="position:relative; z-index:1;" />
+            </ui:VisualElement>
+
+            <!-- 우측: CTA -->
+            <ui:VisualElement name="idle-cta-area" class="idle-cta-area">
+                <!-- 터치 CTA 카드 -->
+                <ui:VisualElement name="idle-touch-card" class="idle-touch-card">
+                    <!-- 리플 영역 -->
+                    <ui:VisualElement name="touch-ripple-area" class="touch-ripple-area">
+                        <ui:VisualElement class="touch-ripple touch-ripple--lg" />
+                        <ui:VisualElement class="touch-ripple touch-ripple--md" />
+                        <ui:VisualElement class="touch-ripple touch-ripple--sm" />
+                        <ui:VisualElement class="touch-center-circle" />
+                    </ui:VisualElement>
+                    <!-- 텍스트 -->
+                    <ui:Label text="화면을&#10;터치하세요" class="idle-touch-main" />
+                    <ui:Label text="Touch to Start" class="idle-touch-en" />
+                    <ui:Label text="触摸开始 · タッチして開始" class="idle-touch-intl" />
+                    <!-- 깜빡 도트 -->
+                    <ui:VisualElement class="idle-dots">
+                        <ui:VisualElement name="dot-1" class="idle-dot" style="opacity:1;" />
+                        <ui:VisualElement name="dot-2" class="idle-dot" style="opacity:0.5;" />
+                        <ui:VisualElement name="dot-3" class="idle-dot" style="opacity:0.2;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- QR 보조 카드 -->
+                <ui:VisualElement name="idle-qr-card" class="idle-qr-card">
+                    <!-- QR 아이콘 자리 (C#에서 VectorImage 설정) -->
+                    <ui:VisualElement style="width:52px; height:52px; border-width:2px; border-color:rgb(138,112,96); border-radius:4px; flex-shrink:0; margin-right:18px;" />
+                    <ui:VisualElement>
+                        <ui:Label text="스마트폰으로 계속하기" class="idle-qr-title" />
+                        <ui:Label text="QR 스캔 시 모바일에서 안내를 받을 수 있습니다" class="idle-qr-desc" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 하단 단청 띠 -->
+        <ui:VisualElement name="dancheong-bottom" class="dancheong-band" />
+    </ui:VisualElement>
+</ui:UXML>
+

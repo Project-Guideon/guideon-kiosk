@@ -1,0 +1,90 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-pairing.uss" />
+    <ui:VisualElement name="pairing-root" class="screen-root changsal-bg pairing-root">
+        <!-- 상단 단청 띠 -->
+        <ui:VisualElement name="dancheong-top" class="dancheong-band" />
+
+        <!-- 좌/우 분할 (dancheong-band 높이만큼 flex로 남은 공간) -->
+        <ui:VisualElement name="pairing-content" style="flex: 1; flex-direction: row;">
+
+            <!-- 좌측 안내 패널 680px -->
+            <ui:VisualElement name="pairing-left" class="pairing-left">
+                <!-- 로고 -->
+                <ui:VisualElement name="logo-row" class="logo-group" style="margin-bottom: 24px;">
+                    <ui:VisualElement style="width:48px; height:48px; border-radius:50%; background-color:rgba(200,64,48,0.1); border-width:1.5px; border-color:rgb(177,74,46); align-items:center; justify-content:center; margin-right:16px;">
+                        <ui:Label text="G" style="font-size:28px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                        <ui:Label text="GUIDEON" class="logo-wordmark" />
+                        <ui:Label text="AI 관광 안내 시스템" class="logo-sub" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- 구분선 -->
+                <ui:VisualElement style="width:100%; height:1px; background-color:rgba(90,60,20,0.1); margin-bottom:24px;" />
+
+                <!-- 제목 -->
+                <ui:Label name="pairing-title" text="디바이스 등록" class="pairing-title" />
+
+                <!-- 설명 -->
+                <ui:Label name="pairing-desc" text="이 키오스크를 시스템에 연결하려면&#10;오른쪽의 6자리 인증 코드를&#10;관리자에게 전달해 주세요." class="pairing-desc" />
+
+                <!-- 단계 3개 -->
+                <ui:VisualElement name="pairing-step-1" class="pairing-step-row">
+                    <ui:VisualElement class="pairing-step-num"><ui:Label text="1" class="pairing-step-num-text"/></ui:VisualElement>
+                    <ui:Label text="관리자 웹 페이지에 접속" class="pairing-step-text"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="pairing-step-2" class="pairing-step-row">
+                    <ui:VisualElement class="pairing-step-num"><ui:Label text="2" class="pairing-step-num-text"/></ui:VisualElement>
+                    <ui:Label text="디바이스 관리 → 키오스크 등록" class="pairing-step-text"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="pairing-step-3" class="pairing-step-row">
+                    <ui:VisualElement class="pairing-step-num"><ui:Label text="3" class="pairing-step-num-text"/></ui:VisualElement>
+                    <ui:Label text="아래 코드를 Admin 페이지에 입력" class="pairing-step-text"/>
+                </ui:VisualElement>
+
+                <!-- 만료 안내 -->
+                <ui:Label text="코드는 5분 후 만료되며 자동으로 갱신됩니다" class="pairing-expire-hint" />
+            </ui:VisualElement>
+
+            <!-- 우측 코드 영역 -->
+            <ui:VisualElement name="pairing-right" class="pairing-right">
+                <!-- 코드 카드 -->
+                <ui:VisualElement name="code-card" class="pairing-code-card">
+                    <!-- 상단 단청 띠 (카드 내) -->
+                    <ui:VisualElement style="position:absolute; top:0; left:0; right:0; height:6px; background-color:rgb(200,64,48);" />
+                    <ui:Label text="인증 코드 / Authentication Code" class="pairing-code-label" style="margin-top:16px;" />
+                    <!-- 6자리 박스 -->
+                    <ui:VisualElement name="code-box-row" class="code-box-row">
+                        <ui:VisualElement name="code-box-0" class="code-box"><ui:Label name="digit-0" text="-" class="code-box__digit"/></ui:VisualElement>
+                        <ui:VisualElement name="code-box-1" class="code-box"><ui:Label name="digit-1" text="-" class="code-box__digit"/></ui:VisualElement>
+                        <ui:VisualElement name="code-box-2" class="code-box"><ui:Label name="digit-2" text="-" class="code-box__digit"/></ui:VisualElement>
+                        <ui:VisualElement name="code-box-3" class="code-box"><ui:Label name="digit-3" text="-" class="code-box__digit"/></ui:VisualElement>
+                        <ui:VisualElement name="code-box-4" class="code-box"><ui:Label name="digit-4" text="-" class="code-box__digit"/></ui:VisualElement>
+                        <ui:VisualElement name="code-box-5" class="code-box"><ui:Label name="digit-5" text="-" class="code-box__digit"/></ui:VisualElement>
+                    </ui:VisualElement>
+                    <!-- 타이머 -->
+                    <ui:VisualElement name="timer-group" class="timer-group">
+                        <ui:VisualElement style="flex-direction:row; align-items:center;">
+                            <ui:Label text="만료까지 " class="timer-text" />
+                            <ui:Label name="timer-countdown" text="05:00" class="timer-countdown" />
+                            <ui:Label text=" 남음" class="timer-text" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="timer-track" class="timer-track">
+                            <ui:VisualElement name="timer-fill" class="timer-fill" style="width:100%;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- 하단 안내 -->
+                <ui:Label text="코드 등록 후 키오스크가 자동으로 연결됩니다" class="pairing-footer-hint" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 하단 단청 띠 -->
+        <ui:VisualElement name="dancheong-bottom" class="dancheong-band" />
+    </ui:VisualElement>
+</ui:UXML>
+

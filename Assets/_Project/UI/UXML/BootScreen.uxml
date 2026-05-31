@@ -1,0 +1,56 @@
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-boot.uss" />
+    <ui:VisualElement name="boot-root" class="screen-root changsal-bg boot-root">
+        <!-- 상단 단청 띠 -->
+        <ui:VisualElement name="dancheong-top" class="dancheong-band" />
+
+        <!-- 중앙 콘텐츠 -->
+        <ui:VisualElement name="boot-center" class="boot-center" style="flex: 1; align-items: center; justify-content: center;">
+            <!-- G 로고 -->
+            <ui:VisualElement name="logo-container" class="boot-logo-container">
+                <ui:VisualElement name="logo-ring" class="boot-logo-ring" />
+                <ui:VisualElement name="logo-inner" class="boot-logo-inner">
+                    <ui:Label name="g-letter" text="G" class="boot-g-letter" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 워드마크 -->
+            <ui:VisualElement name="wordmark-group" class="boot-wordmark-group">
+                <ui:Label name="wordmark" text="GUIDE ON" class="boot-wordmark" />
+                <ui:Label name="subtitle" text="관광지 AI 안내 시스템" class="boot-subtitle" />
+                <!-- 다이아몬드 구분선 -->
+                <ui:VisualElement name="divider-row" class="boot-divider-row">
+                    <ui:VisualElement name="line-left" class="boot-divider-line" />
+                    <ui:VisualElement name="diamond" class="boot-diamond" />
+                    <ui:VisualElement name="line-right" class="boot-divider-line" />
+                </ui:VisualElement>
+                <ui:Label name="location" text="경복궁 / Gyeongbokgung Palace" class="boot-location" />
+            </ui:VisualElement>
+
+            <!-- 로딩 -->
+            <ui:VisualElement name="loading-group" class="boot-loading-group">
+                <!-- 스피너는 C#에서 schedule로 회전 애니메이션 처리 -->
+                <ui:VisualElement name="spinner" style="width: 48px; height: 48px; border-radius: 50%; border-width: 4px; border-color: rgb(177,74,46); border-top-color: rgba(177,74,46,0.2);" />
+                <ui:Label name="status-text" text="시스템을 초기화하는 중입니다..." class="boot-status-text" />
+                <ui:VisualElement name="progress-track" class="boot-progress-track">
+                    <ui:VisualElement name="progress-fill" class="boot-progress-fill" style="width: 0%;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- 하단 정보 -->
+        <ui:VisualElement name="footer" class="boot-footer">
+            <ui:Label text="KIOSK-MAIN-01" class="boot-footer-text" />
+            <ui:Label text="·" class="boot-footer-text" />
+            <ui:Label name="kiosk-location" text="경복궁 정문 안내소" class="boot-footer-text" />
+            <ui:Label text="·" class="boot-footer-text" />
+            <ui:Label text="v1.0.0" class="boot-footer-text" />
+        </ui:VisualElement>
+
+        <!-- 하단 단청 띠 -->
+        <ui:VisualElement name="dancheong-bottom" class="dancheong-band" />
+    </ui:VisualElement>
+</ui:UXML>
+

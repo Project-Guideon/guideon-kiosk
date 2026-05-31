@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +8,8 @@ namespace Guideon.UI
     /// 채팅 버블. 사용자 / AI 따라 색상과 정렬이 달라진다.
     /// ChatPanel의 ScrollRect Content 아래 동적으로 생성됨.
     /// </summary>
-    public class MessageBubble : MonoBehaviour
+    [System.Obsolete("Step 8: UI Toolkit으로 교체됨")]
+        public class MessageBubble : MonoBehaviour
     {
         public enum Sender { User, Ai }
 

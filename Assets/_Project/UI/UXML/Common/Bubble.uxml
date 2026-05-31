@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- 대화 버블 템플릿 — C#에서 class 추가로 user/ai 분기 -->
+    <!-- sender == User: class="bubble-user", sender == Ai: class="bubble-ai" -->
+    <ui:VisualElement name="bubble-root" class="bubble-user">
+        <ui:Label name="bubble-label" class="bubble__label" text="내 질문" />
+        <ui:Label name="bubble-text" class="bubble__text" text="" />
+    </ui:VisualElement>
+</ui:UXML>
