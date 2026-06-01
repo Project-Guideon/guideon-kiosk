@@ -29,10 +29,17 @@ namespace Guideon.Mascot
         /// <summary>UI Toolkit VisualElement.backgroundImage에 주입할 텍스처.</summary>
         public RenderTexture Texture { get; private set; }
 
+        /// <summary>
+        /// 현재 씬의 MascotStage 인스턴스.
+        /// 화면 컨트롤러가 Inspector 배선 없이 텍스처를 가져갈 때 사용.
+        /// </summary>
+        public static MascotStage Active { get; private set; }
+
         // ── 생명주기 ─────────────────────────────────────────
 
         private void Awake()
         {
+            Active = this;
             CreateRenderTexture();
         }
 
@@ -48,6 +55,7 @@ namespace Guideon.Mascot
 
         private void OnDestroy()
         {
+            if (Active == this) Active = null;
             if (Texture != null)
             {
                 Texture.Release();

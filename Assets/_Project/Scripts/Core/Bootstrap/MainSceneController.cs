@@ -49,10 +49,7 @@ namespace Guideon.Core
         {
             ApplyBootstrapData();
             UIManager.Instance.ShowOnly(UIManager.Panel.Idle);
-
-            // RenderTexture를 Idle 화면 mascot-slot에 바인딩
-            if (_mascotStage != null)
-                _idleScreen?.SetMascotTexture(_mascotStage.Texture);
+            // 텍스처 바인딩은 화면 컨트롤러의 OnBindUI에서 MascotStage.Active 경유로 자동 처리됨
         }
 
         private void ApplyBootstrapData()
@@ -76,12 +73,8 @@ namespace Guideon.Core
 
             await UIManager.Instance.TransitionToAsync(UIManager.Panel.Chat);
 
-            // Chat 화면이 활성화된 직후 RenderTexture 바인딩 + Greeting 재생
-            if (_mascotStage != null)
-            {
-                _chatScreen?.SetMascotTexture(_mascotStage.Texture);
-                _mascotStage.PlayGreeting();
-            }
+            // Greeting 재생 (텍스처 바인딩은 ChatScreenController.OnBindUI에서 자동 처리)
+            MascotStage.Active?.PlayGreeting();
 
             await ChatManager.Instance.CreateSessionAsync();
             IdleTimeoutManager.Instance.Begin();
@@ -108,8 +101,8 @@ namespace Guideon.Core
             ChatManager.Instance.EndSession();
             await UIManager.Instance.TransitionToAsync(UIManager.Panel.Idle);
 
-            // Idle 복귀 시 마스코트 포즈 리셋
-            _mascotStage?.ResetToIdle();
+            // Idle 복귀 시 마스코트 포즈 리셋 (MascotStage.Active로 Inspector 배선 불필요)
+            MascotStage.Active?.ResetToIdle();
         }
     }
 }

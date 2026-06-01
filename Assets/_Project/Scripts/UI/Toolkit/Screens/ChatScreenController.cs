@@ -78,6 +78,11 @@ namespace Guideon.UI
             SetMicState(MascotState.Idle);
 
             _waveformJob = Root?.schedule.Execute(() => _waveform?.SetLevel(_rmsLevel)).Every(32);
+
+            // 패널이 켜질 때마다 마스코트 텍스처 재바인딩
+            // (UIDocument는 활성화 시 UXML에서 비주얼 트리를 새로 복제하므로 매번 주입 필요)
+            if (Mascot.MascotStage.Active != null)
+                SetMascotTexture(Mascot.MascotStage.Active.Texture);
         }
 
         protected override void SubscribeEvents()
