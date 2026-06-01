@@ -117,6 +117,18 @@ namespace Guideon.UI
             return new Vector2(rect.x, rect.y);
         }
 
+        /// <summary>
+        /// RenderTexture를 mascot-slot 배경에 주입.
+        /// MascotStage 초기화 후 MainSceneController에서 호출.
+        /// </summary>
+        public void SetMascotTexture(UnityEngine.RenderTexture rt)
+        {
+            var slot = Q("mascot-slot");
+            if (slot == null || rt == null) return;
+            slot.style.backgroundImage = new UnityEngine.UIElements.StyleBackground(
+                UnityEngine.UIElements.Background.FromRenderTexture(rt));
+        }
+
         // ── 애니메이션 ─────────────────────────────────────────────
 
         private void StartAnimations()

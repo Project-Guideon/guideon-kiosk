@@ -442,6 +442,18 @@ namespace Guideon.UI
             _bubbleList?.Clear();
         }
 
+        /// <summary>
+        /// RenderTexture를 mascot-slot 배경에 주입.
+        /// Chat 화면 전환 완료 후 MainSceneController에서 호출.
+        /// </summary>
+        public void SetMascotTexture(UnityEngine.RenderTexture rt)
+        {
+            var slot = Q("mascot-slot");
+            if (slot == null || rt == null) return;
+            slot.style.backgroundImage = new UnityEngine.UIElements.StyleBackground(
+                UnityEngine.UIElements.Background.FromRenderTexture(rt));
+        }
+
         // ── 마스코트 타이핑 점 ──────────────────────────────────
 
         private void SetMascotDotsVisible(bool on)
