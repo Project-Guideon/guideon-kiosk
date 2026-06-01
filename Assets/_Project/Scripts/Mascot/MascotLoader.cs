@@ -103,6 +103,8 @@ namespace Guideon.Mascot
                 _modelRoot = instance.Root;
                 SetupModel(instance.Root);
 
+                // 로드 완료 → 화면 컨트롤러가 RT 재주입(repaint 강제)
+                EventBus.Publish(new MascotLoadedEvent());
                 Debug.Log($"[MascotLoader] 로드 완료: {name}");
             }
             catch (Exception e)

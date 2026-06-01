@@ -91,6 +91,7 @@ namespace Guideon.UI
             EventBus.Subscribe<SttResultEvent>(OnSttResult);
             EventBus.Subscribe<MascotStateEvent>(OnMascotState);
             EventBus.Subscribe<ChatNoticeEvent>(OnChatNotice);
+            EventBus.Subscribe<MascotLoadedEvent>(OnMascotLoaded);
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRecordingStateChanged += OnRecordingStateChanged;
         }
@@ -101,8 +102,15 @@ namespace Guideon.UI
             EventBus.Unsubscribe<SttResultEvent>(OnSttResult);
             EventBus.Unsubscribe<MascotStateEvent>(OnMascotState);
             EventBus.Unsubscribe<ChatNoticeEvent>(OnChatNotice);
+            EventBus.Unsubscribe<MascotLoadedEvent>(OnMascotLoaded);
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRecordingStateChanged -= OnRecordingStateChanged;
+        }
+
+        private void OnMascotLoaded(MascotLoadedEvent _)
+        {
+            if (Mascot.MascotStage.Active != null)
+                SetMascotTexture(Mascot.MascotStage.Active.Texture);
         }
 
         protected override void OnDisable()

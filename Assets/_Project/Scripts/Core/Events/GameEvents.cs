@@ -10,6 +10,9 @@ namespace Guideon.Core
         public MascotState State;
     }
 
+    /// <summary>GLB 모델 로드 완료 신호. 화면 컨트롤러가 RT를 재주입해 repaint를 강제한다.</summary>
+    public struct MascotLoadedEvent { }
+
     // ── STT (음성 인식) ───────────────────────────────────
     public struct SttResultEvent
     {

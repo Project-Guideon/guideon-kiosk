@@ -86,6 +86,22 @@ namespace Guideon.UI
             _animJob?.Resume();
         }
 
+        protected override void SubscribeEvents()
+        {
+            Core.EventBus.Subscribe<Core.MascotLoadedEvent>(OnMascotLoaded);
+        }
+
+        protected override void UnsubscribeEvents()
+        {
+            Core.EventBus.Unsubscribe<Core.MascotLoadedEvent>(OnMascotLoaded);
+        }
+
+        private void OnMascotLoaded(Core.MascotLoadedEvent _)
+        {
+            if (Mascot.MascotStage.Active != null)
+                SetMascotTexture(Mascot.MascotStage.Active.Texture);
+        }
+
         // ── Public API ────────────────────────────────────────────
 
         public void SetSiteName(string siteName)
