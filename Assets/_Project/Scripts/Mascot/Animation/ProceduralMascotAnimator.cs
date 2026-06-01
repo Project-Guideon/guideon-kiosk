@@ -1,3 +1,4 @@
+using Guideon.Core;
 using UnityEngine;
 
 namespace Guideon.Mascot

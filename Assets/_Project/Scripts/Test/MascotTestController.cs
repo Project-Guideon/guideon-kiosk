@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
-using UniGLTF;
+using Guideon.Core;
 using Guideon.Mascot;
+using UniGLTF;
+using UnityEngine;
 
 namespace Guideon.Test
 {

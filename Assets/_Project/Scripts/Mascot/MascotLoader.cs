@@ -1,6 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Guideon.Mascot;
+using Guideon.Core;
 using UniGLTF;
 using UnityEngine;
 using UnityEngine.Networking;
