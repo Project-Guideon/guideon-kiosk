@@ -25,6 +25,7 @@ namespace Guideon.Mascot
 
         private RuntimeGltfInstance _currentInstance;
         private ProceduralMascotAnimator _animator;
+        private GameObject _modelRoot; // LateUpdate 트랜스폼 라이브 적용용
 
         public ProceduralMascotAnimator Animator => _animator;
         public bool IsLoaded => _currentInstance != null;
@@ -32,6 +33,18 @@ namespace Guideon.Mascot
         private void Start()
         {
             LoadDefaultAsync().Forget();
+        }
+
+        /// <summary>
+        /// Play 중 Inspector에서 _rotation/_positionOffset/_scale을 바꾸면 즉시 반영.
+        /// ProceduralMascotAnimator는 본(localRotation)만 조작하므로 루트 트랜스폼과 무충돌.
+        /// </summary>
+        private void LateUpdate()
+        {
+            if (_modelRoot == null) return;
+            _modelRoot.transform.localPosition = _positionOffset;
+            _modelRoot.transform.localRotation = Quaternion.Euler(_rotation);
+            _modelRoot.transform.localScale    = Vector3.one * _scale;
         }
 
         // ── Public API ──────────────────────────────────────
@@ -67,6 +80,7 @@ namespace Guideon.Mascot
         public void SwapMascot(GameObject newModel)
         {
             DestroyCurrentInstance();
+            _modelRoot = newModel;
             SetupModel(newModel);
         }
 
@@ -86,6 +100,7 @@ namespace Guideon.Mascot
 
                 DestroyCurrentInstance();
                 _currentInstance = instance;
+                _modelRoot = instance.Root;
                 SetupModel(instance.Root);
 
                 Debug.Log($"[MascotLoader] 로드 완료: {name}");
@@ -126,6 +141,7 @@ namespace Guideon.Mascot
                 Destroy(_currentInstance.Root);
                 _currentInstance = null;
                 _animator = null;
+                _modelRoot = null;
             }
         }
     }
