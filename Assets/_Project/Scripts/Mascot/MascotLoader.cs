@@ -24,6 +24,58 @@ namespace Guideon.Mascot
         [SerializeField] private Vector3 _rotation = Vector3.zero;
         [SerializeField] private float _scale = 1f;
 
+        // ── 부트 선행 캐시 (static) ─────────────────────────
+        /// <summary>Boot 씬에서 미리 받아둔 GLB 바이트. null이면 런타임 다운로드.</summary>
+        public static byte[] CachedModelBytes { get; private set; }
+        public static string CachedModelName  { get; private set; }
+
+        /// <summary>
+        /// BootSceneController에서 호출.
+        /// URL 있으면 다운로드, 없으면 로컬 파일 읽어서 캐싱.
+        /// 실패해도 Main 씬에서 fallback 재시도 가능 — 예외 throw 하지 않음.
+        /// </summary>
+        public static async UniTask<bool> PreloadBytesAsync(string url)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(url))
+                {
+                    using var req = UnityWebRequest.Get(url);
+                    await req.SendWebRequest();
+                    if (req.result != UnityWebRequest.Result.Success)
+                    {
+                        Debug.LogWarning($"[MascotLoader] 선행 다운로드 실패: {req.error}");
+                        return false;
+                    }
+                    CachedModelBytes = req.downloadHandler.data;
+                    CachedModelName  = "mascot_server";
+                    Debug.Log($"[MascotLoader] 선행 캐싱 완료 (서버) — {CachedModelBytes.Length} bytes");
+                    return true;
+                }
+                else
+                {
+                    // 로컬 fallback 바이트 캐싱
+                    string path = System.IO.Path.Combine(
+                        Application.dataPath, "_Project/Art/Models/Mascot/mascot.glb");
+                    if (!System.IO.File.Exists(path))
+                    {
+                        Debug.LogWarning($"[MascotLoader] 로컬 GLB 없음: {path}");
+                        return false;
+                    }
+                    CachedModelBytes = System.IO.File.ReadAllBytes(path);
+                    CachedModelName  = "mascot_default";
+                    Debug.Log($"[MascotLoader] 선행 캐싱 완료 (로컬) — {CachedModelBytes.Length} bytes");
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[MascotLoader] 선행 캐싱 예외: {e.Message}");
+                return false;
+            }
+        }
+
+        // ── 인스턴스 필드 ────────────────────────────────────
         private RuntimeGltfInstance _currentInstance;
         private ProceduralMascotAnimator _animator;
         private GameObject _modelRoot; // LateUpdate 트랜스폼 라이브 적용용
@@ -37,22 +89,30 @@ namespace Guideon.Mascot
         }
 
         /// <summary>
-        /// 부트스트랩에서 받은 서버 URL로 로드 시도. 없으면 로컬 fallback.
+        /// 부트에서 캐싱된 바이트가 있으면 바로 파싱, 없으면 다운로드 후 파싱.
         /// </summary>
         private async UniTaskVoid LoadMascotAsync()
         {
+            if (CachedModelBytes != null)
+            {
+                Debug.Log("[MascotLoader] 캐시 바이트로 파싱 — 다운로드 생략");
+                await LoadBytesAsync(CachedModelBytes, CachedModelName ?? "mascot_cached");
+                return;
+            }
+
+            // 캐시 없음 → 직접 다운로드 (부트 미실행 시 fallback)
             string url = AuthManager.HasInstance
                 ? AuthManager.Instance.BootstrapData?.Mascot?.ModelUrl
                 : null;
 
             if (!string.IsNullOrEmpty(url))
             {
-                Debug.Log($"[MascotLoader] 서버 모델 로드: {url}");
+                Debug.Log($"[MascotLoader] 캐시 없음 → 서버 모델 직접 로드: {url}");
                 await LoadFromUrlAsync(url);
             }
             else
             {
-                Debug.Log("[MascotLoader] 서버 URL 없음 → 로컬 fallback");
+                Debug.Log("[MascotLoader] 캐시 없음 → 로컬 fallback");
                 await LoadDefaultAsync();
             }
         }
