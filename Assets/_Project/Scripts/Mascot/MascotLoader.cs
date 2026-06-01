@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Guideon.Core;
+using Guideon.Network;
 using UniGLTF;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -32,7 +33,28 @@ namespace Guideon.Mascot
 
         private void Start()
         {
-            LoadDefaultAsync().Forget();
+            LoadMascotAsync().Forget();
+        }
+
+        /// <summary>
+        /// 부트스트랩에서 받은 서버 URL로 로드 시도. 없으면 로컬 fallback.
+        /// </summary>
+        private async UniTaskVoid LoadMascotAsync()
+        {
+            string url = AuthManager.HasInstance
+                ? AuthManager.Instance.BootstrapData?.Mascot?.ModelUrl
+                : null;
+
+            if (!string.IsNullOrEmpty(url))
+            {
+                Debug.Log($"[MascotLoader] 서버 모델 로드: {url}");
+                await LoadFromUrlAsync(url);
+            }
+            else
+            {
+                Debug.Log("[MascotLoader] 서버 URL 없음 → 로컬 fallback");
+                await LoadDefaultAsync();
+            }
         }
 
         /// <summary>
