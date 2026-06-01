@@ -104,6 +104,15 @@ namespace Guideon.Mascot
             model.transform.localRotation = Quaternion.Euler(_rotation);
             model.transform.localScale = Vector3.one * _scale;
 
+            // GLB 로드 시 생성된 모든 오브젝트를 부모와 같은 레이어로 맞춤
+            // (MascotCamera가 Mascot 레이어만 렌더링하기 때문에 필수)
+            int layer = parent.gameObject.layer;
+            if (layer > 0)
+            {
+                foreach (var t in model.GetComponentsInChildren<Transform>(true))
+                    t.gameObject.layer = layer;
+            }
+
             var rig = BoneRig.Build(model);
             _animator = model.AddComponent<ProceduralMascotAnimator>();
             _animator.Initialize(rig);
