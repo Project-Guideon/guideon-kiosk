@@ -46,56 +46,79 @@ namespace Guideon.Mascot
             {
                 string n = t.name.ToLower();
 
-                // Hips
-                if (rig.Hips == null && (n.Contains("hip") || n == "pelvis"))
+                // Hips — Tripo/Blender/Mixamo 대응
+                if (rig.Hips == null && (n.Contains("hip") || n == "pelvis" || n == "mixamorig:hips"))
                     rig.Hips = t;
 
-                // Spine chain — Tripo/Blender 다양한 네이밍 대응
-                if (rig.Spine == null && (n == "spine" || n == "spine0" || n == "spine_01" || n == "spine.001" || n.StartsWith("spine") && n.Length <= 8))
+                // Spine chain — Tripo/Blender/Mixamo 다양한 네이밍 대응
+                if (rig.Spine == null && (n == "spine" || n == "spine0" || n == "spine_01" || n == "spine.001"
+                    || (n.StartsWith("spine") && n.Length <= 8) || n == "mixamorig:spine"))
                     rig.Spine = t;
-                else if (rig.Spine1 == null && (n == "spine1" || n == "spine01" || n == "spine_02" || n == "spine.002"))
+                else if (rig.Spine1 == null && (n == "spine1" || n == "spine01" || n == "spine_02" || n == "spine.002"
+                    || n == "mixamorig:spine1"))
                     rig.Spine1 = t;
-                else if (rig.Spine2 == null && (n == "spine2" || n == "spine02" || n == "chest" || n == "spine.003" || n == "spine_03" || n == "upper_body" || n == "torso"))
+                else if (rig.Spine2 == null && (n == "spine2" || n == "spine02" || n == "chest" || n == "spine.003"
+                    || n == "spine_03" || n == "upper_body" || n == "torso" || n == "mixamorig:spine2"))
                     rig.Spine2 = t;
 
-                // Head/Neck
-                if (rig.Neck == null && n.Contains("neck"))
+                // Head/Neck — Mixamo 포함
+                if (rig.Neck == null && (n.Contains("neck") || n == "mixamorig:neck"))
                     rig.Neck = t;
-                if (rig.Head == null && n.Contains("head") && !n.Contains("headtop"))
+                if (rig.Head == null && (n.Contains("head") && !n.Contains("headtop") || n == "mixamorig:head"))
                     rig.Head = t;
                 if (rig.Jaw == null && (n.Contains("jaw") || n.Contains("chin")))
                     rig.Jaw = t;
 
-                // Left arm — l_upperarm / upper_arm.l / shoulder_l / leftarm 등 대응
-                if (rig.LeftUpperArm == null && (n.Contains("l_upperarm") || n.Contains("leftupper") || n.Contains("upper_arm.l") || n.Contains("l_arm") || n.Contains("shoulder.l") || n.Contains("l_shoulder") || n == "leftarm"))
+                // Left arm — Tripo / Blender / Mixamo (mixamorig:LeftArm 등)
+                if (rig.LeftUpperArm == null && (n.Contains("l_upperarm") || n.Contains("leftupper")
+                    || n.Contains("upper_arm.l") || n.Contains("l_arm") || n.Contains("shoulder.l")
+                    || n.Contains("l_shoulder") || n == "leftarm" || n == "mixamorig:leftarm"))
                     rig.LeftUpperArm = t;
-                if (rig.LeftForearm == null && (n.Contains("l_forearm") || n.Contains("leftforearm") || n.Contains("forearm.l") || n.Contains("l_elbow") || n == "leftforearm"))
+                if (rig.LeftForearm == null && (n.Contains("l_forearm") || n.Contains("leftforearm")
+                    || n.Contains("forearm.l") || n.Contains("l_elbow") || n == "leftforearm"
+                    || n == "mixamorig:leftforearm"))
                     rig.LeftForearm = t;
-                if (rig.LeftHand == null && (n.Contains("l_hand") || n.Contains("lefthand") || n.Contains("hand.l")))
+                if (rig.LeftHand == null && (n.Contains("l_hand") || n.Contains("lefthand")
+                    || n.Contains("hand.l") || n == "mixamorig:lefthand"))
                     rig.LeftHand = t;
 
-                // Right arm
-                if (rig.RightUpperArm == null && (n.Contains("r_upperarm") || n.Contains("rightupper") || n.Contains("upper_arm.r") || n.Contains("r_arm") || n.Contains("shoulder.r") || n.Contains("r_shoulder") || n == "rightarm"))
+                // Right arm — Mixamo 포함
+                if (rig.RightUpperArm == null && (n.Contains("r_upperarm") || n.Contains("rightupper")
+                    || n.Contains("upper_arm.r") || n.Contains("r_arm") || n.Contains("shoulder.r")
+                    || n.Contains("r_shoulder") || n == "rightarm" || n == "mixamorig:rightarm"))
                     rig.RightUpperArm = t;
-                if (rig.RightForearm == null && (n.Contains("r_forearm") || n.Contains("rightforearm") || n.Contains("forearm.r") || n.Contains("r_elbow") || n == "rightforearm"))
+                if (rig.RightForearm == null && (n.Contains("r_forearm") || n.Contains("rightforearm")
+                    || n.Contains("forearm.r") || n.Contains("r_elbow") || n == "rightforearm"
+                    || n == "mixamorig:rightforearm"))
                     rig.RightForearm = t;
-                if (rig.RightHand == null && (n.Contains("r_hand") || n.Contains("righthand") || n.Contains("hand.r")))
+                if (rig.RightHand == null && (n.Contains("r_hand") || n.Contains("righthand")
+                    || n.Contains("hand.r") || n == "mixamorig:righthand"))
                     rig.RightHand = t;
 
-                // Left leg
-                if (rig.LeftThigh == null && (n.Contains("l_thigh") || n.Contains("leftupperleg") || n.Contains("thigh.l") || n.Contains("l_leg") || n.Contains("upper_leg.l")))
+                // Left leg — Mixamo: mixamorig:LeftUpLeg / LeftLeg / LeftFoot
+                if (rig.LeftThigh == null && (n.Contains("l_thigh") || n.Contains("leftupperleg")
+                    || n.Contains("thigh.l") || n.Contains("l_leg") || n.Contains("upper_leg.l")
+                    || n == "mixamorig:leftupleg"))
                     rig.LeftThigh = t;
-                if (rig.LeftCalf == null && (n.Contains("l_calf") || n.Contains("leftlowerleg") || n.Contains("shin.l") || n.Contains("l_knee") || n.Contains("lower_leg.l")))
+                if (rig.LeftCalf == null && (n.Contains("l_calf") || n.Contains("leftlowerleg")
+                    || n.Contains("shin.l") || n.Contains("l_knee") || n.Contains("lower_leg.l")
+                    || n == "mixamorig:leftleg"))
                     rig.LeftCalf = t;
-                if (rig.LeftFoot == null && (n.Contains("l_foot") || n.Contains("leftfoot") || n.Contains("foot.l")))
+                if (rig.LeftFoot == null && (n.Contains("l_foot") || n.Contains("leftfoot")
+                    || n.Contains("foot.l") || n == "mixamorig:leftfoot"))
                     rig.LeftFoot = t;
 
-                // Right leg
-                if (rig.RightThigh == null && (n.Contains("r_thigh") || n.Contains("rightupperleg") || n.Contains("thigh.r") || n.Contains("r_leg") || n.Contains("upper_leg.r")))
+                // Right leg — Mixamo 포함
+                if (rig.RightThigh == null && (n.Contains("r_thigh") || n.Contains("rightupperleg")
+                    || n.Contains("thigh.r") || n.Contains("r_leg") || n.Contains("upper_leg.r")
+                    || n == "mixamorig:rightupleg"))
                     rig.RightThigh = t;
-                if (rig.RightCalf == null && (n.Contains("r_calf") || n.Contains("rightlowerleg") || n.Contains("shin.r") || n.Contains("r_knee") || n.Contains("lower_leg.r")))
+                if (rig.RightCalf == null && (n.Contains("r_calf") || n.Contains("rightlowerleg")
+                    || n.Contains("shin.r") || n.Contains("r_knee") || n.Contains("lower_leg.r")
+                    || n == "mixamorig:rightleg"))
                     rig.RightCalf = t;
-                if (rig.RightFoot == null && (n.Contains("r_foot") || n.Contains("rightfoot") || n.Contains("foot.r")))
+                if (rig.RightFoot == null && (n.Contains("r_foot") || n.Contains("rightfoot")
+                    || n.Contains("foot.r") || n == "mixamorig:rightfoot"))
                     rig.RightFoot = t;
             }
 
