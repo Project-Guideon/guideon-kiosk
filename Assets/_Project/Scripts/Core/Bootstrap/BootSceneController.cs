@@ -77,10 +77,10 @@ namespace Guideon.Core
                     return;
                 }
 
-                // 마스코트 GLB 선행 다운로드 (Main 씬 로딩 중 대기 시간 제거)
+                // 마스코트 GLB 선행 다운로드 (animModelUrl 우선, 없으면 modelUrl, 없으면 로컬 fallback)
                 _bootScreen.SetStatus("마스코트 불러오는 중...", 0.85f);
-                string mascotUrl = Network.AuthManager.Instance.BootstrapData?.Mascot?.ModelUrl;
-                await MascotLoader.PreloadBytesAsync(mascotUrl);
+                var mascotData = Network.AuthManager.Instance.BootstrapData?.Mascot;
+                await MascotLoader.PreloadAsync(mascotData);
 
                 // 하트비트 시작
                 _bootScreen.SetStatus("준비 완료!", 1.0f);
