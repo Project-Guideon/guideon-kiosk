@@ -287,34 +287,14 @@ namespace Guideon.Mascot
                     t.gameObject.layer = layer;
             }
 
-            bool useClipAnim = _instanceHasAnim
-                && instance != null
-                && instance.AnimationClips != null
-                && instance.AnimationClips.Count > 0;
-
-            if (useClipAnim)
-            {
-                // anim GLB 경로: GltfClipAnimator
-                var legacyAnim = model.GetComponent<Animation>();
-                if (legacyAnim == null)
-                {
-                    Debug.LogWarning("[MascotLoader] Animation 컴포넌트 없음 — 수동 추가");
-                    legacyAnim = model.AddComponent<Animation>();
-                }
-                var clipAnimator = model.AddComponent<GltfClipAnimator>();
-                clipAnimator.Initialize(legacyAnim, instance.AnimationClips, _instanceAnimClips);
-                _animator = clipAnimator;
-                _animator.SetState(MascotState.Idle);
-            }
-            else
-            {
-                // 프로시저럴 폴백 경로
-                var rig = BoneRig.Build(model);
-                var proceduralAnimator = model.AddComponent<ProceduralMascotAnimator>();
-                proceduralAnimator.Initialize(rig);
-                _animator = proceduralAnimator;
-                _animator.SetState(MascotState.Idle);
-            }
+            // Tripo retarget 클립이 캐릭터 체형과 맞지 않아 어색하므로
+            // 메쉬/리깅은 anim GLB를 그대로 사용하되 애니메이션은 프로시저럴로 구동.
+            // GltfClipAnimator는 백엔드 애니메이션 품질이 확보되면 재활성화.
+            var rig = BoneRig.Build(model);
+            var proceduralAnimator = model.AddComponent<ProceduralMascotAnimator>();
+            proceduralAnimator.Initialize(rig);
+            _animator = proceduralAnimator;
+            _animator.SetState(MascotState.Idle);
         }
 
         private void DestroyCurrentInstance()
