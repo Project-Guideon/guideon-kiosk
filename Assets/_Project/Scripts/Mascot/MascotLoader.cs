@@ -29,7 +29,7 @@ namespace Guideon.Mascot
         [SerializeField] private Transform _mountPoint;
         [SerializeField] private Vector3 _positionOffset = Vector3.zero;
         [SerializeField] private Vector3 _rotation = Vector3.zero;
-        [SerializeField] private float _scale = 1f;
+        [SerializeField] private float _scale = 1.5f;
 
         // ── 부트 선행 캐시 (static) ─────────────────────────────
 
