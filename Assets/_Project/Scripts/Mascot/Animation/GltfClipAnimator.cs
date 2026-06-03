@@ -39,6 +39,13 @@ namespace Guideon.Mascot
         private MascotState _currentState = MascotState.Idle;
         private bool _initialized;
 
+        // ── 루트 본 모션 억제 ────────────────────────────────────
+        // Tripo retarget 클립에 Hips의 이동·회전이 베이크돼 있을 경우
+        // LateUpdate에서 초기 바인드포즈로 매 프레임 강제 복원.
+        private Transform _rootBone;
+        private Vector3    _rootBoneInitLocalPos;
+        private Quaternion _rootBoneInitLocalRot;
+
         // ── 초기화 ──────────────────────────────────────────────
 
         /// <summary>
@@ -109,7 +116,36 @@ namespace Guideon.Mascot
 
             Debug.Log(resolveLog.ToString());
 
+            // ── 루트 본(Hips) 탐색 — 이동·회전 억제용 ──────────
+            foreach (var t in gameObject.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name.ToLower().Contains("hip") || t.name.ToLower() == "pelvis")
+                {
+                    _rootBone             = t;
+                    _rootBoneInitLocalPos = t.localPosition;
+                    _rootBoneInitLocalRot = t.localRotation;
+                    Debug.Log($"[GltfClipAnimator] 루트 본 고정: \"{t.name}\"");
+                    break;
+                }
+            }
+            if (_rootBone == null)
+                Debug.LogWarning("[GltfClipAnimator] 루트 본(Hips) 탐색 실패 — 루트 모션 억제 비활성");
+
             _initialized = true;
+        }
+
+        // ── 루트 본 모션 억제 (LateUpdate) ──────────────────────
+
+        /// <summary>
+        /// Legacy Animation이 Update 이전에 본에 커브를 적용한 뒤,
+        /// LateUpdate에서 Hips 본을 초기 바인드포즈로 덮어써
+        /// 180° 뒤집힘과 위치 드리프트를 제거한다.
+        /// </summary>
+        private void LateUpdate()
+        {
+            if (_rootBone == null) return;
+            _rootBone.localPosition = _rootBoneInitLocalPos;
+            _rootBone.localRotation = _rootBoneInitLocalRot;
         }
 
         // ── IMascotAnimator ──────────────────────────────────────
