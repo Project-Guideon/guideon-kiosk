@@ -7,7 +7,7 @@ namespace Guideon.Mascot
     /// 본 기반 프로시저럴 애니메이션 시스템.
     /// GLB 모델에 애니메이션 클립 없이도 Idle/Greeting/Listening/Thinking/Speaking 동작 수행.
     /// </summary>
-    public class ProceduralMascotAnimator : MonoBehaviour
+    public class ProceduralMascotAnimator : MonoBehaviour, IMascotAnimator
     {
         [Header("Animation Settings")]
         [SerializeField] private float transitionSpeed = 5f;
