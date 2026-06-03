@@ -90,7 +90,7 @@ namespace Guideon.Editor
             stage.Editor_SetRefs(cam, loader);
 
             // ── 7. 씬에 MainSceneController 자동 연결 시도 ───
-            var allBehaviours = Object.FindObjectsByType<MonoBehaviour>(FindObjectSortMode.None);
+            var allBehaviours = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
             foreach (var mb in allBehaviours)
             {
                 if (mb.GetType().Name == "MainSceneController")
