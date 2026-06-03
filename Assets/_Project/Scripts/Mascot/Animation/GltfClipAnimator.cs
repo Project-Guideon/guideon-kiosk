@@ -14,6 +14,11 @@ namespace Guideon.Mascot
     ///   1. animClips 맵에서 상태 키(idle/speaking/…)로 클립명 조회 → 같은 이름 클립 탐색
     ///   2. 이름 불일치 또는 맵 없음 → canonical 인덱스 순서로 폴백
     ///      (idle=0, speaking=1, listening=2, thinking=3, greeting=4)
+    ///
+    /// 루트 모션 억제:
+    ///   Tripo retarget 클립에 Hip ~ Armature 체인 전체에 이동·회전이 베이크될 수 있음.
+    ///   Initialize()에서 Hip→instance.Root 방향으로 조상 체인을 수집하고,
+    ///   LateUpdate()에서 초기 바인드포즈로 매 프레임 강제 복원한다.
     /// </summary>
     [DisallowMultipleComponent]
     public class GltfClipAnimator : MonoBehaviour, IMascotAnimator
@@ -39,12 +44,10 @@ namespace Guideon.Mascot
         private MascotState _currentState = MascotState.Idle;
         private bool _initialized;
 
-        // ── 루트 본 모션 억제 ────────────────────────────────────
-        // Tripo retarget 클립에 Hips의 이동·회전이 베이크돼 있을 경우
-        // LateUpdate에서 초기 바인드포즈로 매 프레임 강제 복원.
-        private Transform _rootBone;
-        private Vector3    _rootBoneInitLocalPos;
-        private Quaternion _rootBoneInitLocalRot;
+        // ── 루트 모션 억제 — Hip 조상 체인 ──────────────────────
+        // Hip → instance.Root 사이 모든 노드를 잠금.
+        // Hip만 잠그면 Armature 등 그 위 노드가 돌아갈 수 있으므로 체인 전체를 잠근다.
+        private readonly List<(Transform bone, Vector3 initPos, Quaternion initRot)> _lockedChain = new();
 
         // ── 초기화 ──────────────────────────────────────────────
 
@@ -116,36 +119,63 @@ namespace Guideon.Mascot
 
             Debug.Log(resolveLog.ToString());
 
-            // ── 루트 본(Hips) 탐색 — 이동·회전 억제용 ──────────
+            // ── 루트 모션 억제 체인 구성 ────────────────────────
+            // Hip 본을 찾아, Hip → instance.Root(exclusive) 방향으로 거슬러 올라가며
+            // 모든 중간 노드를 잠금 체인에 추가.
+            // 이렇게 하면 Armature 등 Hip 위의 씬 노드가 회전/이동해도 억제된다.
+            Transform hipBone = null;
             foreach (var t in gameObject.GetComponentsInChildren<Transform>(true))
             {
                 if (t.name.ToLower().Contains("hip") || t.name.ToLower() == "pelvis")
                 {
-                    _rootBone             = t;
-                    _rootBoneInitLocalPos = t.localPosition;
-                    _rootBoneInitLocalRot = t.localRotation;
-                    Debug.Log($"[GltfClipAnimator] 루트 본 고정: \"{t.name}\"");
+                    hipBone = t;
                     break;
                 }
             }
-            if (_rootBone == null)
-                Debug.LogWarning("[GltfClipAnimator] 루트 본(Hips) 탐색 실패 — 루트 모션 억제 비활성");
+
+            if (hipBone != null)
+            {
+                var chainLog = new StringBuilder("[GltfClipAnimator] 루트 모션 잠금 체인:\n");
+                var cur = hipBone;
+                while (cur != null && cur != gameObject.transform)
+                {
+                    _lockedChain.Add((cur, cur.localPosition, cur.localRotation));
+                    chainLog.AppendLine(
+                        $"  \"{cur.name}\"  pos={cur.localPosition:F3}  rot=({cur.localEulerAngles:F1})");
+                    cur = cur.parent;
+                }
+                Debug.Log(chainLog.ToString());
+            }
+            else
+            {
+                // Hip 탐색 실패 → instance.Root 직계 자식 전체를 fallback 잠금
+                var chainLog = new StringBuilder(
+                    "[GltfClipAnimator] Hip 탐색 실패 — 직계 자식 fallback 잠금:\n");
+                foreach (Transform child in gameObject.transform)
+                {
+                    _lockedChain.Add((child, child.localPosition, child.localRotation));
+                    chainLog.AppendLine($"  \"{child.name}\"");
+                }
+                Debug.LogWarning(chainLog.ToString());
+            }
 
             _initialized = true;
         }
 
-        // ── 루트 본 모션 억제 (LateUpdate) ──────────────────────
+        // ── 루트 모션 억제 (LateUpdate) ──────────────────────────
 
         /// <summary>
         /// Legacy Animation이 Update 이전에 본에 커브를 적용한 뒤,
-        /// LateUpdate에서 Hips 본을 초기 바인드포즈로 덮어써
-        /// 180° 뒤집힘과 위치 드리프트를 제거한다.
+        /// LateUpdate에서 잠금 체인 전체를 초기 바인드포즈로 덮어쓴다.
+        /// Hip 단독 잠금으로 해결 안 될 경우 Armature 등 상위 노드까지 억제한다.
         /// </summary>
         private void LateUpdate()
         {
-            if (_rootBone == null) return;
-            _rootBone.localPosition = _rootBoneInitLocalPos;
-            _rootBone.localRotation = _rootBoneInitLocalRot;
+            foreach (var (bone, pos, rot) in _lockedChain)
+            {
+                bone.localPosition = pos;
+                bone.localRotation = rot;
+            }
         }
 
         // ── IMascotAnimator ──────────────────────────────────────
