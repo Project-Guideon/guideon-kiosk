@@ -14,6 +14,7 @@ namespace Guideon.Network.Models
         [JsonProperty("answer")]        public string Answer;        // final_text
         [JsonProperty("query")]         public string Query;         // final_text
         [JsonProperty("category")]      public string Category;      // final_text
+        [JsonProperty("map_url")]       public string MapUrl;        // final_text (DIRECTION 카테고리)
         [JsonProperty("language_code")] public string LanguageCode;
         [JsonProperty("confidence")]    public float  Confidence;
         [JsonProperty("is_final")]      public bool   IsFinal;

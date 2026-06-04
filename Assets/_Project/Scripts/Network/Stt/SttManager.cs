@@ -265,8 +265,8 @@ namespace Guideon.Network.Stt
                     break;
 
                 case "final_text":
-                    Debug.Log($"[SttManager] final_text — '{msg.Answer}'");
-                    HandleAiResponse(msg.Answer);
+                    Debug.Log($"[SttManager] final_text — '{msg.Answer}'  category={msg.Category}  map_url={msg.MapUrl}");
+                    HandleAiResponse(msg.Answer, msg.Category, msg.MapUrl);
                     break;
 
                 case "status":
@@ -304,7 +304,7 @@ namespace Guideon.Network.Stt
             EventBus.Publish(new MascotStateEvent { State = MascotState.Thinking });
         }
 
-        private void HandleAiResponse(string answer)
+        private void HandleAiResponse(string answer, string category = null, string mapUrl = null)
         {
             if (string.IsNullOrWhiteSpace(answer)) return;
             _awaitingAnswer = false;
@@ -314,6 +314,8 @@ namespace Guideon.Network.Stt
                 SessionId = ChatManager.HasInstance ? ChatManager.Instance.CurrentSessionId : null,
                 Emotion   = "default",
                 Language  = ConfigManager.Instance.Config.kiosk.language,
+                Category  = category,
+                MapUrl    = mapUrl,
             });
             EventBus.Publish(new MascotStateEvent { State = MascotState.Speaking });
         }

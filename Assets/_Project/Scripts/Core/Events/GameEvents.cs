@@ -42,6 +42,8 @@ namespace Guideon.Core
         public string Emotion;
         public string Language;
         public DisplayHint Display; // null이면 장소 언급 없음
+        public string Category;    // "DIRECTION" 등 서버 카테고리
+        public string MapUrl;      // category==DIRECTION 일 때 카카오맵 URL, 없으면 null
     }
 
     // ── 페어링 ────────────────────────────────────────────
