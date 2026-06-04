@@ -54,6 +54,25 @@ namespace Guideon.UI
             PanelId = UIManager.Panel.Chat;
         }
 
+        // 에디터 테스트 전용: M 키 → DIRECTION mock 이벤트 발사
+        private void Update()
+        {
+#if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                Debug.Log("[ChatScreen] TEST: M키 → DIRECTION mock 이벤트");
+                EventBus.Publish(new ChatResponseEvent
+                {
+                    Answer   = "(테스트) 화장실은 본관 1층에 있어요.",
+                    Category = "DIRECTION",
+                    MapUrl   = "https://map.kakao.com/link/to/본관화장실,37.5796,126.9770",
+                    Emotion  = "default",
+                    Language = "ko-KR",
+                });
+            }
+#endif
+        }
+
         protected override void OnBindUI()
         {
             _bubbleList        = Q("bubble-list");
