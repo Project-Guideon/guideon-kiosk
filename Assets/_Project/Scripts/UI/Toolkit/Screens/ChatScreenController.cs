@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Guideon.Core;
 using Guideon.Network.Stt;
+using Guideon.UI.Map;
 using Guideon.UI.Toolkit;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -34,6 +35,18 @@ namespace Guideon.UI
         private IVisualElementScheduledItem _dotsAnimJob;
         private float _rmsLevel;
         private int   _dotsAnimPhase;
+
+        // ── 지도 모드 ──────────────────────────────────────────
+        private IMapView      _mapView;
+        private string        _lastMapUrl;
+        private bool          _mapOpen;
+        private VisualElement _mapRegion;
+        private VisualElement _mapWebviewArea;
+        private Label         _mapUrlLabel;
+        private Label         _mapSpeechText;
+        private Button        _mapBtnClose;
+        private Button        _btnOpenBrowser;
+        private Button        _btnMap;
 
         protected override void Awake()
         {
@@ -71,6 +84,19 @@ namespace Guideon.UI
             _micButton?.RegisterCallback<ClickEvent>(_ => OnMicClicked());
             _endButton?.RegisterCallback<ClickEvent>(_ => OnEndClicked());
             _endButton?.RegisterCallback<PointerDownEvent>(_ => AnimateEndButtonPress());
+
+            // 지도 패널 요소 바인딩
+            _btnMap         = Q<Button>("btn-map");
+            _mapRegion      = Q("map-region");
+            _mapWebviewArea = Q("map-webview-area");
+            _mapUrlLabel    = Q<Label>("map-url-label");
+            _mapSpeechText  = Q<Label>("map-speech-text");
+            _mapBtnClose    = Q<Button>("btn-map-close");
+            _btnOpenBrowser = Q<Button>("btn-open-browser");
+
+            _btnMap?.RegisterCallback<ClickEvent>(_ => OnMapButtonClicked());
+            _mapBtnClose?.RegisterCallback<ClickEvent>(_ => CloseMap());
+            _btnOpenBrowser?.RegisterCallback<ClickEvent>(_ => OnOpenBrowserClicked());
 
             SetRecording(false);
             SetMascotDotsVisible(false);
@@ -121,6 +147,9 @@ namespace Guideon.UI
             StopPulse();
             if (SttManager.HasInstance)
                 SttManager.Instance.OnRmsLevel -= OnRmsLevel;
+            // 화면을 떠날 때 웹뷰 잔상 반드시 제거
+            _mapView?.Hide();
+            _mapOpen = false;
             base.OnDisable();
         }
 
@@ -282,6 +311,10 @@ namespace Guideon.UI
             AppendBubble(e.Answer, isUser: false);
 
             Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
+
+            // 길안내 응답이면 지도 패널 자동 열기
+            if (e.Category == "DIRECTION" && !string.IsNullOrEmpty(e.MapUrl))
+                OpenMap(e.MapUrl, placeName: null);
         }
 
         private void OnChatNotice(ChatNoticeEvent e)
@@ -465,6 +498,112 @@ namespace Guideon.UI
             if (slot == null || rt == null) return;
             slot.style.backgroundImage = new UnityEngine.UIElements.StyleBackground(
                 UnityEngine.UIElements.Background.FromRenderTexture(rt));
+        }
+
+        // ── 지도 모드 ──────────────────────────────────────────
+
+        /// <summary>
+        /// DIRECTION 응답 수신 또는 btn-map 수동 클릭 시 지도 패널을 연다.
+        /// placeName이 있으면 말풍선에 표시.
+        /// </summary>
+        private void OpenMap(string url, string placeName)
+        {
+            if (string.IsNullOrEmpty(url)) return;
+            _lastMapUrl = url;
+
+            // IMapView 초기화 (최초 1회)
+            if (_mapView == null)
+            {
+                _mapView = MapViewFactory.Create();
+                // 폴백(Placeholder)이면 URL 변경 이벤트를 UI에 연결
+                if (_mapView is PlaceholderMapView placeholder)
+                    placeholder.OnUrlChanged += OnPlaceholderUrlChanged;
+            }
+
+            // 우측 마스코트 패널 숨기고 지도 패널 표시
+            var chatRight = Q("chat-right");
+            if (chatRight != null) chatRight.style.display = DisplayStyle.None;
+            if (_mapRegion != null) _mapRegion.style.display = DisplayStyle.Flex;
+
+            // 마스코트 RT를 작은 슬롯에 재주입
+            var miniSlot = Q("map-mascot-slot");
+            if (miniSlot != null && Mascot.MascotStage.Active?.Texture != null)
+                miniSlot.style.backgroundImage = new StyleBackground(
+                    Background.FromRenderTexture(Mascot.MascotStage.Active.Texture));
+
+            // 말풍선 텍스트
+            if (_mapSpeechText != null)
+                _mapSpeechText.text = string.IsNullOrEmpty(placeName)
+                    ? "안내해 드릴게요!" : $"{placeName}\n안내해 드릴게요!";
+
+            // 웹뷰 영역 사각형 계산 후 웹뷰 열기 (레이아웃 확정 다음 프레임)
+            Root?.schedule.Execute(ShowWebViewAfterLayout).ExecuteLater(32);
+            _mapOpen = true;
+
+            // btn-map 버튼 텍스트 → 닫기 토글
+            if (_btnMap != null) _btnMap.text = "🗺 지도 닫기";
+        }
+
+        private void ShowWebViewAfterLayout()
+        {
+            if (_mapWebviewArea == null || _mapView == null || string.IsNullOrEmpty(_lastMapUrl)) return;
+
+            // UI Toolkit 패널 좌표(포인트) → 스크린 픽셀 변환
+            var panel = Root?.panel;
+            if (panel == null) return;
+
+            Rect panelRect = _mapWebviewArea.worldBound; // 패널 포인트 단위
+            float ppp      = panel.scaledPixelsPerPoint;  // 포인트→픽셀 배율
+
+            // Y 축: UI Toolkit은 top=0이 화면 위, 스크린은 bottom=0이 화면 아래
+            float screenH = Screen.height;
+            var screenRect = new Rect(
+                panelRect.x      * ppp,
+                screenH - (panelRect.yMax * ppp),
+                panelRect.width  * ppp,
+                panelRect.height * ppp
+            );
+
+            _mapView.Show(_lastMapUrl, screenRect);
+        }
+
+        private void CloseMap()
+        {
+            _mapOpen = false;
+            _mapView?.Hide();
+
+            // 우측 마스코트 패널 복원
+            var chatRight = Q("chat-right");
+            if (chatRight != null) chatRight.style.display = DisplayStyle.Flex;
+            if (_mapRegion != null) _mapRegion.style.display = DisplayStyle.None;
+
+            // 메인 마스코트 슬롯 텍스처 재주입
+            if (Mascot.MascotStage.Active != null)
+                SetMascotTexture(Mascot.MascotStage.Active.Texture);
+
+            if (_btnMap != null) _btnMap.text = "🗺 지도 보기";
+        }
+
+        private void OnMapButtonClicked()
+        {
+            if (_mapOpen)
+                CloseMap();
+            else if (!string.IsNullOrEmpty(_lastMapUrl))
+                OpenMap(_lastMapUrl, placeName: null);
+        }
+
+        private void OnOpenBrowserClicked()
+        {
+            if (_mapView is PlaceholderMapView p)
+                p.OpenInBrowser();
+            else if (!string.IsNullOrEmpty(_lastMapUrl))
+                Application.OpenURL(_lastMapUrl);
+        }
+
+        private void OnPlaceholderUrlChanged(string url)
+        {
+            if (_mapUrlLabel != null)
+                _mapUrlLabel.text = url ?? "";
         }
 
         // ── 마스코트 타이핑 점 ──────────────────────────────────
