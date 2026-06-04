@@ -76,6 +76,38 @@
                     <ui:VisualElement class="mascot-emote-dots__dot" />
                 </ui:VisualElement>
             </ui:VisualElement>
+
+            <!-- 지도 패널 (DIRECTION 응답 시 chat-right 대신 표시, 기본 hidden) -->
+            <ui:VisualElement name="map-region" class="map-region">
+                <!-- 헤더: 위치명 + 닫기 버튼 -->
+                <ui:VisualElement name="map-header" class="map-header">
+                    <ui:VisualElement style="flex-direction:row; align-items:center; flex:1;">
+                        <ui:Label text="📍" style="font-size:18px; margin-right:10px;" />
+                        <ui:Label name="map-dest-label" text="길안내" class="map-dest-label" />
+                    </ui:VisualElement>
+                    <ui:Button name="btn-map-close" text="✕ 닫기" class="action-btn action-btn--close" />
+                </ui:VisualElement>
+
+                <!-- 웹뷰 영역: 네이티브 웹뷰(Android)는 이 영역 위에 오버레이됨.
+                     에디터/Windows에서는 map-placeholder(URL 안내)가 보임. -->
+                <ui:VisualElement name="map-webview-area" class="map-webview-area">
+                    <!-- 폴백 플레이스홀더 (에디터 / Android 웹뷰 로딩 전) -->
+                    <ui:VisualElement name="map-placeholder" class="map-placeholder">
+                        <ui:Label text="🗺" style="font-size:48px; margin-bottom:16px;" />
+                        <ui:Label text="카카오맵 길안내" style="font-size:20px; -unity-font-style:bold; color:rgb(74,53,32); margin-bottom:8px;" />
+                        <ui:Label name="map-url-label" text="" class="map-url-label" />
+                        <ui:Button name="btn-open-browser" text="📱 브라우저에서 열기" class="action-btn map-open-btn" style="margin-top:20px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- 마스코트 미니 슬롯: 웹뷰 사각형 밖(하단 스트립)에 배치 -->
+                <ui:VisualElement name="map-mascot-strip" class="map-mascot-strip">
+                    <ui:VisualElement name="map-mascot-slot" class="map-mascot-slot" />
+                    <ui:VisualElement name="map-speech" class="map-speech-bubble">
+                        <ui:Label name="map-speech-text" text="안내해 드릴게요!" class="map-speech-text" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- 하단 단청 띠 -->

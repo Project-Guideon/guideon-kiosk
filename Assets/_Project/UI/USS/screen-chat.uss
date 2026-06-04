@@ -249,4 +249,107 @@
     transition-timing-function: ease-in-out;
 }
 
+/* ── 지도 패널 (DIRECTION 응답 시 chat-right 대신 표시) ── */
 
+.map-region {
+    display: none;                      /* C#에서 OpenMap() 시 Flex로 전환 */
+    flex: 1;
+    flex-direction: column;
+    background-color: rgb(240, 232, 216);
+    border-left-width: 1px;
+    border-left-color: rgba(90, 60, 20, 0.12);
+}
+
+/* 지도 헤더 */
+.map-header {
+    flex-direction: row;
+    align-items: center;
+    height: 56px;
+    padding: 0 20px;
+    background-color: rgba(245, 237, 224, 0.95);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(90, 60, 20, 0.1);
+    flex-shrink: 0;
+}
+
+.map-dest-label {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: rgb(74, 53, 32);
+}
+
+.action-btn--close {
+    background-color: rgba(200, 64, 48, 0.08);
+    color: rgb(177, 74, 46);
+    border-color: rgba(177, 74, 46, 0.3);
+}
+
+/* 웹뷰 영역: 네이티브 오버레이가 덮음. flex:1로 나머지 공간 채움 */
+.map-webview-area {
+    flex: 1;
+    position: relative;
+}
+
+/* 에디터/Windows 폴백 플레이스홀더 */
+.map-placeholder {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(232, 220, 200);
+    padding: 32px;
+}
+
+.map-url-label {
+    font-size: 13px;
+    color: rgba(90, 60, 20, 0.5);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    max-width: 400px;
+}
+
+.map-open-btn {
+    padding: 10px 28px;
+    border-radius: 24px;
+    background-color: rgb(177, 74, 46);
+    color: rgb(255, 255, 255);
+    border-width: 0;
+    font-size: 16px;
+}
+
+/* 하단 마스코트 스트립: 웹뷰 사각형 밖(헤더+스트립 영역에 배치 → 겹침 없음) */
+.map-mascot-strip {
+    flex-direction: row;
+    align-items: center;
+    height: 110px;
+    padding: 8px 20px;
+    background-color: rgba(245, 237, 224, 0.92);
+    border-top-width: 1px;
+    border-top-color: rgba(90, 60, 20, 0.1);
+    flex-shrink: 0;
+}
+
+/* 마스코트 미니 슬롯 (RenderTexture backgroundImage, C#에서 주입) */
+.map-mascot-slot {
+    width: 80px;
+    height: 90px;
+    flex-shrink: 0;
+    background-color: transparent;
+    margin-right: 14px;
+}
+
+/* 말풍선 */
+.map-speech-bubble {
+    flex: 1;
+    background-color: rgb(255, 255, 255);
+    border-radius: 14px;
+    border-width: 1px;
+    border-color: rgba(177, 74, 46, 0.2);
+    padding: 10px 16px;
+}
+
+.map-speech-text {
+    font-size: 15px;
+    color: rgb(74, 53, 32);
+    white-space: normal;
+}
