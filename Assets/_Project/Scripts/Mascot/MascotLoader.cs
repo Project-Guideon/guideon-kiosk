@@ -261,6 +261,13 @@ namespace Guideon.Mascot
                 _modelRoot       = instance.Root;
                 SetupModel(instance.Root, instance);
 
+                if (_animator == null)
+                {
+                    // GltfClipAnimator가 빈 클립(본 이름 불일치)으로 폴백 예약됨 → base 모델 재로드
+                    FallbackToBaseModelAsync().Forget();
+                    return;
+                }
+
                 EventBus.Publish(new MascotLoadedEvent());
                 Debug.Log($"[MascotLoader] 로드 완료: {name}  hasAnim={_instanceHasAnim}");
             }
@@ -293,6 +300,8 @@ namespace Guideon.Mascot
                                    && _instanceHasAnim
                                    && instance.AnimationClips.Count > 0;
 
+            bool fallbackNeeded = false;
+
             if (useClipAnimator)
             {
                 var anim = model.GetComponent<Animation>();
@@ -300,8 +309,19 @@ namespace Guideon.Mascot
                 {
                     var clipAnimator = model.AddComponent<GltfClipAnimator>();
                     clipAnimator.Initialize(anim, instance.AnimationClips, _instanceAnimClips);
-                    _animator = clipAnimator;
-                    Debug.Log($"[MascotLoader] GltfClipAnimator 활성화 — 클립 {instance.AnimationClips.Count}개");
+
+                    if (clipAnimator.HasUsableClips)
+                    {
+                        _animator = clipAnimator;
+                        Debug.Log($"[MascotLoader] GltfClipAnimator 활성화 — 클립 {instance.AnimationClips.Count}개");
+                    }
+                    else
+                    {
+                        // 클립에 데이터 없음(본 이름 불일치) → base 모델로 재로드
+                        Debug.LogWarning("[MascotLoader] GltfClipAnimator 클립 데이터 없음 → base 모델 폴백 예약");
+                        Destroy(clipAnimator);
+                        fallbackNeeded = true;
+                    }
                 }
                 else
                 {
@@ -311,7 +331,7 @@ namespace Guideon.Mascot
                 }
             }
 
-            if (!useClipAnimator)
+            if (!useClipAnimator && !fallbackNeeded)
             {
                 // animModelUrl 없음 / 클립 없음 / 외부 SwapMascot → ProceduralMascotAnimator
                 var rig = BoneRig.Build(model);
@@ -321,7 +341,30 @@ namespace Guideon.Mascot
                 Debug.Log("[MascotLoader] ProceduralMascotAnimator 활성화 (폴백)");
             }
 
-            _animator.SetState(MascotState.Idle);
+            if (!fallbackNeeded)
+                _animator.SetState(MascotState.Idle);
+        }
+
+        /// <summary>
+        /// GltfClipAnimator 클립 불일치 시 base 모델(modelUrl)로 재로드 후 ProceduralMascotAnimator 사용.
+        /// </summary>
+        private async UniTaskVoid FallbackToBaseModelAsync()
+        {
+            var mascot = AuthManager.HasInstance ? AuthManager.Instance.BootstrapData?.Mascot : null;
+            string baseUrl = mascot?.ModelUrl;
+
+            if (!string.IsNullOrEmpty(baseUrl))
+            {
+                Debug.Log($"[MascotLoader] base 모델 재로드: {baseUrl}");
+                _instanceHasAnim   = false;
+                _instanceAnimClips = null;
+                await LoadFromUrlAsync(baseUrl, hasAnim: false);
+            }
+            else
+            {
+                Debug.Log("[MascotLoader] base URL 없음 → 로컬 fallback");
+                await LoadDefaultAsync();
+            }
         }
 
         private void DestroyCurrentInstance()

@@ -44,6 +44,9 @@ namespace Guideon.Mascot
         private MascotState _currentState = MascotState.Idle;
         private bool _initialized;
 
+        /// <summary>클립에 실제 애니메이션 데이터(channel)가 있으면 true. false면 본 이름 불일치 등으로 combine 실패.</summary>
+        public bool HasUsableClips { get; private set; }
+
         // ── 루트 모션 억제 — Hip 조상 체인 ──────────────────────
         // Hip → instance.Root 사이 모든 노드를 잠금.
         // Hip만 잠그면 Armature 등 그 위 노드가 돌아갈 수 있으므로 체인 전체를 잠근다.
@@ -80,7 +83,7 @@ namespace Guideon.Mascot
             // ── 실제 클립명 목록 로그 (검증용) ──
             var sb = new StringBuilder($"[GltfClipAnimator] 로드된 클립 {clips.Count}개:\n");
             for (int i = 0; i < clips.Count; i++)
-                sb.AppendLine($"  [{i}] \"{clips[i].name}\"  wrapMode={clips[i].wrapMode}");
+                sb.AppendLine($"  [{i}] \"{clips[i].name}\"  length={clips[i].length:F2}s  wrapMode={clips[i].wrapMode}");
             Debug.Log(sb.ToString());
 
             // ── 상태→클립명 해석 ──
@@ -162,6 +165,28 @@ namespace Guideon.Mascot
                     chainLog.AppendLine($"  \"{child.name}\"");
                 }
                 Debug.LogWarning(chainLog.ToString());
+            }
+
+            // ── 클립 사용 가능 여부 판정 ─────────────────────────────
+            // combiner.js가 본 이름을 못 찾으면 채널이 0개 → clip.length ≈ 0
+            int usableCount = 0;
+            foreach (var kvp in _stateClipName)
+            {
+                var c = _anim.GetClip(kvp.Value);
+                if (c != null && c.length > 0.01f) usableCount++;
+            }
+            HasUsableClips = usableCount > 0;
+
+            if (!HasUsableClips)
+            {
+                // 본 이름 전체 덤프 → combiner.js 수정 가이드
+                var boneNames = new StringBuilder(
+                    $"[GltfClipAnimator] ⚠ 클립 데이터 없음 ({usableCount}/{_stateClipName.Count}개) — " +
+                    "combiner.js 본 이름 불일치 가능성.\n모델 본 이름 목록:\n");
+                foreach (var t in gameObject.GetComponentsInChildren<Transform>(true))
+                    boneNames.AppendLine($"  \"{t.name}\"");
+                Debug.LogWarning(boneNames.ToString());
+                return; // 이하 초기화 불필요
             }
 
             // ── 전체 본 바인드 포즈 캡처 ────────────────────────────
