@@ -294,11 +294,11 @@ namespace Guideon.Mascot
                     t.gameObject.layer = layer;
             }
 
-            // v4 파이프라인: animModelUrl 있음 → GltfClipAnimator, 없음 → ProceduralMascotAnimator 폴백.
-            // animModelUrl != null → mesh-processor가 자동 병합한 anim GLB → Animation 컴포넌트 + 클립 내장.
-            bool useClipAnimator = instance != null
-                                   && _instanceHasAnim
-                                   && instance.AnimationClips.Count > 0;
+            // combiner.js에 리타게팅 수식(dstBind * inv(srcBind) * srcAnim) 적용 전까지
+            // GltfClipAnimator는 비활성화 — Mixamo 절댓값 회전이 Tripo 좌표계와 불일치.
+            // 백엔드 combiner.js 수정 완료 후 아래 조건 복원:
+            //   bool useClipAnimator = instance != null && _instanceHasAnim && instance.AnimationClips.Count > 0;
+            bool useClipAnimator = false;
 
             bool fallbackNeeded = false;
 
