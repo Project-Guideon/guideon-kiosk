@@ -49,6 +49,11 @@ namespace Guideon.Mascot
         // Hip만 잠그면 Armature 등 그 위 노드가 돌아갈 수 있으므로 체인 전체를 잠근다.
         private readonly List<(Transform bone, Vector3 initPos, Quaternion initRot)> _lockedChain = new();
 
+        // ── 전체 본 바인드 포즈 위치·스케일 (회전 전용 리타게팅) ──────
+        // Mixamo translation/scale 채널이 Tripo 스켈레톤 비율과 달라 본이 폭발하는 문제 방지.
+        // LateUpdate에서 localPosition + localScale을 복원 → localRotation만 애니메이션이 구동.
+        private readonly List<(Transform bone, Vector3 pos, Vector3 scale)> _boneRestPose = new();
+
         // ── 초기화 ──────────────────────────────────────────────
 
         /// <summary>
@@ -159,6 +164,14 @@ namespace Guideon.Mascot
                 Debug.LogWarning(chainLog.ToString());
             }
 
+            // ── 전체 본 바인드 포즈 캡처 ────────────────────────────
+            // Initialize 시점(SetState 호출 전) = 바인드 포즈 → 이 값을 LateUpdate에서 복원.
+            foreach (var t in gameObject.GetComponentsInChildren<Transform>(true))
+            {
+                if (t == transform) continue; // 루트는 MascotLoader.LateUpdate가 관리
+                _boneRestPose.Add((t, t.localPosition, t.localScale));
+            }
+
             _initialized = true;
         }
 
@@ -171,6 +184,15 @@ namespace Guideon.Mascot
         /// </summary>
         private void LateUpdate()
         {
+            // 1. 모든 본: 위치·스케일 바인드 포즈 복원 (translation/scale 채널 무력화)
+            //    → localRotation은 건드리지 않아 클립 회전 애니메이션이 그대로 살아있음
+            foreach (var (bone, pos, scale) in _boneRestPose)
+            {
+                bone.localPosition = pos;
+                bone.localScale    = scale;
+            }
+
+            // 2. Hip 체인: 회전까지 완전 잠금 (루트 모션 억제)
             foreach (var (bone, pos, rot) in _lockedChain)
             {
                 bone.localPosition = pos;
