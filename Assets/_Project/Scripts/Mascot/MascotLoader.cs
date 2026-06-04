@@ -287,13 +287,40 @@ namespace Guideon.Mascot
                     t.gameObject.layer = layer;
             }
 
-            // Tripo retarget 클립이 캐릭터 체형과 맞지 않아 어색하므로
-            // 메쉬/리깅은 anim GLB를 그대로 사용하되 애니메이션은 프로시저럴로 구동.
-            // GltfClipAnimator는 백엔드 애니메이션 품질이 확보되면 재활성화.
-            var rig = BoneRig.Build(model);
-            var proceduralAnimator = model.AddComponent<ProceduralMascotAnimator>();
-            proceduralAnimator.Initialize(rig);
-            _animator = proceduralAnimator;
+            // v4 파이프라인: animModelUrl 있음 → GltfClipAnimator, 없음 → ProceduralMascotAnimator 폴백.
+            // animModelUrl != null → mesh-processor가 자동 병합한 anim GLB → Animation 컴포넌트 + 클립 내장.
+            bool useClipAnimator = instance != null
+                                   && _instanceHasAnim
+                                   && instance.AnimationClips.Count > 0;
+
+            if (useClipAnimator)
+            {
+                var anim = model.GetComponent<Animation>();
+                if (anim != null)
+                {
+                    var clipAnimator = model.AddComponent<GltfClipAnimator>();
+                    clipAnimator.Initialize(anim, instance.AnimationClips, _instanceAnimClips);
+                    _animator = clipAnimator;
+                    Debug.Log($"[MascotLoader] GltfClipAnimator 활성화 — 클립 {instance.AnimationClips.Count}개");
+                }
+                else
+                {
+                    // anim GLB임에도 Animation 컴포넌트 없음 → 프로시저럴 폴백
+                    Debug.LogWarning("[MascotLoader] anim GLB에 Animation 컴포넌트 없음 → 프로시저럴 폴백");
+                    useClipAnimator = false;
+                }
+            }
+
+            if (!useClipAnimator)
+            {
+                // animModelUrl 없음 / 클립 없음 / 외부 SwapMascot → ProceduralMascotAnimator
+                var rig = BoneRig.Build(model);
+                var proceduralAnimator = model.AddComponent<ProceduralMascotAnimator>();
+                proceduralAnimator.Initialize(rig);
+                _animator = proceduralAnimator;
+                Debug.Log("[MascotLoader] ProceduralMascotAnimator 활성화 (폴백)");
+            }
+
             _animator.SetState(MascotState.Idle);
         }
 
