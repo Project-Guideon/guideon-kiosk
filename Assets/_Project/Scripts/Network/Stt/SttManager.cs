@@ -244,6 +244,7 @@ namespace Guideon.Network.Stt
         private void OnWsMessage(byte[] data)
         {
             string json = System.Text.Encoding.UTF8.GetString(data);
+            Debug.Log($"[SttManager] RAW WS ▶ {json}");
             SttMessage msg;
             try { msg = JsonConvert.DeserializeObject<SttMessage>(json); }
             catch { Debug.LogWarning($"[SttManager] JSON 파싱 실패: {json}"); return; }
