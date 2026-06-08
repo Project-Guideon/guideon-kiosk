@@ -89,6 +89,7 @@ Assets/StreamingAssets/config.local.json
 
 # Unity 자동 씬 복구 파일
 Assets/_Recovery/
+Assets/_Recovery.meta
 
 # 환경변수 파일
 .env
