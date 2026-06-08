@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Guideon.Chat;
 using Guideon.Core;
 using Guideon.Network.Stt;
 using Guideon.UI.Map;
@@ -560,6 +561,7 @@ namespace Guideon.UI
             // 웹뷰 영역 사각형 계산 후 웹뷰 열기 (레이아웃 확정 다음 프레임)
             Root?.schedule.Execute(ShowWebViewAfterLayout).ExecuteLater(32);
             _mapOpen = true;
+            IdleTimeoutManager.Instance?.Stop();
 
             // btn-map 버튼 텍스트 → 닫기 토글
             if (_btnMap != null) _btnMap.text = "🗺 지도 닫기";
@@ -592,6 +594,7 @@ namespace Guideon.UI
         {
             _mapOpen = false;
             _mapView?.Hide();
+            IdleTimeoutManager.Instance?.Begin();
 
             // 우측 마스코트 패널 복원
             var chatRight = Q("chat-right");
