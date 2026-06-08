@@ -331,9 +331,11 @@ namespace Guideon.UI
 
             Root?.schedule.Execute(ScrollToBottom).ExecuteLater(50);
 
-            // 길안내 응답이면 지도 패널 자동 열기
+            // 길안내 응답이면 지도 패널 자동 열기, 아니면 열려있던 지도 닫기
             if (e.Category == "DIRECTION" && !string.IsNullOrEmpty(e.MapUrl))
                 OpenMap(e.MapUrl, placeName: null);
+            else if (_mapOpen)
+                CloseMap();
         }
 
         private void OnChatNotice(ChatNoticeEvent e)
