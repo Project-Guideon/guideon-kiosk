@@ -1,4 +1,5 @@
 #if (UNITY_ANDROID && !UNITY_EDITOR) || UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+using Gree.UnityWebView;
 using UnityEngine;
 
 namespace Guideon.UI.Map
