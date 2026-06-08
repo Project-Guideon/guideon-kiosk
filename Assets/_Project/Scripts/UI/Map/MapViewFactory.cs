@@ -7,7 +7,7 @@ namespace Guideon.UI.Map
     {
         public static IMapView Create()
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if (UNITY_ANDROID && !UNITY_EDITOR) || UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
             return new GreeMapView();
 #else
             return new PlaceholderMapView();
