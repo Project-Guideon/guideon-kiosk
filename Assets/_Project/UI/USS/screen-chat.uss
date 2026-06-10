@@ -38,6 +38,12 @@
     justify-content: space-between;
 }
 
+/* 지도 모드: 채팅창 축소 → 지도 영역 확보 */
+.chat-left--map {
+    width: 360px;
+    padding: 32px 24px 28px;
+}
+
 /* ScrollView 대화 영역 */
 .chat-scroll {
     flex: 1;
@@ -317,8 +323,9 @@
     font-size: 16px;
 }
 
-/* 하단 마스코트 스트립: 웹뷰 사각형 밖(헤더+스트립 영역에 배치 → 겹침 없음) */
+/* 하단 마스코트 스트립: 지도 중 숨김 → map-webview-area가 세로 전체 차지 */
 .map-mascot-strip {
+    display: none;
     flex-direction: row;
     align-items: center;
     height: 110px;

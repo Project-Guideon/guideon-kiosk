@@ -542,21 +542,12 @@ namespace Guideon.UI
                     placeholder.OnUrlChanged += OnPlaceholderUrlChanged;
             }
 
-            // 우측 마스코트 패널 숨기고 지도 패널 표시
+            // 채팅창 축소 + 마스코트 패널 숨김 + 지도 패널 표시
+            var chatLeft = Q("chat-left");
+            chatLeft?.AddToClassList("chat-left--map");
             var chatRight = Q("chat-right");
             if (chatRight != null) chatRight.style.display = DisplayStyle.None;
             if (_mapRegion != null) _mapRegion.style.display = DisplayStyle.Flex;
-
-            // 마스코트 RT를 작은 슬롯에 재주입
-            var miniSlot = Q("map-mascot-slot");
-            if (miniSlot != null && Mascot.MascotStage.Active?.Texture != null)
-                miniSlot.style.backgroundImage = new StyleBackground(
-                    Background.FromRenderTexture(Mascot.MascotStage.Active.Texture));
-
-            // 말풍선 텍스트
-            if (_mapSpeechText != null)
-                _mapSpeechText.text = string.IsNullOrEmpty(placeName)
-                    ? "안내해 드릴게요!" : $"{placeName}\n안내해 드릴게요!";
 
             // 웹뷰 영역 사각형 계산 후 웹뷰 열기 (레이아웃 확정 다음 프레임)
             Root?.schedule.Execute(ShowWebViewAfterLayout).ExecuteLater(32);
@@ -596,7 +587,9 @@ namespace Guideon.UI
             _mapView?.Hide();
             IdleTimeoutManager.Instance?.Begin();
 
-            // 우측 마스코트 패널 복원
+            // 채팅창 복원 + 마스코트 패널 복원
+            var chatLeft = Q("chat-left");
+            chatLeft?.RemoveFromClassList("chat-left--map");
             var chatRight = Q("chat-right");
             if (chatRight != null) chatRight.style.display = DisplayStyle.Flex;
             if (_mapRegion != null) _mapRegion.style.display = DisplayStyle.None;
