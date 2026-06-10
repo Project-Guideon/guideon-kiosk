@@ -98,11 +98,15 @@ namespace Guideon.Mascot
             return LoadLocalFallback();
         }
 
+        // GLB 다운로드 타임아웃 (초). nginx static 서빙 전환 후에도 고지연 환경 대비.
+        private const int DownloadTimeoutSeconds = 30;
+
         private static async UniTask<bool> DownloadBytesAsync(string url, string name)
         {
             try
             {
                 using var req = UnityWebRequest.Get(url);
+                req.timeout = DownloadTimeoutSeconds;
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
                 {
@@ -189,6 +193,7 @@ namespace Guideon.Mascot
         {
             Debug.Log($"[MascotLoader] URL 로딩: {url}");
             using var req = UnityWebRequest.Get(url);
+            req.timeout = DownloadTimeoutSeconds;
             await req.SendWebRequest();
 
             if (req.result != UnityWebRequest.Result.Success)
