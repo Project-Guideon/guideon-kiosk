@@ -113,7 +113,12 @@ namespace Guideon.Mascot
                     Debug.LogWarning($"[MascotLoader] 다운로드 실패 ({name}): {req.error}");
                     return false;
                 }
-                CachedModelBytes = req.downloadHandler.data;
+
+                var data = req.downloadHandler.data;
+                if (!IsValidGlb(data, name))
+                    return false;
+
+                CachedModelBytes = data;
                 CachedModelName  = name;
                 return true;
             }
@@ -122,6 +127,38 @@ namespace Guideon.Mascot
                 Debug.LogWarning($"[MascotLoader] 다운로드 예외 ({name}): {e.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// GLB 바이너리 최소 무결성 검증.
+        /// GLB 헤더: magic(4) "glTF" + version(4) + totalLength(4) = 12 bytes.
+        /// 서버 버그 또는 네트워크 문제로 잘린 응답이 오면 파싱 전에 조기 탐지.
+        /// </summary>
+        private static bool IsValidGlb(byte[] data, string name)
+        {
+            if (data == null || data.Length < 12)
+            {
+                Debug.LogWarning($"[MascotLoader] GLB 검증 실패 ({name}): 데이터가 너무 짧음 ({data?.Length ?? 0} bytes)");
+                return false;
+            }
+
+            // magic: 0x46546C67 ("glTF" little-endian)
+            uint magic = (uint)(data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24));
+            if (magic != 0x46546C67u)
+            {
+                Debug.LogWarning($"[MascotLoader] GLB 검증 실패 ({name}): 잘못된 매직 0x{magic:X8} (GLB가 아니거나 FBX일 수 있음)");
+                return false;
+            }
+
+            // totalLength: 헤더 선언 크기와 실제 수신 바이트 비교
+            uint declared = (uint)(data[8] | (data[9] << 8) | (data[10] << 16) | (data[11] << 24));
+            if (data.Length < (int)declared)
+            {
+                Debug.LogWarning($"[MascotLoader] GLB 검증 실패 ({name}): 잘린 다운로드 — 선언 {declared} bytes, 수신 {data.Length} bytes");
+                return false;
+            }
+
+            return true;
         }
 
         private static bool LoadLocalFallback()
@@ -201,9 +238,15 @@ namespace Guideon.Mascot
                 Debug.LogError($"[MascotLoader] 다운로드 실패: {req.error}. 기본 마스코트 유지.");
                 return;
             }
+            var data = req.downloadHandler.data;
+            if (!IsValidGlb(data, "mascot_server"))
+            {
+                Debug.LogError("[MascotLoader] 잘린/손상 GLB 수신 — 기본 마스코트 유지.");
+                return;
+            }
             _instanceHasAnim   = hasAnim;
             _instanceAnimClips = animClips;
-            await LoadBytesAsync(req.downloadHandler.data, "mascot_server");
+            await LoadBytesAsync(data, "mascot_server");
         }
 
         public void SwapMascot(GameObject newModel)
