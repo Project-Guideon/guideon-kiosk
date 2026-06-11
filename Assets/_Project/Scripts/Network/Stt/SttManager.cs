@@ -385,7 +385,7 @@ namespace Guideon.Network.Stt
                 _waitingForDone = true;
 
                 float waited = 0f;
-                while (_waitingForDone && waited < 30f)
+                while (_waitingForDone && waited < 60f)
                 {
                     await UniTask.Yield();
                     waited += Time.deltaTime;
