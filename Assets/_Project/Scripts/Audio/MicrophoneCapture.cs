@@ -1,5 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
+#if UNITY_ANDROID && !UNITY_EDITOR
+using UnityEngine.Android;
+#endif
 
 namespace Guideon.Audio
 {
@@ -30,17 +34,46 @@ namespace Guideon.Audio
             _sampleRate = targetSampleRate;
             _frameSamples = targetSampleRate * frameMs / 1000;
 
-            // 마이크 권한 요청 (Windows Editor에서도 동작)
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Android 6+ (API 23+): 런타임 권한 요청 필요
+            // Application.RequestUserAuthorization은 Android 미지원
+            StartCoroutine(RequestAndStartAndroid());
+#else
             if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
             {
-                StartCoroutine(RequestAndStart(targetSampleRate, frameMs));
+                StartCoroutine(RequestAndStartDesktop());
                 return;
             }
-
             BeginMicrophone();
+#endif
         }
 
-        private System.Collections.IEnumerator RequestAndStart(int targetSampleRate, int frameMs)
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private IEnumerator RequestAndStartAndroid()
+        {
+            if (!Permission.HasUserAuthorizedPermission(Permission.Microphone))
+            {
+                bool done = false;
+                bool granted = false;
+
+                var callbacks = new PermissionCallbacks();
+                callbacks.PermissionGranted += _ => { granted = true; done = true; };
+                callbacks.PermissionDenied += _ => done = true;
+                callbacks.PermissionDeniedAndDontAskAgain += _ => done = true;
+                Permission.RequestUserPermissions(new[] { Permission.Microphone }, callbacks);
+
+                yield return new WaitUntil(() => done);
+
+                if (!granted)
+                {
+                    Debug.LogError("[MicrophoneCapture] 마이크 권한 거부됨 (Android)");
+                    yield break;
+                }
+            }
+            BeginMicrophone();
+        }
+#else
+        private IEnumerator RequestAndStartDesktop()
         {
             yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
             if (Application.HasUserAuthorization(UserAuthorization.Microphone))
@@ -48,6 +81,7 @@ namespace Guideon.Audio
             else
                 Debug.LogError("[MicrophoneCapture] 마이크 권한 거부됨");
         }
+#endif
 
         private void BeginMicrophone()
         {
