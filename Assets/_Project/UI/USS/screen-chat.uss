@@ -47,6 +47,7 @@
 /* ScrollView 대화 영역 */
 .chat-scroll {
     flex: 1;
+    min-height: 0; /* 콘텐츠 높이만큼 늘어나지 않고 가용 공간에 clamp → 내부 세로 스크롤 활성화 */
 }
 
 .chat-bubble-list {
