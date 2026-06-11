@@ -21,14 +21,14 @@
                 </ui:VisualElement>
                 <ui:VisualElement>
                     <ui:Label text="GUIDEON" style="font-size:28px; color:rgb(26,18,8); letter-spacing:2px; -unity-font-style:bold;" />
-                    <ui:Label text="경복궁 AI 안내 시스템" class="logo-sub" />
+                    <ui:Label text="경기대학교 AI 안내 시스템" class="logo-sub" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <!-- 운영 정보 칩 -->
             <ui:VisualElement name="idle-header-chips" class="idle-header-chips" style="gap: 20px;">
                 <ui:VisualElement name="chip-hours" class="chip">
                     <ui:VisualElement style="flex-direction:column; margin-left:10px;">
-                        <ui:Label text="개방시간" class="chip__label" />
+                        <ui:Label text="운영시간" class="chip__label" />
                         <ui:Label name="chip-hours-val" text="09:00 – 18:00" class="chip__value" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -55,14 +55,14 @@
                 <!-- 위치 뱃지 -->
                 <ui:VisualElement name="location-badge" class="idle-location-badge">
                     <ui:VisualElement class="idle-location-dot" />
-                    <ui:Label name="location-text" text="경복궁 정문 안내소" class="idle-location-text" />
+                    <ui:Label name="location-text" text="경기대학교 정문 안내소" class="idle-location-text" />
                 </ui:VisualElement>
                 <!-- 환영 문구 (76px Noto Serif KR 700) -->
-                <ui:Label name="welcome-headline" text="경복궁에&#10;오신 것을&#10;환영합니다" class="idle-welcome-headline" />
+                <ui:Label name="welcome-headline" text="경기대학교에&#10;오신 것을&#10;환영합니다" class="idle-welcome-headline" />
                 <!-- 영문 -->
-                <ui:Label text="Welcome to Gyeongbokgung Palace" class="idle-welcome-en" />
+                <ui:Label text="Welcome to Kyonggi University" class="idle-welcome-en" />
                 <!-- 다국어 -->
-                <ui:Label text="景福宮へようこそ · 欢迎来到景福宫" class="idle-welcome-intl" />
+                <ui:Label text="京畿大学校へようこそ · 欢迎来到京畿大学" class="idle-welcome-intl" />
             </ui:VisualElement>
 
             <!-- 중앙: 마스코트 슬롯 -->
