@@ -2,7 +2,9 @@ using System.IO;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
+#if UNITY_ANDROID && !UNITY_EDITOR
 using UnityEngine.Networking;
+#endif
 
 namespace Guideon.Core
 {
@@ -100,24 +102,21 @@ namespace Guideon.Core
         // ── 내부 ────────────────────────────────────────────
 
         /// <summary>
-        /// StreamingAssets 파일을 UnityWebRequest로 읽는다.
-        /// Android: streamingAssetsPath = "jar:file://..." → System.IO.File 불가, UWR 필수.
+        /// StreamingAssets 파일 읽기.
+        /// Android: JAR URI 방식이라 System.IO.File 불가 → UnityWebRequest 사용.
+        /// 그 외: 일반 파일시스템이므로 File.ReadAllTextAsync 사용 (file:// URI 변환 불필요).
         /// </summary>
         private static async UniTask<string> TryReadStreamingAssetAsync(string filename)
         {
-            string uri = BuildStreamingUri(filename);
+#if UNITY_ANDROID && !UNITY_EDITOR
+            string uri = $"{Application.streamingAssetsPath}/{filename}";
             using var req = UnityWebRequest.Get(uri);
             await req.SendWebRequest();
             return req.result == UnityWebRequest.Result.Success ? req.downloadHandler.text : null;
-        }
-
-        private static string BuildStreamingUri(string filename)
-        {
-#if UNITY_ANDROID && !UNITY_EDITOR
-            // Android: streamingAssetsPath이 이미 "jar:file://..." 포함
-            return $"{Application.streamingAssetsPath}/{filename}";
 #else
-            return $"file://{Path.Combine(Application.streamingAssetsPath, filename).Replace('\\', '/')}";
+            string path = Path.Combine(Application.streamingAssetsPath, filename);
+            if (!File.Exists(path)) return null;
+            return await File.ReadAllTextAsync(path);
 #endif
         }
     }
