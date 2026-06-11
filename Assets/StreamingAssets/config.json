@@ -13,7 +13,7 @@
     "sttSilenceTimeoutMs": 1500,
     "sttSampleRate": 16000,
     "sttFrameMs": 20,
-    "sttVadThreshold": 0.0300000012,
+    "sttVadThreshold": 0.03,
     "sttMaxRecordingSeconds": 8.0,
     "sttNoSpeechExitSeconds": 9.0,
     "ttsEnabled": true,
