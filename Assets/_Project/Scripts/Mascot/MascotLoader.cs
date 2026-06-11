@@ -98,8 +98,8 @@ namespace Guideon.Mascot
             return LoadLocalFallback();
         }
 
-        // GLB 다운로드 타임아웃 (초). nginx static 서빙 전환 후에도 고지연 환경 대비.
-        private const int DownloadTimeoutSeconds = 30;
+        // 한국↔eu-north-1(스톡홀름) WAN 고지연 — 7MB GLB가 느려도 완료되도록 넉넉히.
+        private const int DownloadTimeoutSeconds = 180;
 
         private static async UniTask<bool> DownloadBytesAsync(string url, string name)
         {

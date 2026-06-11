@@ -49,7 +49,18 @@
 /* ScrollView 대화 영역 */
 .chat-scroll {
     flex: 1;
-    min-height: 0; /* 콘텐츠 높이만큼 늘어나지 않고 가용 공간에 clamp → 내부 세로 스크롤 활성화 */
+    min-height: 0;
+}
+
+/* Unity 6 ScrollView 내부 수정:
+   - content-container: flex-shrink:0 → 자연 높이 유지 (viewport 초과 → 스크롤 활성화)
+   - content-viewport: overflow:hidden → 스크롤 translate 시 콘텐츠가 헤더·마이크바 영역으로 시각적으로 비어져 나오는 것 방지 */
+.chat-scroll #unity-content-container {
+    flex-shrink: 0;
+}
+
+.chat-scroll #unity-content-viewport {
+    overflow: hidden;
 }
 
 .chat-bubble-list {

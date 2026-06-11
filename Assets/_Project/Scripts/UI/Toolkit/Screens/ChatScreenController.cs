@@ -83,7 +83,6 @@ namespace Guideon.UI
             _endButton         = Q<Button>("btn-end");
             _micHint           = Q<Label>("mic-hint");
             _mascotDots        = Q("mascot-emote-dots");
-
             // 마이크 버튼에 펄스 링 동적 생성
             if (_micButton != null)
             {
@@ -501,8 +500,10 @@ namespace Guideon.UI
 
         private void ScrollToBottom()
         {
-            if (_chatScroll != null)
-                _chatScroll.verticalScroller.value = _chatScroll.verticalScroller.highValue;
+            if (_chatScroll == null) return;
+            // ScrollTo: 마지막 버블이 보이도록 스크롤. highValue보다 타이밍에 강건함.
+            if (_bubbleList != null && _bubbleList.childCount > 0)
+                _chatScroll.ScrollTo(_bubbleList[_bubbleList.childCount - 1]);
         }
 
         private void ClearBubbles()
