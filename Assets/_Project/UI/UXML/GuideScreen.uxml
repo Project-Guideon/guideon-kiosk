@@ -11,14 +11,14 @@
                 </ui:VisualElement>
                 <ui:VisualElement>
                     <ui:Label text="GUIDEON" class="logo-wordmark" />
-                    <ui:Label text="경복궁 AI 안내" class="logo-sub" />
+                    <ui:Label text="경기대학교 AI 안내" class="logo-sub" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="chat-status-row">
                 <ui:VisualElement class="status-dot" />
                 <ui:Label text="AI 안내 진행 중" style="font-size:17px; color:rgb(74,53,32); margin-right:14px;" />
                 <ui:VisualElement class="chip" style="padding:5px 20px; border-radius:20px; background-color:rgba(200,64,48,0.07);">
-                    <ui:Label name="area-chip" text="근정전 권역" style="font-size:14px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                    <ui:Label name="area-chip" text="종합강의동 권역" style="font-size:14px; color:rgb(177,74,46); -unity-font-style:bold;" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement style="flex-direction:row; align-items:center;">
@@ -38,7 +38,7 @@
                     <!-- 사용자 질문 -->
                     <ui:VisualElement style="align-self:flex-end; max-width:420px;" class="bubble-user">
                         <ui:Label text="내 질문" class="bubble__label" />
-                        <ui:Label name="user-question" text="근정전은 어디에 있나요?" class="bubble__text" style="font-size:24px;" />
+                        <ui:Label name="user-question" text="종합강의동은 어디에 있나요?" class="bubble__text" style="font-size:24px;" />
                     </ui:VisualElement>
                     <!-- 구분 화살표 -->
                     <ui:VisualElement class="divider-arrow" style="margin:24px 0;">
@@ -53,7 +53,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="bubble-ai" style="flex:1;">
                             <ui:Label text="가이온이 · AI 안내" class="bubble__label" style="color:rgb(177,74,46);" />
-                            <ui:Label name="ai-answer" text="근정전은 경복궁 정문에서 북쪽으로 직진하시면 보이십니다." class="bubble__text" style="font-size:22px;" />
+                            <ui:Label name="ai-answer" text="종합강의동은 정문에서 북쪽으로 직진하시면 보이십니다." class="bubble__text" style="font-size:22px;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -69,8 +69,8 @@
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction:row; flex-wrap:wrap;">
                         <ui:Button text="화장실 위치" class="quick-chip" />
-                        <ui:Button text="매표소" class="quick-chip" />
-                        <ui:Button text="오늘 행사" class="quick-chip" />
+                        <ui:Button text="도서관" class="quick-chip" />
+                        <ui:Button text="학사 일정" class="quick-chip" />
                         <ui:Button text="식당 추천" class="quick-chip" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -87,7 +87,7 @@
                     <ui:VisualElement name="map-header" class="guide-map-header">
                         <ui:VisualElement style="flex-direction:row; align-items:center;">
                             <ui:Label text="📍" style="font-size:18px; margin-right:12px;" />
-                            <ui:Label name="map-location" text="경복궁 근정전 권역" style="font-size:18px; color:rgb(26,18,8); -unity-font-style:bold;" />
+                            <ui:Label name="map-location" text="경기대학교 종합강의동 권역" style="font-size:18px; color:rgb(26,18,8); -unity-font-style:bold;" />
                             <ui:Label text=" 현재 위치 기준" style="font-size:15px; color:rgb(138,112,96); margin-left:8px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction:row;">
@@ -100,14 +100,14 @@
                     <!-- 말풍선 -->
                     <ui:VisualElement name="guide-speech" class="guide-speech-bubble">
                         <ui:Label text="가이온이" class="guide-speech-label" />
-                        <ui:Label name="guide-speech-text" text="근정전은 여기서&#10;도보 약 3분 거리예요!" class="guide-speech-text" />
+                        <ui:Label name="guide-speech-text" text="종합강의동은 여기서&#10;도보 약 3분 거리예요!" class="guide-speech-text" />
                     </ui:VisualElement>
                     <!-- 목적지 카드 -->
                     <ui:VisualElement name="dest-card" class="guide-dest-card">
                         <ui:Label text="📍" style="font-size:24px; margin-right:16px;" />
                         <ui:VisualElement>
                             <ui:Label text="목적지" class="guide-dest-label" />
-                            <ui:Label name="dest-name" text="근정전" class="guide-dest-value" />
+                            <ui:Label name="dest-name" text="종합강의동" class="guide-dest-value" />
                         </ui:VisualElement>
                         <ui:VisualElement class="guide-dest-divider" />
                         <ui:VisualElement>

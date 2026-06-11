@@ -16,6 +16,7 @@ namespace Guideon.UI
             public const string Chat    = "Chat";
             public const string Guide   = "Guide";
             public const string Error   = "Error";
+            public const string Admin   = "Admin";
         }
 
         [Serializable]

@@ -58,13 +58,14 @@ namespace Guideon.Editor
             if (panelSettings == null) return;
 
             // 각 스크린 생성
-            CreateScreen<IdleScreenController>("IdleScreen",  "IdleScreen.uxml",  panelSettings);
-            CreateScreen<ChatScreenController>("ChatScreen",  "ChatScreen.uxml",  panelSettings);
-            CreateScreen<GuideScreenController>("GuideScreen","GuideScreen.uxml", panelSettings);
-            CreateScreen<ErrorScreenController>("ErrorScreen","ErrorScreen.uxml", panelSettings);
+            CreateScreen<IdleScreenController>("IdleScreen",   "IdleScreen.uxml",   panelSettings);
+            CreateScreen<ChatScreenController>("ChatScreen",   "ChatScreen.uxml",   panelSettings);
+            CreateScreen<GuideScreenController>("GuideScreen", "GuideScreen.uxml",  panelSettings);
+            CreateScreen<ErrorScreenController>("ErrorScreen", "ErrorScreen.uxml",  panelSettings);
+            CreateScreen<AdminScreenController>("AdminScreen", "AdminScreen.uxml",  panelSettings);
 
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-            Debug.Log("[GUIDEON] Main Scene UI 설정 완료. MainSceneController의 _scenePanels를 Inspector에서 연결하세요.");
+            Debug.Log("[GUIDEON] Main Scene UI 설정 완료. MainSceneController의 _scenePanels와 _adminScreen을 Inspector에서 연결하세요.");
         }
 
         // ── TMP SDF 힌트 ──────────────────────────────────────────
@@ -91,6 +92,7 @@ namespace Guideon.Editor
             CheckAsset<VisualTreeAsset>(UxmlRoot + "ChatScreen.uxml",    issues);
             CheckAsset<VisualTreeAsset>(UxmlRoot + "GuideScreen.uxml",   issues);
             CheckAsset<VisualTreeAsset>(UxmlRoot + "ErrorScreen.uxml",   issues);
+            CheckAsset<VisualTreeAsset>(UxmlRoot + "AdminScreen.uxml",   issues);
             CheckAsset<StyleSheet>("Assets/_Project/UI/USS/tokens.uss",  issues);
             CheckAsset<StyleSheet>("Assets/_Project/UI/USS/common.uss",  issues);
 

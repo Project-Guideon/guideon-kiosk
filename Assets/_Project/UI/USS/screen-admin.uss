@@ -1,0 +1,219 @@
+/* Admin Screen — 관리자 설정 페이지 */
+
+.admin-root {
+    flex-direction: column;
+}
+
+/* ── 메인 영역 ── */
+.admin-main {
+    flex: 1;
+    flex-direction: row;
+    padding: 28px 56px 32px;
+    align-items: flex-start;
+}
+
+/* ── 카드 열 ── */
+.admin-col {
+    flex: 1;
+    flex-direction: column;
+}
+
+/* ── 카드 공통 ── */
+.admin-card {
+    margin-bottom: 20px;
+    padding: 28px 32px;
+}
+
+.admin-card-title {
+    font-size: 12px;
+    color: rgb(177, 74, 46);
+    letter-spacing: 4px;
+    -unity-font-style: bold;
+    margin-bottom: 18px;
+}
+
+/* ── 정보 행 ── */
+.admin-info-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.admin-info-label {
+    font-size: 14px;
+    color: rgb(138, 112, 96);
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.admin-info-value {
+    font-size: 15px;
+    color: rgb(26, 18, 8);
+    -unity-font-style: bold;
+    flex: 1;
+}
+
+/* ── 슬라이더 영역 ── */
+.admin-slider-desc {
+    font-size: 14px;
+    color: rgb(138, 112, 96);
+    white-space: normal;
+    margin-bottom: 14px;
+}
+
+.admin-slider-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.admin-range-label {
+    font-size: 12px;
+    color: rgb(138, 112, 96);
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.admin-slider {
+    flex: 1;
+    height: 48px;
+    margin: 0 4px;
+}
+
+/* 슬라이더 thumb — 터치 친화적 크기 */
+.admin-slider > .unity-base-slider__dragger {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: rgb(177, 74, 46);
+    border-width: 0;
+    margin-top: -4px;
+}
+
+.admin-slider > .unity-base-slider__tracker {
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(90, 60, 20, 0.15);
+    margin-top: 0;
+}
+
+/* ── 스텝 버튼 (±) ── */
+.admin-step-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    font-size: 30px;
+    -unity-font-style: bold;
+    background-color: rgba(200, 64, 48, 0.08);
+    border-width: 1.5px;
+    border-color: rgba(200, 64, 48, 0.25);
+    color: rgb(177, 74, 46);
+    flex-shrink: 0;
+    margin: 0 4px;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+.admin-step-btn:hover {
+    background-color: rgba(200, 64, 48, 0.14);
+}
+
+.admin-step-btn:active {
+    scale: 0.88;
+    background-color: rgba(200, 64, 48, 0.22);
+}
+
+.admin-slider-val {
+    font-size: 22px;
+    color: rgb(26, 18, 8);
+    -unity-font-style: bold;
+    width: 72px;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+}
+
+.admin-slider-hint {
+    font-size: 12px;
+    color: rgb(138, 112, 96);
+    margin-top: 8px;
+}
+
+/* ── 위험 작업 카드 ── */
+.admin-danger-title {
+    font-size: 12px;
+    color: rgba(200, 64, 48, 0.65);
+    letter-spacing: 4px;
+    -unity-font-style: bold;
+    margin-bottom: 18px;
+}
+
+.admin-danger-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.admin-btn-lg {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-right: 14px;
+    margin-bottom: 8px;
+}
+
+.admin-danger-note {
+    font-size: 12px;
+    color: rgb(138, 112, 96);
+    white-space: normal;
+    margin-top: 14px;
+}
+
+/* ── 확인 다이얼로그 오버레이 ── */
+.admin-confirm-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(26, 18, 8, 0.55);
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-confirm-card {
+    width: 560px;
+    padding: 48px 52px;
+    background-color: rgb(245, 237, 224);
+    border-radius: 24px;
+    border-width: 1.5px;
+    border-color: rgba(90, 60, 20, 0.15);
+    flex-direction: column;
+    align-items: center;
+}
+
+.admin-confirm-title {
+    font-size: 26px;
+    color: rgb(26, 18, 8);
+    -unity-font-style: bold;
+    margin-bottom: 14px;
+    -unity-text-align: middle-center;
+}
+
+.admin-confirm-msg {
+    font-size: 17px;
+    color: rgb(74, 53, 32);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 36px;
+}
+
+.admin-confirm-btns {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.admin-confirm-btns Button {
+    padding: 12px 40px;
+    border-radius: 10px;
+    font-size: 16px;
+    margin: 0 8px;
+}

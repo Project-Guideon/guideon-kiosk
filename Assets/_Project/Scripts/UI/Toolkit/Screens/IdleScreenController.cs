@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Guideon.Core;
 using Guideon.UI.Toolkit;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -33,6 +34,10 @@ namespace Guideon.UI
         // 각 링의 기본 최대 알파 (sm이 가장 진하게)
         private static readonly float[] RippleBaseAlpha = { 0.7f, 0.45f, 0.22f };
 
+        // ── 관리자 롱프레스 진행 인디케이터 ──────────────────────
+        private VisualElement _adminProgressTrack;
+        private VisualElement _adminProgressFill;
+
         protected override void Awake()
         {
             base.Awake();
@@ -59,10 +64,9 @@ namespace Guideon.UI
 
             _centerCircle = Root?.Q(className: "touch-center-circle");
 
-            // 화면 어디를 눌러도 터치 이벤트 발행 (UI Toolkit 포인터 이벤트로 확실히 처리)
-            var idleRoot = Root?.Q("idle-root");
-            idleRoot?.RegisterCallback<PointerDownEvent>(_ =>
-                Guideon.Core.EventBus.Publish(new Guideon.Core.UserTouchedEvent()));
+            // 관리자 롱프레스 진행 인디케이터 (TouchDetector가 AdminLongPressEvent로 구동)
+            _adminProgressTrack = Q("admin-longpress-indicator");
+            _adminProgressFill  = Q("admin-longpress-fill");
 
             StartAnimations();
 
@@ -89,11 +93,13 @@ namespace Guideon.UI
         protected override void SubscribeEvents()
         {
             Core.EventBus.Subscribe<Core.MascotLoadedEvent>(OnMascotLoaded);
+            Core.EventBus.Subscribe<Core.AdminLongPressEvent>(OnAdminLongPress);
         }
 
         protected override void UnsubscribeEvents()
         {
             Core.EventBus.Unsubscribe<Core.MascotLoadedEvent>(OnMascotLoaded);
+            Core.EventBus.Unsubscribe<Core.AdminLongPressEvent>(OnAdminLongPress);
         }
 
         private void OnMascotLoaded(Core.MascotLoadedEvent _)
@@ -220,6 +226,27 @@ namespace Guideon.UI
                 float cardScale = Mathf.Lerp(0.992f, 1.008f, (pulse + 1f) * 0.5f);
                 _touchCard.style.opacity = opacity;
                 _touchCard.style.scale   = new StyleScale(new Scale(new Vector3(cardScale, cardScale, 1f)));
+            }
+        }
+
+        // ── 관리자 롱프레스 진행 인디케이터 ──────────────────────
+        // TouchDetector(Input System)가 발행하는 AdminLongPressEvent를 받아 UI에 반영.
+
+        private void OnAdminLongPress(Core.AdminLongPressEvent e)
+        {
+            if (_adminProgressTrack == null) return;
+
+            if (e.Active)
+            {
+                _adminProgressTrack.style.display = DisplayStyle.Flex;
+                if (_adminProgressFill != null)
+                    _adminProgressFill.style.width = Length.Percent(e.Progress * 100f);
+            }
+            else
+            {
+                _adminProgressTrack.style.display = DisplayStyle.None;
+                if (_adminProgressFill != null)
+                    _adminProgressFill.style.width = Length.Percent(0f);
             }
         }
     }

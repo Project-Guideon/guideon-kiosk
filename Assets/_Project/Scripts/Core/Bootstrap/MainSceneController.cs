@@ -20,6 +20,9 @@ namespace Guideon.Core
         [Tooltip("Main 씬 패널들. UIManager에 동적 등록되어 Boot 씬의 동명 패널을 덮어쓴다.")]
         [SerializeField] private UIManager.PanelEntry[] _scenePanels;
 
+        [Header("관리자")]
+        [SerializeField] private AdminScreenController _adminScreen;
+
         [Header("마스코트")]
         [SerializeField] private MascotStage _mascotStage;
 
@@ -28,7 +31,18 @@ namespace Guideon.Core
             // Boot 씬에서 등록됐던 IdlePanel/ErrorPanel 참조는 씬 전환으로 destroy됨.
             // Main 씬 패널을 같은 id로 다시 등록해서 UIManager가 정상 동작하도록 한다.
             if (UIManager.HasInstance)
+            {
                 UIManager.Instance.BindPanels(_scenePanels);
+
+                // Admin 패널 — Inspector에 배선돼 있으면 그대로 쓰고,
+                // 미배선(null)이면 씬에서 자동 탐색 (Setup 메뉴 실행 후 Inspector 재배선 생략 가능)
+                if (_adminScreen == null)
+                    _adminScreen = FindFirstObjectByType<AdminScreenController>();
+                if (_adminScreen != null)
+                    UIManager.Instance.BindPanel(UIManager.Panel.Admin, _adminScreen);
+                else
+                    Debug.LogWarning("[MainSceneController] AdminScreenController를 찾을 수 없음 — AdminScreen GameObject가 씬에 있는지 확인.");
+            }
         }
 
         private void OnEnable()
@@ -36,6 +50,8 @@ namespace Guideon.Core
             EventBus.Subscribe<UserTouchedEvent>(OnUserTouched);
             EventBus.Subscribe<IdleTimeoutEvent>(OnIdleTimeout);
             EventBus.Subscribe<ChatExitRequestedEvent>(OnChatExitRequested);
+            EventBus.Subscribe<AdminRequestedEvent>(OnAdminRequested);
+            EventBus.Subscribe<AdminClosedEvent>(OnAdminClosed);
         }
 
         private void OnDisable()
@@ -43,6 +59,8 @@ namespace Guideon.Core
             EventBus.Unsubscribe<UserTouchedEvent>(OnUserTouched);
             EventBus.Unsubscribe<IdleTimeoutEvent>(OnIdleTimeout);
             EventBus.Unsubscribe<ChatExitRequestedEvent>(OnChatExitRequested);
+            EventBus.Unsubscribe<AdminRequestedEvent>(OnAdminRequested);
+            EventBus.Unsubscribe<AdminClosedEvent>(OnAdminClosed);
         }
 
         private void Start()
@@ -70,6 +88,7 @@ namespace Guideon.Core
         private async UniTaskVoid EnterChatAsync()
         {
             if (UIManager.Instance.IsVisible(UIManager.Panel.Chat)) return;
+            if (UIManager.Instance.IsVisible(UIManager.Panel.Admin)) return;
 
             await UIManager.Instance.TransitionToAsync(UIManager.Panel.Chat);
 
@@ -103,6 +122,29 @@ namespace Guideon.Core
 
             // Idle 복귀 시 마스코트 포즈 리셋 (MascotStage.Active로 Inspector 배선 불필요)
             MascotStage.Active?.ResetToIdle();
+        }
+
+        // ── Idle ↔ Admin ──────────────────────────────────────────
+
+        private void OnAdminRequested(AdminRequestedEvent _)
+        {
+            EnterAdminAsync().Forget();
+        }
+
+        private async UniTaskVoid EnterAdminAsync()
+        {
+            if (UIManager.Instance.IsVisible(UIManager.Panel.Admin)) return;
+            await UIManager.Instance.TransitionToAsync(UIManager.Panel.Admin);
+        }
+
+        private void OnAdminClosed(AdminClosedEvent _)
+        {
+            ReturnFromAdminAsync().Forget();
+        }
+
+        private async UniTaskVoid ReturnFromAdminAsync()
+        {
+            await UIManager.Instance.TransitionToAsync(UIManager.Panel.Idle);
         }
     }
 }

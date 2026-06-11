@@ -1,0 +1,115 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../USS/tokens.uss" />
+    <ui:Style src="../USS/common.uss" />
+    <ui:Style src="../USS/screen-admin.uss" />
+    <ui:VisualElement name="admin-root" class="screen-root admin-root">
+
+        <!-- 상단 단청 띠 -->
+        <ui:VisualElement class="dancheong-band" />
+
+        <!-- 헤더 -->
+        <ui:VisualElement name="admin-header" class="header-bar">
+            <ui:VisualElement class="logo-group">
+                <ui:VisualElement style="width:42px; height:42px; border-radius:50%; background-color:rgba(200,64,48,0.08); border-width:1.5px; border-color:rgb(177,74,46); align-items:center; justify-content:center; margin-right:16px;">
+                    <ui:Label text="G" style="font-size:24px; color:rgb(177,74,46); -unity-font-style:bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement>
+                    <ui:Label text="GUIDEON" class="logo-wordmark" />
+                    <ui:Label text="관리자 설정" class="logo-sub" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label text="운영자 전용 화면입니다" style="font-size:15px; color:rgb(138,112,96);" />
+            <ui:Button name="btn-close" text="✕  닫기" class="action-btn" />
+        </ui:VisualElement>
+
+        <!-- 메인 2열 -->
+        <ui:VisualElement name="admin-main" class="admin-main">
+
+            <!-- 좌측 열 -->
+            <ui:VisualElement class="admin-col" style="margin-right:20px;">
+
+                <!-- 디바이스 · 서버 정보 -->
+                <ui:VisualElement class="card admin-card">
+                    <ui:Label text="디바이스 · 서버 정보" class="admin-card-title" />
+                    <ui:VisualElement class="admin-info-row">
+                        <ui:Label text="디바이스 ID" class="admin-info-label" />
+                        <ui:Label name="info-device-id" text="—" class="admin-info-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="admin-info-row">
+                        <ui:Label text="서버 URL" class="admin-info-label" />
+                        <ui:Label name="info-server-url" text="—" class="admin-info-value" style="font-size:13px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="admin-info-row" style="margin-top:4px;">
+                        <ui:Label text="페어링" class="admin-info-label" />
+                        <ui:VisualElement style="flex-direction:row; align-items:center;">
+                            <ui:VisualElement name="info-paired-dot" class="status-dot" />
+                            <ui:Label name="info-paired-text" text="완료" style="font-size:15px; color:rgb(74,53,32);" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- 마이크 민감도 -->
+                <ui:VisualElement class="card admin-card">
+                    <ui:Label text="마이크 민감도" class="admin-card-title" />
+                    <ui:Label text="값이 높을수록 작은 소리도 인식합니다. 야외·소음 환경에서는 낮춰주세요." class="admin-slider-desc" />
+                    <ui:VisualElement class="admin-slider-row">
+                        <ui:Label text="낮음" class="admin-range-label" />
+                        <ui:Button name="btn-mic-dec" text="−" class="admin-step-btn" />
+                        <ui:Slider name="slider-mic" low-value="0" high-value="100" value="74" class="admin-slider" />
+                        <ui:Button name="btn-mic-inc" text="＋" class="admin-step-btn" />
+                        <ui:Label text="높음" class="admin-range-label" style="-unity-text-align:middle-right;" />
+                        <ui:Label name="val-mic" text="74%" class="admin-slider-val" />
+                    </ui:VisualElement>
+                    <ui:Label name="hint-vad" text="현재 임계값: 0.030" class="admin-slider-hint" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- 우측 열 -->
+            <ui:VisualElement class="admin-col">
+
+                <!-- 유휴 복귀 시간 -->
+                <ui:VisualElement class="card admin-card">
+                    <ui:Label text="유휴 복귀 시간" class="admin-card-title" />
+                    <ui:Label text="대화 종료 후 Idle 화면으로 복귀하는 대기 시간입니다." class="admin-slider-desc" />
+                    <ui:VisualElement class="admin-slider-row">
+                        <ui:Label text="30초" class="admin-range-label" />
+                        <ui:Button name="btn-idle-dec" text="−" class="admin-step-btn" />
+                        <ui:Slider name="slider-idle" low-value="30" high-value="600" value="120" class="admin-slider" />
+                        <ui:Button name="btn-idle-inc" text="＋" class="admin-step-btn" />
+                        <ui:Label text="10분" class="admin-range-label" style="-unity-text-align:middle-right;" />
+                        <ui:Label name="val-idle" text="120초" class="admin-slider-val" style="width:80px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- 위험 작업 -->
+                <ui:VisualElement class="card admin-card">
+                    <ui:Label text="⚠  위험 작업" class="admin-danger-title" />
+                    <ui:VisualElement class="admin-danger-row">
+                        <ui:Button name="btn-repair" text="디바이스 초기화 · 재페어링" class="action-btn action-btn--danger admin-btn-lg" />
+                        <ui:Button name="btn-quit" text="앱 종료" class="action-btn action-btn--danger admin-btn-lg" />
+                    </ui:VisualElement>
+                    <ui:Label text="초기화 시 기기 연결이 해제되고 앱이 재시작됩니다. 다시 페어링 코드를 발급해야 합니다." class="admin-danger-note" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- 하단 단청 띠 -->
+        <ui:VisualElement class="dancheong-band dancheong-band--bottom" />
+
+        <!-- 확인 다이얼로그 오버레이 (초기 숨김) -->
+        <ui:VisualElement name="confirm-overlay" class="admin-confirm-overlay hidden">
+            <ui:VisualElement class="admin-confirm-card">
+                <ui:Label name="confirm-title" text="확인" class="admin-confirm-title" />
+                <ui:Label name="confirm-msg" text="" class="admin-confirm-msg" />
+                <ui:VisualElement class="admin-confirm-btns">
+                    <ui:Button name="btn-confirm-ok" text="확인" class="action-btn action-btn--danger" />
+                    <ui:Button name="btn-confirm-cancel" text="취소" class="action-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

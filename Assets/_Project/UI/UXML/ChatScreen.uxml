@@ -15,7 +15,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement>
                     <ui:Label text="GUIDEON" class="logo-wordmark" />
-                    <ui:Label text="경복궁 AI 안내" class="logo-sub" />
+                    <ui:Label text="경기대학교 AI 안내" class="logo-sub" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <!-- 상태 -->
@@ -55,10 +55,10 @@
                     <!-- 빠른 질문 칩 -->
                     <ui:VisualElement name="quick-chips" style="flex-direction:row; flex-wrap:wrap;">
                         <ui:Button text="화장실 어디예요?" class="quick-chip" />
-                        <ui:Button text="근정전 위치" class="quick-chip" />
+                        <ui:Button text="종합강의동 위치" class="quick-chip" />
                         <ui:Button text="오늘 행사" class="quick-chip" />
                         <ui:Button text="식당 추천" class="quick-chip" />
-                        <ui:Button text="관람 시간" class="quick-chip" />
+                        <ui:Button text="운영 시간" class="quick-chip" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
