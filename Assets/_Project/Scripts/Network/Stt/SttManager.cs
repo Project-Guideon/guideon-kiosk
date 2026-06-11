@@ -37,6 +37,16 @@ namespace Guideon.Network.Stt
         // 종료 버튼 / 무발화 자동 복귀 시 TtsDone 자동 재시작 방지
         private bool _exiting;
 
+        // ── 지도 모드 플래그 ─────────────────────────────
+        // 지도 열린 동안 무발화 Idle 복귀를 차단한다. 마이크/STT 자체는 유지.
+        public bool MapMode { get; private set; }
+
+        /// <summary>지도 패널 열릴 때 호출. 무발화 자동 복귀를 차단한다.</summary>
+        public void EnterMapMode() => MapMode = true;
+
+        /// <summary>지도 패널 닫힐 때 호출. 무발화 자동 복귀를 재개한다.</summary>
+        public void ExitMapMode()  => MapMode = false;
+
         // 답변 수신 여부 — done-타임아웃 시 에러 메시지 분기용
         private bool _awaitingAnswer;
 
@@ -223,6 +233,7 @@ namespace Guideon.Network.Stt
         private void OnVadNoSpeechTimeout()
         {
             if (!IsRecording) return; // WS 외부 종료 후 VAD 뒤늦게 fire 방지
+            if (MapMode) return;      // 지도 모드에선 무발화로 메인 복귀하지 않음
             Debug.Log("[SttManager] 무발화 종료 → Idle 복귀");
             _exiting = true;
             StopCaptureAndClose(sendStop: false).Forget();
