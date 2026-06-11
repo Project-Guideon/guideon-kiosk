@@ -90,6 +90,13 @@ namespace Guideon.Core
 
     public struct AdminClosedEvent { }
 
+    /// <summary>매 프레임 롱프레스 진행도 전파. Active=false 이면 취소/완료.</summary>
+    public struct AdminLongPressEvent
+    {
+        public bool  Active;
+        public float Progress; // 0~1
+    }
+
     // ── 대화 안내 ──────────────────────────────────────────
     public enum ChatNoticeType { Info, Error }
 

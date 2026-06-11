@@ -34,12 +34,9 @@ namespace Guideon.UI
         // 각 링의 기본 최대 알파 (sm이 가장 진하게)
         private static readonly float[] RippleBaseAlpha = { 0.7f, 0.45f, 0.22f };
 
-        // ── 관리자 진입 롱프레스 (좌상단 모서리 3초) ─────────────
-        private const long AdminLongPressMs = 3000L;
-        private const float AdminHitSize    = 120f;
-        private VisualElement               _idleRoot;
-        private IVisualElementScheduledItem _adminTriggerJob;
-        private bool                        _adminLongPressActive;
+        // ── 관리자 롱프레스 진행 인디케이터 ──────────────────────
+        private VisualElement _adminProgressTrack;
+        private VisualElement _adminProgressFill;
 
         protected override void Awake()
         {
@@ -67,12 +64,9 @@ namespace Guideon.UI
 
             _centerCircle = Root?.Q(className: "touch-center-circle");
 
-            // idle-root에 trickle-down으로 등록 → 자식 어떤 요소보다 먼저 실행
-            // 좌상단 모서리 = 관리자 롱프레스, 나머지 = 채팅 진입
-            _idleRoot = Root?.Q("idle-root");
-            _idleRoot?.RegisterCallback<PointerDownEvent>(OnIdlePointerDown, TrickleDown.TrickleDown);
-            _idleRoot?.RegisterCallback<PointerUpEvent>(_ => CancelAdminLongPress(), TrickleDown.TrickleDown);
-            _idleRoot?.RegisterCallback<PointerLeaveEvent>(_ => CancelAdminLongPress(), TrickleDown.TrickleDown);
+            // 관리자 롱프레스 진행 인디케이터 (TouchDetector가 AdminLongPressEvent로 구동)
+            _adminProgressTrack = Q("admin-longpress-indicator");
+            _adminProgressFill  = Q("admin-longpress-fill");
 
             StartAnimations();
 
@@ -99,11 +93,13 @@ namespace Guideon.UI
         protected override void SubscribeEvents()
         {
             Core.EventBus.Subscribe<Core.MascotLoadedEvent>(OnMascotLoaded);
+            Core.EventBus.Subscribe<Core.AdminLongPressEvent>(OnAdminLongPress);
         }
 
         protected override void UnsubscribeEvents()
         {
             Core.EventBus.Unsubscribe<Core.MascotLoadedEvent>(OnMascotLoaded);
+            Core.EventBus.Unsubscribe<Core.AdminLongPressEvent>(OnAdminLongPress);
         }
 
         private void OnMascotLoaded(Core.MascotLoadedEvent _)
@@ -233,37 +229,25 @@ namespace Guideon.UI
             }
         }
 
-        // ── 관리자 롱프레스 ────────────────────────────────────────
+        // ── 관리자 롱프레스 진행 인디케이터 ──────────────────────
+        // TouchDetector(Input System)가 발행하는 AdminLongPressEvent를 받아 UI에 반영.
 
-        private void OnIdlePointerDown(PointerDownEvent e)
+        private void OnAdminLongPress(Core.AdminLongPressEvent e)
         {
-            // e.position = 패널 좌표계 (1920×1080 CSS px) — idle-root 위치 무관하게 안전
-            bool inAdminCorner = e.position.x < AdminHitSize && e.position.y < AdminHitSize;
+            if (_adminProgressTrack == null) return;
 
-            if (inAdminCorner)
+            if (e.Active)
             {
-                // 자식 요소가 이 이벤트를 받지 않도록 소비
-                e.StopPropagation();
-                _adminLongPressActive = true;
-                _adminTriggerJob = _idleRoot.schedule.Execute(() =>
-                {
-                    if (!_adminLongPressActive) return;
-                    _adminLongPressActive = false;
-                    Debug.Log("[IdleScreen] 관리자 롱프레스 — AdminRequestedEvent 발행");
-                    EventBus.Publish(new AdminRequestedEvent());
-                }).StartingIn(AdminLongPressMs);
+                _adminProgressTrack.style.display = DisplayStyle.Flex;
+                if (_adminProgressFill != null)
+                    _adminProgressFill.style.width = Length.Percent(e.Progress * 100f);
             }
             else
             {
-                EventBus.Publish(new UserTouchedEvent());
+                _adminProgressTrack.style.display = DisplayStyle.None;
+                if (_adminProgressFill != null)
+                    _adminProgressFill.style.width = Length.Percent(0f);
             }
-        }
-
-        private void CancelAdminLongPress()
-        {
-            if (!_adminLongPressActive) return;
-            _adminLongPressActive = false;
-            _adminTriggerJob?.Pause();
         }
     }
 }
