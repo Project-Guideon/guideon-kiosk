@@ -54,7 +54,9 @@
                     <ui:Label text="값이 높을수록 작은 소리도 인식합니다. 야외·소음 환경에서는 낮춰주세요." class="admin-slider-desc" />
                     <ui:VisualElement class="admin-slider-row">
                         <ui:Label text="낮음" class="admin-range-label" />
+                        <ui:Button name="btn-mic-dec" text="−" class="admin-step-btn" />
                         <ui:Slider name="slider-mic" low-value="0" high-value="100" value="74" class="admin-slider" />
+                        <ui:Button name="btn-mic-inc" text="＋" class="admin-step-btn" />
                         <ui:Label text="높음" class="admin-range-label" style="-unity-text-align:middle-right;" />
                         <ui:Label name="val-mic" text="74%" class="admin-slider-val" />
                     </ui:VisualElement>
@@ -72,7 +74,9 @@
                     <ui:Label text="대화 종료 후 Idle 화면으로 복귀하는 대기 시간입니다." class="admin-slider-desc" />
                     <ui:VisualElement class="admin-slider-row">
                         <ui:Label text="30초" class="admin-range-label" />
+                        <ui:Button name="btn-idle-dec" text="−" class="admin-step-btn" />
                         <ui:Slider name="slider-idle" low-value="30" high-value="600" value="120" class="admin-slider" />
+                        <ui:Button name="btn-idle-inc" text="＋" class="admin-step-btn" />
                         <ui:Label text="10분" class="admin-range-label" style="-unity-text-align:middle-right;" />
                         <ui:Label name="val-idle" text="120초" class="admin-slider-val" style="width:80px;" />
                     </ui:VisualElement>

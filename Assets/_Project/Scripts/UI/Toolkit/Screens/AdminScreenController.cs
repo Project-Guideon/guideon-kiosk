@@ -29,9 +29,13 @@ namespace Guideon.UI
         private Slider _sliderMic;
         private Label  _valMic;
         private Label  _hintVad;
+        private Button _btnMicDec;
+        private Button _btnMicInc;
 
         private Slider _sliderIdle;
         private Label  _valIdle;
+        private Button _btnIdleDec;
+        private Button _btnIdleInc;
 
         private Button _btnClose;
         private Button _btnRepair;
@@ -64,13 +68,17 @@ namespace Guideon.UI
             _infoPairedText= Q<Label>("info-paired-text");
 
             // 마이크 민감도
-            _sliderMic = Q<Slider>("slider-mic");
-            _valMic    = Q<Label>("val-mic");
-            _hintVad   = Q<Label>("hint-vad");
+            _sliderMic  = Q<Slider>("slider-mic");
+            _valMic     = Q<Label>("val-mic");
+            _hintVad    = Q<Label>("hint-vad");
+            _btnMicDec  = Q<Button>("btn-mic-dec");
+            _btnMicInc  = Q<Button>("btn-mic-inc");
 
             // 유휴 복귀 시간
-            _sliderIdle = Q<Slider>("slider-idle");
-            _valIdle    = Q<Label>("val-idle");
+            _sliderIdle  = Q<Slider>("slider-idle");
+            _valIdle     = Q<Label>("val-idle");
+            _btnIdleDec  = Q<Button>("btn-idle-dec");
+            _btnIdleInc  = Q<Button>("btn-idle-inc");
 
             // 버튼
             _btnClose  = Q<Button>("btn-close");
@@ -88,6 +96,12 @@ namespace Guideon.UI
             _btnClose?.RegisterCallback<ClickEvent>(_ => OnCloseClicked());
             _sliderMic?.RegisterCallback<ChangeEvent<float>>(OnMicSliderChanged);
             _sliderIdle?.RegisterCallback<ChangeEvent<float>>(OnIdleSliderChanged);
+
+            // 스텝 버튼 (slider.value 설정 → ChangeEvent 자동 발행)
+            _btnMicDec?.RegisterCallback<ClickEvent>(_ => StepSlider(_sliderMic,  -5f,   0f, 100f));
+            _btnMicInc?.RegisterCallback<ClickEvent>(_ => StepSlider(_sliderMic,  +5f,   0f, 100f));
+            _btnIdleDec?.RegisterCallback<ClickEvent>(_ => StepSlider(_sliderIdle, -30f, 30f, 600f));
+            _btnIdleInc?.RegisterCallback<ClickEvent>(_ => StepSlider(_sliderIdle, +30f, 30f, 600f));
             _btnRepair?.RegisterCallback<ClickEvent>(_ => ShowConfirm(
                 ConfirmAction.Repair,
                 "디바이스 초기화",
@@ -223,6 +237,15 @@ namespace Guideon.UI
 
             // 4. Boot 씬 재로드 → BootSceneController.RunAsync() 가 페어링 흐름 진입
             await GameManager.Instance.LoadSceneAsync(GameManager.Scenes.Boot);
+        }
+
+        // ── 슬라이더 스텝 ────────────────────────────────────────
+        // slider.value 설정은 ChangeEvent<float>를 발행해 기존 핸들러가 자동 처리한다.
+
+        private static void StepSlider(Slider slider, float delta, float min, float max)
+        {
+            if (slider == null) return;
+            slider.value = Mathf.Clamp(slider.value + delta, min, max);
         }
 
         // ── 매핑 헬퍼 ────────────────────────────────────────────

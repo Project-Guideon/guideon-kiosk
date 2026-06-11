@@ -75,8 +75,51 @@
 
 .admin-slider {
     flex: 1;
+    height: 48px;
+    margin: 0 4px;
+}
+
+/* 슬라이더 thumb — 터치 친화적 크기 */
+.admin-slider > .unity-base-slider__dragger {
+    width: 40px;
     height: 40px;
-    margin: 0 6px;
+    border-radius: 20px;
+    background-color: rgb(177, 74, 46);
+    border-width: 0;
+    margin-top: -4px;
+}
+
+.admin-slider > .unity-base-slider__tracker {
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(90, 60, 20, 0.15);
+    margin-top: 0;
+}
+
+/* ── 스텝 버튼 (±) ── */
+.admin-step-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    font-size: 30px;
+    -unity-font-style: bold;
+    background-color: rgba(200, 64, 48, 0.08);
+    border-width: 1.5px;
+    border-color: rgba(200, 64, 48, 0.25);
+    color: rgb(177, 74, 46);
+    flex-shrink: 0;
+    margin: 0 4px;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+.admin-step-btn:hover {
+    background-color: rgba(200, 64, 48, 0.14);
+}
+
+.admin-step-btn:active {
+    scale: 0.88;
+    background-color: rgba(200, 64, 48, 0.22);
 }
 
 .admin-slider-val {

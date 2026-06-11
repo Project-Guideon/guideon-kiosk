@@ -37,7 +37,7 @@ namespace Guideon.Core
                 // Admin 패널 — Inspector에 배선돼 있으면 그대로 쓰고,
                 // 미배선(null)이면 씬에서 자동 탐색 (Setup 메뉴 실행 후 Inspector 재배선 생략 가능)
                 if (_adminScreen == null)
-                    _adminScreen = FindObjectOfType<AdminScreenController>();
+                    _adminScreen = FindFirstObjectByType<AdminScreenController>();
                 if (_adminScreen != null)
                     UIManager.Instance.BindPanel(UIManager.Panel.Admin, _adminScreen);
                 else
