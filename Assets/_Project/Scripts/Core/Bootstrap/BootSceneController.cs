@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using Guideon.Mascot;
 using Guideon.UI;
 using UnityEngine;
 
@@ -75,6 +76,11 @@ namespace Guideon.Core
                         onRetry: () => RunAsync().Forget());
                     return;
                 }
+
+                // 마스코트 GLB 선행 다운로드 (animModelUrl 우선, 없으면 modelUrl, 없으면 로컬 fallback)
+                _bootScreen.SetStatus("마스코트 불러오는 중...", 0.85f);
+                var mascotData = Network.AuthManager.Instance.BootstrapData?.Mascot;
+                await MascotLoader.PreloadAsync(mascotData);
 
                 // 하트비트 시작
                 _bootScreen.SetStatus("준비 완료!", 1.0f);

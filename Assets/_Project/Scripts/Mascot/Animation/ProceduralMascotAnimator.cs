@@ -1,3 +1,4 @@
+using Guideon.Core;
 using UnityEngine;
 
 namespace Guideon.Mascot
@@ -6,7 +7,7 @@ namespace Guideon.Mascot
     /// 본 기반 프로시저럴 애니메이션 시스템.
     /// GLB 모델에 애니메이션 클립 없이도 Idle/Greeting/Listening/Thinking/Speaking 동작 수행.
     /// </summary>
-    public class ProceduralMascotAnimator : MonoBehaviour
+    public class ProceduralMascotAnimator : MonoBehaviour, IMascotAnimator
     {
         [Header("Animation Settings")]
         [SerializeField] private float transitionSpeed = 5f;
@@ -34,6 +35,12 @@ namespace Guideon.Mascot
         [SerializeField] private float speakingJawSpeed = 8f;
         [SerializeField] private float speakingHeadBobAmount = 3f;
         [SerializeField] private float speakingGestureAmount = 8f;
+
+        [Header("T포즈 보정 (Inspector에서 직접 튜닝)")]
+        [Tooltip("왼팔 UpperArm을 T포즈에서 내리는 로컬 회전값. 모델마다 다름 — Play 중 조절 가능.")]
+        [SerializeField] private Vector3 _leftArmRestEuler  = new Vector3(0f,  0f, -75f);
+        [Tooltip("오른팔 UpperArm 보정값.")]
+        [SerializeField] private Vector3 _rightArmRestEuler = new Vector3(0f,  0f,  75f);
 
         private BoneRig _rig;
         private MascotState _currentState = MascotState.Idle;
@@ -82,6 +89,9 @@ namespace Guideon.Mascot
             // 매 프레임 초기 포즈로 리셋 후 애니메이션 적용
             _rig.ResetAll();
 
+            // T포즈 → 자연스러운 팔 내림 보정 (ResetAll 직후, 애니메이션 적용 전)
+            ApplyRestPose();
+
             // Idle은 항상 베이스로 깔림
             ApplyIdle();
 
@@ -106,6 +116,20 @@ namespace Guideon.Mascot
                     break;
             }
         }
+
+        #region RestPose - T포즈 보정
+
+        private void ApplyRestPose()
+        {
+            if (_rig.LeftUpperArm != null)
+                RotateAdditively(_rig.LeftUpperArm,
+                    _leftArmRestEuler.x, _leftArmRestEuler.y, _leftArmRestEuler.z);
+            if (_rig.RightUpperArm != null)
+                RotateAdditively(_rig.RightUpperArm,
+                    _rightArmRestEuler.x, _rightArmRestEuler.y, _rightArmRestEuler.z);
+        }
+
+        #endregion
 
         #region Idle - 호흡 + 미세 흔들림
 

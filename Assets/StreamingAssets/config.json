@@ -5,12 +5,14 @@
     "timeout": 60
   },
   "device": {
-    "id": "123123123",
-    "token": "abe3c842-58fc-491c-a302-3fac6121046b"
+    "id": "KIOSK-MAIN-03",
+    "token": "c9fc4980-7d1f-46dd-b740-7dc044f6a03e"
   },
   "kiosk": {
     "idleTimeoutSeconds": 120,
     "sttSilenceTimeoutMs": 1500,
+    "sttSampleRate": 16000,
+    "sttFrameMs": 20,
     "sttVadThreshold": 0.03,
     "sttMaxRecordingSeconds": 8.0,
     "sttNoSpeechExitSeconds": 9.0,

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Guideon.Chat;
+using Guideon.Mascot;
 using Guideon.Network;
 using Guideon.Network.Stt;
 using Guideon.UI;
@@ -15,8 +16,12 @@ namespace Guideon.Core
     {
         [Header("Panels")]
         [SerializeField] private IdleScreenController _idleScreen;
+        [SerializeField] private ChatScreenController _chatScreen;
         [Tooltip("Main 씬 패널들. UIManager에 동적 등록되어 Boot 씬의 동명 패널을 덮어쓴다.")]
         [SerializeField] private UIManager.PanelEntry[] _scenePanels;
+
+        [Header("마스코트")]
+        [SerializeField] private MascotStage _mascotStage;
 
         private void Awake()
         {
@@ -44,6 +49,7 @@ namespace Guideon.Core
         {
             ApplyBootstrapData();
             UIManager.Instance.ShowOnly(UIManager.Panel.Idle);
+            // 텍스처 바인딩은 화면 컨트롤러의 OnBindUI에서 MascotStage.Active 경유로 자동 처리됨
         }
 
         private void ApplyBootstrapData()
@@ -66,6 +72,9 @@ namespace Guideon.Core
             if (UIManager.Instance.IsVisible(UIManager.Panel.Chat)) return;
 
             await UIManager.Instance.TransitionToAsync(UIManager.Panel.Chat);
+
+            // Greeting 재생 (텍스처 바인딩은 ChatScreenController.OnBindUI에서 자동 처리)
+            MascotStage.Active?.PlayGreeting();
 
             await ChatManager.Instance.CreateSessionAsync();
             IdleTimeoutManager.Instance.Begin();
@@ -91,6 +100,9 @@ namespace Guideon.Core
             IdleTimeoutManager.Instance.Stop();
             ChatManager.Instance.EndSession();
             await UIManager.Instance.TransitionToAsync(UIManager.Panel.Idle);
+
+            // Idle 복귀 시 마스코트 포즈 리셋 (MascotStage.Active로 Inspector 배선 불필요)
+            MascotStage.Active?.ResetToIdle();
         }
     }
 }

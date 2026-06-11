@@ -2,6 +2,7 @@
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm",
+    "net.gree.unity-webview": "https://github.com/gree/unity-webview.git?path=dist/package",
     "com.gamelovers.mcp-unity": "https://github.com/CoderGamester/mcp-unity.git",
     "com.hecomi.ulipsync": "https://github.com/hecomi/uLipSync.git#upm",
     "com.unity.addressables": "2.9.1",
