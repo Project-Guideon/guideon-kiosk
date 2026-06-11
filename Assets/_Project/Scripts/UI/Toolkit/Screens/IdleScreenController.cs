@@ -37,9 +37,9 @@ namespace Guideon.UI
         // ── 관리자 진입 롱프레스 (좌상단 모서리 3초) ─────────────
         private const long AdminLongPressMs = 3000L;
         private const float AdminHitSize    = 120f;
-        private VisualElement             _adminHitArea;
+        private VisualElement               _idleRoot;
         private IVisualElementScheduledItem _adminTriggerJob;
-        private bool                      _adminLongPressActive;
+        private bool                        _adminLongPressActive;
 
         protected override void Awake()
         {
@@ -67,12 +67,12 @@ namespace Guideon.UI
 
             _centerCircle = Root?.Q(className: "touch-center-circle");
 
-            // 화면 어디를 눌러도 터치 이벤트 발행 — 좌상단 관리자 영역은 제외
-            var idleRoot = Root?.Q("idle-root");
-            idleRoot?.RegisterCallback<PointerDownEvent>(OnIdleRootPointerDown);
-
-            // 관리자 진입: 좌상단 모서리 투명 영역 3초 롱프레스
-            SetupAdminHitArea(idleRoot);
+            // idle-root에 trickle-down으로 등록 → 자식 어떤 요소보다 먼저 실행
+            // 좌상단 모서리 = 관리자 롱프레스, 나머지 = 채팅 진입
+            _idleRoot = Root?.Q("idle-root");
+            _idleRoot?.RegisterCallback<PointerDownEvent>(OnIdlePointerDown, TrickleDown.TrickleDown);
+            _idleRoot?.RegisterCallback<PointerUpEvent>(_ => CancelAdminLongPress(), TrickleDown.TrickleDown);
+            _idleRoot?.RegisterCallback<PointerLeaveEvent>(_ => CancelAdminLongPress(), TrickleDown.TrickleDown);
 
             StartAnimations();
 
@@ -235,49 +235,28 @@ namespace Guideon.UI
 
         // ── 관리자 롱프레스 ────────────────────────────────────────
 
-        private void OnIdleRootPointerDown(PointerDownEvent e)
+        private void OnIdlePointerDown(PointerDownEvent e)
         {
-            // 좌상단 관리자 영역 터치는 채팅 진입 차단 (롱프레스 감지 중)
-            if (e.localPosition.x < AdminHitSize && e.localPosition.y < AdminHitSize) return;
-            EventBus.Publish(new UserTouchedEvent());
-        }
+            // e.position = 패널 좌표계 (1920×1080 CSS px) — idle-root 위치 무관하게 안전
+            bool inAdminCorner = e.position.x < AdminHitSize && e.position.y < AdminHitSize;
 
-        private void SetupAdminHitArea(VisualElement idleRoot)
-        {
-            if (idleRoot == null) return;
-
-            // 좌상단 120×120px 투명 히트 영역
-            _adminHitArea = new VisualElement
+            if (inAdminCorner)
             {
-                style =
+                // 자식 요소가 이 이벤트를 받지 않도록 소비
+                e.StopPropagation();
+                _adminLongPressActive = true;
+                _adminTriggerJob = _idleRoot.schedule.Execute(() =>
                 {
-                    position        = Position.Absolute,
-                    top             = 0,
-                    left            = 0,
-                    width           = AdminHitSize,
-                    height          = AdminHitSize,
-                    backgroundColor = Color.clear,
-                }
-            };
-            idleRoot.Add(_adminHitArea);
-
-            _adminHitArea.RegisterCallback<PointerDownEvent>(OnAdminPointerDown);
-            _adminHitArea.RegisterCallback<PointerUpEvent>(_ => CancelAdminLongPress());
-            _adminHitArea.RegisterCallback<PointerLeaveEvent>(_ => CancelAdminLongPress());
-        }
-
-        private void OnAdminPointerDown(PointerDownEvent e)
-        {
-            _adminLongPressActive = true;
-
-            // 3초 뒤 관리자 진입
-            _adminTriggerJob = _adminHitArea.schedule.Execute(() =>
+                    if (!_adminLongPressActive) return;
+                    _adminLongPressActive = false;
+                    Debug.Log("[IdleScreen] 관리자 롱프레스 — AdminRequestedEvent 발행");
+                    EventBus.Publish(new AdminRequestedEvent());
+                }).StartingIn(AdminLongPressMs);
+            }
+            else
             {
-                if (!_adminLongPressActive) return;
-                _adminLongPressActive = false;
-                Debug.Log("[IdleScreen] 관리자 롱프레스 감지 — AdminRequestedEvent 발행");
-                EventBus.Publish(new AdminRequestedEvent());
-            }).StartingIn(AdminLongPressMs);
+                EventBus.Publish(new UserTouchedEvent());
+            }
         }
 
         private void CancelAdminLongPress()
