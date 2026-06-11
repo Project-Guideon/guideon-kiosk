@@ -40,7 +40,7 @@
 
 /* 지도 모드: 채팅창 축소 → 지도 영역 확보 */
 .chat-left--map {
-    width: 360px;
+    width: 480px;
     padding: 32px 24px 28px;
 }
 
