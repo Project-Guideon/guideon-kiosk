@@ -79,6 +79,20 @@ namespace Guideon.Network
             }
         }
 
+        /// <summary>
+        /// 인메모리 상태 초기화. 재페어링 전에 호출해 stale 코드/시크릿 제거.
+        /// </summary>
+        public void Reset()
+        {
+            CancelPairing();
+            CurrentCode   = null;
+            ExpiresAt     = null;
+            CurrentSecret = null;
+            IsPairing     = false;
+            _api          = null;
+            Debug.Log("[PairingManager] Reset.");
+        }
+
         /// <summary>페어링 폴링을 취소합니다.</summary>
         public void CancelPairing()
         {

@@ -96,6 +96,19 @@ namespace Guideon.Network
             return true;
         }
 
+        /// <summary>
+        /// 인메모리 캐시 초기화. 재페어링 전에 호출해 stale 상태를 제거.
+        /// </summary>
+        public void Reset()
+        {
+            DeviceContext  = null;
+            BootstrapData  = null;
+            IsVerified     = false;
+            IsBootstrapped = false;
+            _api           = null;
+            Debug.Log("[AuthManager] Reset.");
+        }
+
         /// <summary>verify → bootstrap 순차 실행.</summary>
         public async UniTask<bool> AuthenticateAsync()
         {
