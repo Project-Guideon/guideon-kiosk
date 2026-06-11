@@ -45,21 +45,39 @@ namespace Guideon.Core
         }
 
         /// <summary>
+        /// 현재 Config 전체를 config 파일에 저장.
+        /// kiosk 설정(마이크 민감도 등) 변경 후 영속화할 때 사용.
+        /// </summary>
+        public async UniTask SaveConfigAsync()
+        {
+            if (Config == null || string.IsNullOrEmpty(_loadedPath)) return;
+
+            var settings = new JsonSerializerSettings { Formatting = Formatting.Indented };
+            string json = JsonConvert.SerializeObject(Config, settings);
+            await File.WriteAllTextAsync(_loadedPath, json);
+
+            Debug.Log($"[ConfigManager] Config saved to: {Path.GetFileName(_loadedPath)}");
+        }
+
+        /// <summary>
         /// 페어링 완료 후 device.id와 device.token을 config 파일에 저장.
         /// </summary>
         public async UniTask SaveDeviceCredentialsAsync(string deviceId, string plainToken)
         {
             Config.device.id = deviceId;
             Config.device.token = plainToken;
+            await SaveConfigAsync();
+        }
 
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented
-            };
-            string json = JsonConvert.SerializeObject(Config, settings);
-            await File.WriteAllTextAsync(_loadedPath, json);
-
-            Debug.Log($"[ConfigManager] Device credentials saved to: {Path.GetFileName(_loadedPath)}");
+        /// <summary>
+        /// device 자격증명을 초기화하고 파일에 저장. 관리자 재페어링 시 사용.
+        /// </summary>
+        public async UniTask ResetDeviceCredentialsAsync()
+        {
+            Config.device.id = "";
+            Config.device.token = "";
+            await SaveConfigAsync();
+            Debug.Log("[ConfigManager] Device credentials cleared.");
         }
     }
 }
