@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Guideon.Core;
 using Guideon.UI.Toolkit;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -33,6 +34,13 @@ namespace Guideon.UI
         // 각 링의 기본 최대 알파 (sm이 가장 진하게)
         private static readonly float[] RippleBaseAlpha = { 0.7f, 0.45f, 0.22f };
 
+        // ── 관리자 진입 롱프레스 (좌상단 모서리 3초) ─────────────
+        private const long AdminLongPressMs = 3000L;
+        private const float AdminHitSize    = 120f;
+        private VisualElement             _adminHitArea;
+        private IVisualElementScheduledItem _adminTriggerJob;
+        private bool                      _adminLongPressActive;
+
         protected override void Awake()
         {
             base.Awake();
@@ -63,6 +71,9 @@ namespace Guideon.UI
             var idleRoot = Root?.Q("idle-root");
             idleRoot?.RegisterCallback<PointerDownEvent>(_ =>
                 Guideon.Core.EventBus.Publish(new Guideon.Core.UserTouchedEvent()));
+
+            // 관리자 진입: 좌상단 모서리 투명 영역 3초 롱프레스
+            SetupAdminHitArea(idleRoot);
 
             StartAnimations();
 
@@ -221,6 +232,66 @@ namespace Guideon.UI
                 _touchCard.style.opacity = opacity;
                 _touchCard.style.scale   = new StyleScale(new Scale(new Vector3(cardScale, cardScale, 1f)));
             }
+        }
+
+        // ── 관리자 롱프레스 ────────────────────────────────────────
+
+        private void SetupAdminHitArea(VisualElement idleRoot)
+        {
+            if (idleRoot == null) return;
+
+            // 좌상단 120×120px 투명 히트 영역
+            _adminHitArea = new VisualElement
+            {
+                style =
+                {
+                    position        = Position.Absolute,
+                    top             = 0,
+                    left            = 0,
+                    width           = AdminHitSize,
+                    height          = AdminHitSize,
+                    backgroundColor = Color.clear,
+                }
+            };
+            idleRoot.Add(_adminHitArea);
+
+            _adminHitArea.RegisterCallback<PointerDownEvent>(OnAdminPointerDown,  TrickleDown.TrickleDown);
+            _adminHitArea.RegisterCallback<PointerUpEvent>(OnAdminPointerUp,      TrickleDown.TrickleDown);
+            _adminHitArea.RegisterCallback<PointerLeaveEvent>(OnAdminPointerLeave,TrickleDown.TrickleDown);
+        }
+
+        private void OnAdminPointerDown(PointerDownEvent e)
+        {
+            // 일반 채팅 진입 이벤트가 버블링되지 않도록 차단
+            e.StopPropagation();
+
+            _adminLongPressActive = true;
+
+            // 3초 뒤 관리자 진입
+            _adminTriggerJob = _adminHitArea.schedule.Execute(() =>
+            {
+                if (!_adminLongPressActive) return;
+                _adminLongPressActive = false;
+                Debug.Log("[IdleScreen] 관리자 롱프레스 감지 — AdminRequestedEvent 발행");
+                EventBus.Publish(new AdminRequestedEvent());
+            }).StartingIn(AdminLongPressMs);
+        }
+
+        private void OnAdminPointerUp(PointerUpEvent e)
+        {
+            CancelAdminLongPress();
+        }
+
+        private void OnAdminPointerLeave(PointerLeaveEvent e)
+        {
+            CancelAdminLongPress();
+        }
+
+        private void CancelAdminLongPress()
+        {
+            if (!_adminLongPressActive) return;
+            _adminLongPressActive = false;
+            _adminTriggerJob?.Pause();
         }
     }
 }
