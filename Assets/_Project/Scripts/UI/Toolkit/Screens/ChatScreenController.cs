@@ -553,6 +553,7 @@ namespace Guideon.UI
             Root?.schedule.Execute(ShowWebViewAfterLayout).ExecuteLater(32);
             _mapOpen = true;
             IdleTimeoutManager.Instance?.Stop();
+            SttManager.Instance?.EnterMapMode();
 
             // btn-map 버튼 텍스트 → 닫기 토글
             if (_btnMap != null) _btnMap.text = "🗺 지도 닫기";
@@ -569,11 +570,12 @@ namespace Guideon.UI
             Rect panelRect = _mapWebviewArea.worldBound; // 패널 포인트 단위
             float ppp      = panel.scaledPixelsPerPoint;  // 포인트→픽셀 배율
 
-            // Y 축: UI Toolkit은 top=0이 화면 위, 스크린은 bottom=0이 화면 아래
-            float screenH = Screen.height;
+            // UI Toolkit worldBound는 top-left 기준. GreeMapView.ApplyRect 가
+            // SetMargins(left, top, right, bottom)으로 변환할 때 Y 반전을 자체 처리하므로
+            // 여기서는 top 기준 좌표를 그대로 넘긴다 (이중 반전 방지).
             var screenRect = new Rect(
                 panelRect.x      * ppp,
-                screenH - (panelRect.yMax * ppp),
+                panelRect.y      * ppp,
                 panelRect.width  * ppp,
                 panelRect.height * ppp
             );
@@ -586,6 +588,7 @@ namespace Guideon.UI
             _mapOpen = false;
             _mapView?.Hide();
             IdleTimeoutManager.Instance?.Begin();
+            SttManager.Instance?.ExitMapMode();
 
             // 채팅창 복원 + 마스코트 패널 복원
             var chatLeft = Q("chat-left");
