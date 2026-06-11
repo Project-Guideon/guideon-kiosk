@@ -77,6 +77,7 @@ namespace Guideon.Core
         private async UniTaskVoid EnterChatAsync()
         {
             if (UIManager.Instance.IsVisible(UIManager.Panel.Chat)) return;
+            if (UIManager.Instance.IsVisible(UIManager.Panel.Admin)) return;
 
             await UIManager.Instance.TransitionToAsync(UIManager.Panel.Chat);
 

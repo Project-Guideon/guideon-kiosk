@@ -67,10 +67,9 @@ namespace Guideon.UI
 
             _centerCircle = Root?.Q(className: "touch-center-circle");
 
-            // 화면 어디를 눌러도 터치 이벤트 발행 (UI Toolkit 포인터 이벤트로 확실히 처리)
+            // 화면 어디를 눌러도 터치 이벤트 발행 — 좌상단 관리자 영역은 제외
             var idleRoot = Root?.Q("idle-root");
-            idleRoot?.RegisterCallback<PointerDownEvent>(_ =>
-                Guideon.Core.EventBus.Publish(new Guideon.Core.UserTouchedEvent()));
+            idleRoot?.RegisterCallback<PointerDownEvent>(OnIdleRootPointerDown);
 
             // 관리자 진입: 좌상단 모서리 투명 영역 3초 롱프레스
             SetupAdminHitArea(idleRoot);
@@ -236,6 +235,13 @@ namespace Guideon.UI
 
         // ── 관리자 롱프레스 ────────────────────────────────────────
 
+        private void OnIdleRootPointerDown(PointerDownEvent e)
+        {
+            // 좌상단 관리자 영역 터치는 채팅 진입 차단 (롱프레스 감지 중)
+            if (e.localPosition.x < AdminHitSize && e.localPosition.y < AdminHitSize) return;
+            EventBus.Publish(new UserTouchedEvent());
+        }
+
         private void SetupAdminHitArea(VisualElement idleRoot)
         {
             if (idleRoot == null) return;
@@ -255,16 +261,13 @@ namespace Guideon.UI
             };
             idleRoot.Add(_adminHitArea);
 
-            _adminHitArea.RegisterCallback<PointerDownEvent>(OnAdminPointerDown,  TrickleDown.TrickleDown);
-            _adminHitArea.RegisterCallback<PointerUpEvent>(OnAdminPointerUp,      TrickleDown.TrickleDown);
-            _adminHitArea.RegisterCallback<PointerLeaveEvent>(OnAdminPointerLeave,TrickleDown.TrickleDown);
+            _adminHitArea.RegisterCallback<PointerDownEvent>(OnAdminPointerDown);
+            _adminHitArea.RegisterCallback<PointerUpEvent>(_ => CancelAdminLongPress());
+            _adminHitArea.RegisterCallback<PointerLeaveEvent>(_ => CancelAdminLongPress());
         }
 
         private void OnAdminPointerDown(PointerDownEvent e)
         {
-            // 일반 채팅 진입 이벤트가 버블링되지 않도록 차단
-            e.StopPropagation();
-
             _adminLongPressActive = true;
 
             // 3초 뒤 관리자 진입
@@ -275,16 +278,6 @@ namespace Guideon.UI
                 Debug.Log("[IdleScreen] 관리자 롱프레스 감지 — AdminRequestedEvent 발행");
                 EventBus.Publish(new AdminRequestedEvent());
             }).StartingIn(AdminLongPressMs);
-        }
-
-        private void OnAdminPointerUp(PointerUpEvent e)
-        {
-            CancelAdminLongPress();
-        }
-
-        private void OnAdminPointerLeave(PointerLeaveEvent e)
-        {
-            CancelAdminLongPress();
         }
 
         private void CancelAdminLongPress()
