@@ -2,22 +2,31 @@ using System.IO;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Guideon.Core
 {
     /// <summary>
-    /// StreamingAssets/config.json을 로드해서 앱 전역 설정을 제공.
-    /// config.local.json이 있으면 그게 우선 (로컬 개발용).
+    /// 앱 전역 설정 로더/세이버.
+    ///
+    /// 로드 우선순위:
+    ///   1. persistentDataPath/config.json   — 저장된 사용자 설정 (페어링 토큰 포함)
+    ///   2. StreamingAssets/config.local.json — 개발용 로컬 오버라이드
+    ///   3. StreamingAssets/config.json      — 번들 기본값
+    ///
+    /// 저장은 항상 persistentDataPath/config.json 으로 — Android StreamingAssets는 읽기 전용.
+    /// StreamingAssets 읽기는 UnityWebRequest 사용 (Android JAR URI 대응).
     /// </summary>
     public class ConfigManager : MonoSingleton<ConfigManager>
     {
         public AppConfig Config { get; private set; }
         public bool IsLoaded { get; private set; }
 
-        private string _loadedPath;
+        private string _savePath;
 
         protected override void OnInitialize()
         {
+            _savePath = Path.Combine(Application.persistentDataPath, "config.json");
             LoadAsync().Forget();
         }
 
@@ -27,41 +36,52 @@ namespace Guideon.Core
 
         public async UniTask LoadAsync()
         {
-            string localPath = Path.Combine(Application.streamingAssetsPath, "config.local.json");
-            string defaultPath = Path.Combine(Application.streamingAssetsPath, "config.json");
-            _loadedPath = File.Exists(localPath) ? localPath : defaultPath;
+            string json = null;
 
-            if (!File.Exists(_loadedPath))
+            // 1. 저장된 사용자 설정 (페어링 토큰이 여기에 영속화됨)
+            if (File.Exists(_savePath))
             {
-                Debug.LogError($"[ConfigManager] config.json not found at: {_loadedPath}");
+                json = await File.ReadAllTextAsync(_savePath);
+                Debug.Log("[ConfigManager] Loaded from persistentDataPath/config.json");
+            }
+
+            // 2. StreamingAssets — config.local.json (개발용) → config.json (기본값)
+            if (json == null)
+            {
+                json = await TryReadStreamingAssetAsync("config.local.json");
+                if (json != null)
+                    Debug.Log("[ConfigManager] Loaded from StreamingAssets/config.local.json");
+            }
+
+            if (json == null)
+            {
+                json = await TryReadStreamingAssetAsync("config.json");
+                if (json != null)
+                    Debug.Log("[ConfigManager] Loaded from StreamingAssets/config.json");
+            }
+
+            if (json == null)
+            {
+                Debug.LogError("[ConfigManager] config.json not found in any location!");
                 return;
             }
 
-            string json = await File.ReadAllTextAsync(_loadedPath);
             Config = JsonConvert.DeserializeObject<AppConfig>(json);
             IsLoaded = true;
-
-            Debug.Log($"[ConfigManager] Loaded from: {Path.GetFileName(_loadedPath)}");
         }
 
-        /// <summary>
-        /// 현재 Config 전체를 config 파일에 저장.
-        /// kiosk 설정(마이크 민감도 등) 변경 후 영속화할 때 사용.
-        /// </summary>
+        /// <summary>현재 Config를 persistentDataPath/config.json에 저장.</summary>
         public async UniTask SaveConfigAsync()
         {
-            if (Config == null || string.IsNullOrEmpty(_loadedPath)) return;
+            if (Config == null) return;
 
-            var settings = new JsonSerializerSettings { Formatting = Formatting.Indented };
-            string json = JsonConvert.SerializeObject(Config, settings);
-            await File.WriteAllTextAsync(_loadedPath, json);
+            var serializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
+            string json = JsonConvert.SerializeObject(Config, serializerSettings);
+            await File.WriteAllTextAsync(_savePath, json);
 
-            Debug.Log($"[ConfigManager] Config saved to: {Path.GetFileName(_loadedPath)}");
+            Debug.Log("[ConfigManager] Config saved to persistentDataPath/config.json");
         }
 
-        /// <summary>
-        /// 페어링 완료 후 device.id와 device.token을 config 파일에 저장.
-        /// </summary>
         public async UniTask SaveDeviceCredentialsAsync(string deviceId, string plainToken)
         {
             Config.device.id = deviceId;
@@ -69,15 +89,36 @@ namespace Guideon.Core
             await SaveConfigAsync();
         }
 
-        /// <summary>
-        /// device 자격증명을 초기화하고 파일에 저장. 관리자 재페어링 시 사용.
-        /// </summary>
         public async UniTask ResetDeviceCredentialsAsync()
         {
             Config.device.id = "";
             Config.device.token = "";
             await SaveConfigAsync();
             Debug.Log("[ConfigManager] Device credentials cleared.");
+        }
+
+        // ── 내부 ────────────────────────────────────────────
+
+        /// <summary>
+        /// StreamingAssets 파일을 UnityWebRequest로 읽는다.
+        /// Android: streamingAssetsPath = "jar:file://..." → System.IO.File 불가, UWR 필수.
+        /// </summary>
+        private static async UniTask<string> TryReadStreamingAssetAsync(string filename)
+        {
+            string uri = BuildStreamingUri(filename);
+            using var req = UnityWebRequest.Get(uri);
+            await req.SendWebRequest();
+            return req.result == UnityWebRequest.Result.Success ? req.downloadHandler.text : null;
+        }
+
+        private static string BuildStreamingUri(string filename)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Android: streamingAssetsPath이 이미 "jar:file://..." 포함
+            return $"{Application.streamingAssetsPath}/{filename}";
+#else
+            return $"file://{Path.Combine(Application.streamingAssetsPath, filename).Replace('\\', '/')}";
+#endif
         }
     }
 }
