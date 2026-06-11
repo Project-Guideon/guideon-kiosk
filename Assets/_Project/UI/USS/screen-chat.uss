@@ -26,6 +26,7 @@
 .chat-main {
     flex: 1;
     flex-direction: row;
+    min-height: 0; /* flex 체인 shrink 전파 — 없으면 ScrollView가 콘텐츠 높이만큼 팽창 */
 }
 
 /* 좌측 대화 패널 (860px) */
@@ -36,6 +37,7 @@
     border-right-width: 1px;
     border-right-color: rgba(90, 60, 20, 0.07);
     justify-content: space-between;
+    min-height: 0; /* flex 체인 shrink 전파 — 없으면 chat-scroll이 clamp 안 됨 */
 }
 
 /* 지도 모드: 채팅창 축소 → 지도 영역 확보 */
