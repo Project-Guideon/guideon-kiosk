@@ -31,7 +31,18 @@ namespace Guideon.Core
             // Boot 씬에서 등록됐던 IdlePanel/ErrorPanel 참조는 씬 전환으로 destroy됨.
             // Main 씬 패널을 같은 id로 다시 등록해서 UIManager가 정상 동작하도록 한다.
             if (UIManager.HasInstance)
+            {
                 UIManager.Instance.BindPanels(_scenePanels);
+
+                // Admin 패널 — Inspector에 배선돼 있으면 그대로 쓰고,
+                // 미배선(null)이면 씬에서 자동 탐색 (Setup 메뉴 실행 후 Inspector 재배선 생략 가능)
+                if (_adminScreen == null)
+                    _adminScreen = FindObjectOfType<AdminScreenController>();
+                if (_adminScreen != null)
+                    UIManager.Instance.BindPanel(UIManager.Panel.Admin, _adminScreen);
+                else
+                    Debug.LogWarning("[MainSceneController] AdminScreenController를 찾을 수 없음 — AdminScreen GameObject가 씬에 있는지 확인.");
+            }
         }
 
         private void OnEnable()
