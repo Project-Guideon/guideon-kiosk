@@ -3,6 +3,12 @@
     <ui:Style src="../USS/common.uss" />
     <ui:Style src="../USS/screen-idle.uss" />
     <ui:VisualElement name="idle-root" class="screen-root changsal-bg idle-root">
+
+        <!-- 관리자 롱프레스 진행 인디케이터 (좌상단 절대배치, 평소 숨김) -->
+        <ui:VisualElement name="admin-longpress-indicator" class="admin-lp-track" style="display:none;">
+            <ui:VisualElement name="admin-longpress-fill" class="admin-lp-fill" />
+        </ui:VisualElement>
+
         <!-- 상단 단청 띠 -->
         <ui:VisualElement name="dancheong-top" class="dancheong-band" />
 
