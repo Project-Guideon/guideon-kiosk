@@ -5,8 +5,8 @@
     "timeout": 60
   },
   "device": {
-    "id": "KIOSK-MAIN-03",
-    "token": "c9fc4980-7d1f-46dd-b740-7dc044f6a03e"
+    "id": "",
+    "token": ""
   },
   "kiosk": {
     "idleTimeoutSeconds": 120,
