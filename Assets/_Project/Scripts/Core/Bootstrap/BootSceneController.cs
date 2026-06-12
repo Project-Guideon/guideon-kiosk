@@ -11,6 +11,20 @@ namespace Guideon.Core
         [SerializeField] private PairingScreenController _pairingScreen;
         [SerializeField] private ErrorScreenController _errorScreen;
 
+        private void Awake()
+        {
+            // Boot 씬 재로드 시 (재페어링 등) persistent UIManager의 패널 맵을 갱신한다.
+            // UIManager는 DontDestroyOnLoad 싱글톤이라 OnInitialize가 다시 실행되지 않으므로
+            // MainSceneController.Awake와 동일한 패턴으로 새 씬 패널을 명시적으로 재등록한다.
+            // 최초 부팅 시에는 UIManager.OnInitialize가 _panels 직렬화 참조로 등록하므로 건너뜀.
+            if (UIManager.HasInstance)
+            {
+                UIManager.Instance.BindPanel(UIManager.Panel.Boot,    _bootScreen);
+                UIManager.Instance.BindPanel(UIManager.Panel.Pairing, _pairingScreen);
+                UIManager.Instance.BindPanel(UIManager.Panel.Error,   _errorScreen);
+            }
+        }
+
         private async void Start()
         {
             await RunAsync();
