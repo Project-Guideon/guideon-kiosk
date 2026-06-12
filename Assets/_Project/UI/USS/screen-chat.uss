@@ -248,7 +248,7 @@
 /* AI 처리 중 타이핑 점 */
 .mascot-emote-dots {
     position: absolute;
-    bottom: 80px;
+    bottom: 600px; /* 마스코트 슬롯(560px) 상단보다 위 = 머리 위 */
     left: 0;
     right: 0;
     flex-direction: row;

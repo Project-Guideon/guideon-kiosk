@@ -14,13 +14,21 @@ namespace Guideon.Mascot
 
         [Header("Idle")]
         [SerializeField] private float idleBreathSpeed = 1.5f;
-        [SerializeField] private float idleBreathAmount = 1.5f;
+        [SerializeField] private float idleBreathAmount = 2.5f;
         [SerializeField] private float idleSwaySpeed = 0.8f;
-        [SerializeField] private float idleSwayAmount = 1f;
+        [SerializeField] private float idleSwayAmount = 3f;
+        [SerializeField] private float idleWeightShiftAmount = 4f;   // Hips z-roll, 무게중심 좌우 이동
+        [SerializeField] private float idleLegSwayAmount = 2.5f;     // Thigh z, 체중 이동 반발
+        [SerializeField] private float idleArmSwayAmount = 4f;       // UpperArm 진자
 
         [Header("Greeting")]
-        [SerializeField] private float greetingBowAngle = 20f;
-        [SerializeField] private float greetingArmAngle = 40f;
+        [SerializeField] private float greetingDuration = 3f;
+        [SerializeField] private float greetingArmRaise = 55f;          // RightUpperArm 들기 각도
+        [SerializeField] private float greetingWaveSpeed = 9f;          // Forearm/Hand 흔들기 속도
+        [SerializeField] private float greetingWaveAngle = 22f;         // Forearm/Hand 흔들기 진폭
+        [SerializeField] private float greetingBodySwayAmount = 6f;     // 몸 좌우 흔들기 진폭
+        [SerializeField] private float greetingBodySwaySpeed = 5f;      // 몸 좌우 흔들기 속도
+        [SerializeField] private float greetingNodAngle = 6f;           // 가벼운 고개 끄덕
 
         [Header("Listening")]
         [SerializeField] private float listeningTiltAngle = 10f;
@@ -131,71 +139,71 @@ namespace Guideon.Mascot
 
         #endregion
 
-        #region Idle - 호흡 + 미세 흔들림
+        #region Idle - 호흡 + 체중 이동 + 팔/다리 흔들기
 
         private void ApplyIdle()
         {
-            float breathPhase = Time.time * idleBreathSpeed;
-            float swayPhase = Time.time * idleSwaySpeed;
+            float breath = Mathf.Sin(Time.time * idleBreathSpeed);
+            float sway   = Mathf.Sin(Time.time * idleSwaySpeed); // -1..1 공통 위상
 
-            // 호흡: Spine 약간 위아래
+            // 호흡: Spine 위아래
             if (_rig.Spine != null)
-            {
-                float breathAngle = Mathf.Sin(breathPhase) * idleBreathAmount;
-                RotateAdditively(_rig.Spine, breathAngle, 0, 0);
-            }
+                RotateAdditively(_rig.Spine, breath * idleBreathAmount, 0, 0);
 
-            // 몸 흔들림: 좌우 미세 sway
-            if (_rig.Spine1 != null || _rig.Spine != null)
-            {
-                var target = _rig.Spine1 != null ? _rig.Spine1 : _rig.Spine;
-                float swayAngle = Mathf.Sin(swayPhase) * idleSwayAmount;
-                RotateAdditively(target, 0, 0, swayAngle);
-            }
+            // 무게중심 좌우 이동: Hips를 좌우로 기울여 몸 전체가 흔들림
+            if (_rig.Hips != null)
+                RotateAdditively(_rig.Hips, 0, 0, sway * idleWeightShiftAmount);
 
-            // 머리 약간 움직임
+            // 상체는 반대로 살짝 보정 (뻣뻣한 판자 느낌 제거)
+            var upper = _rig.Spine1 != null ? _rig.Spine1 : _rig.Spine;
+            if (upper != null)
+                RotateAdditively(upper, 0, 0, -sway * idleSwayAmount);
+
+            // 다리: Hips 반대 부호로 체중 이동 느낌 (과도한 쏠림 방지)
+            if (_rig.LeftThigh  != null) RotateAdditively(_rig.LeftThigh,  0, 0, -sway * idleLegSwayAmount);
+            if (_rig.RightThigh != null) RotateAdditively(_rig.RightThigh, 0, 0, -sway * idleLegSwayAmount);
+
+            // 팔: 몸 흔들림 따라 가볍게 흔들리는 진자
+            if (_rig.LeftUpperArm  != null) RotateAdditively(_rig.LeftUpperArm,  0, 0,  sway * idleArmSwayAmount);
+            if (_rig.RightUpperArm != null) RotateAdditively(_rig.RightUpperArm, 0, 0,  sway * idleArmSwayAmount);
+
+            // 머리: 약간 더 큰 bob + sway 반대 방향 turn으로 생동감
             if (_rig.Head != null)
-            {
-                float headBob = Mathf.Sin(Time.time * 0.7f) * 1f;
-                float headTurn = Mathf.Sin(Time.time * 0.3f) * 1.5f;
-                RotateAdditively(_rig.Head, headBob, headTurn, 0);
-            }
+                RotateAdditively(_rig.Head, Mathf.Sin(Time.time * 0.7f) * 1.5f, -sway * 2f, 0);
         }
 
         #endregion
 
-        #region Greeting - 인사 (고개 숙이기 + 팔 흔들기)
+        #region Greeting - 인사 (손 흔들기 + 몸 흔들흔들)
 
         private void ApplyGreeting(float blend)
         {
-            // 2초짜리 one-shot 애니메이션
-            float duration = 2f;
-            float t = Mathf.Clamp01(_stateTimer / duration);
+            float t = Mathf.Clamp01(_stateTimer / greetingDuration);
 
-            // 전반부: 숙이기, 후반부: 올라오기
-            float bowCurve = Mathf.Sin(t * Mathf.PI); // 0→1→0
-            float armCurve = Mathf.Sin(t * Mathf.PI * 2f) * 0.5f + 0.5f; // 흔드는 느낌
+            // 팔 들기 엔벨로프: 처음 20%에 올리고, 마지막 20%에 내림 (가운데 유지)
+            float raise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / 0.2f))
+                        * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((1f - t) / 0.2f));
+            float k = raise * blend;
 
-            if (_rig.Spine != null)
-            {
-                RotateAdditively(_rig.Spine, greetingBowAngle * bowCurve * blend, 0, 0);
-            }
+            // 몸 전체 흔들흔들 (좌우)
+            float bodySway = Mathf.Sin(_stateTimer * greetingBodySwaySpeed);
+            if (_rig.Hips  != null) RotateAdditively(_rig.Hips,  0, 0,  bodySway * greetingBodySwayAmount * k);
+            if (_rig.Spine != null) RotateAdditively(_rig.Spine, 0, 0, -bodySway * greetingBodySwayAmount * 0.4f * k);
 
+            // 가벼운 끄덕 + 몸 흔들림 따라 고개도 살짝
             if (_rig.Head != null)
-            {
-                RotateAdditively(_rig.Head, greetingBowAngle * 0.5f * bowCurve * blend, 0, 0);
-            }
+                RotateAdditively(_rig.Head, greetingNodAngle * raise * blend, bodySway * 3f * k, 0);
 
-            // 오른팔 흔들기
+            // 오른팔 번쩍 들기 (z 음수 = 팔 올리기, 기존 부호 유지)
             if (_rig.RightUpperArm != null)
-            {
-                RotateAdditively(_rig.RightUpperArm, 0, 0, -greetingArmAngle * bowCurve * blend);
-            }
+                RotateAdditively(_rig.RightUpperArm, 0, 0, -greetingArmRaise * k);
+
+            // 손 흔들기: Forearm + Hand 좌우 반복
+            float wave = Mathf.Sin(_stateTimer * greetingWaveSpeed);
             if (_rig.RightForearm != null)
-            {
-                float waveAngle = Mathf.Sin(_stateTimer * 8f) * 20f * bowCurve;
-                RotateAdditively(_rig.RightForearm, 0, 0, waveAngle * blend);
-            }
+                RotateAdditively(_rig.RightForearm, 0, 0, wave * greetingWaveAngle * k);
+            if (_rig.RightHand != null)
+                RotateAdditively(_rig.RightHand, 0, 0, wave * greetingWaveAngle * 0.5f * k);
 
             // one-shot 끝나면 Idle로 복귀
             if (t >= 1f && !_greetingDone)
