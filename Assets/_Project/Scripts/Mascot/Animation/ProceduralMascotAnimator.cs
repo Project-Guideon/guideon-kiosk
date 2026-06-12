@@ -14,12 +14,16 @@ namespace Guideon.Mascot
 
         [Header("Idle")]
         [SerializeField] private float idleBreathSpeed = 1.5f;
-        [SerializeField] private float idleBreathAmount = 2.5f;
+        [SerializeField] private float idleBreathAmount = 3.5f;
         [SerializeField] private float idleSwaySpeed = 0.8f;
-        [SerializeField] private float idleSwayAmount = 3f;
-        [SerializeField] private float idleWeightShiftAmount = 4f;   // Hips z-roll, 무게중심 좌우 이동
-        [SerializeField] private float idleLegSwayAmount = 2.5f;     // Thigh z, 체중 이동 반발
-        [SerializeField] private float idleArmSwayAmount = 4f;       // UpperArm 진자
+        [SerializeField] private float idleSwayAmount = 6f;
+        [SerializeField] private float idleWeightShiftAmount = 10f;  // Hips z-roll — 2등신은 크게 흔들려야 보임
+        [SerializeField] private float idleLegSwayAmount = 5f;       // Thigh z
+        [SerializeField] private float idleArmSwayAmount = 9f;       // UpperArm 기본 진자
+        [SerializeField] private float idleWavePeriod = 0.8f;        // 주기적 손 흔들기 주파수 (≈8초마다 한 번)
+        [SerializeField] private float idleArmRaise = 45f;           // 손 흔들기 시 팔 들기 각도
+        [SerializeField] private float idleWaveSpeed = 8f;           // Forearm 흔들기 속도
+        [SerializeField] private float idleWaveAngle = 28f;          // Forearm 흔들기 진폭
 
         [Header("Greeting")]
         [SerializeField] private float greetingDuration = 3f;
